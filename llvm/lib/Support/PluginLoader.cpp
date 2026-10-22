@@ -11,48 +11,48 @@
 //===----------------------------------------------------------------------===//
 
 #define DONT_GET_PLUGIN_LOADER_OPTION
-#include "llvm/Support/PluginLoader.h"
-#include "llvm/Support/DynamicLibrary.h"
-#include "llvm/Support/Mutex.h"
-#include "llvm/Support/raw_ostream.h"
-#include <vector>
-using namespace llvm;
+#अन्तर्भाव "llvm/Support/PluginLoader.h"
+#अन्तर्भाव "llvm/Support/DynamicLibrary.h"
+#अन्तर्भाव "llvm/Support/Mutex.h"
+#अन्तर्भाव "llvm/Support/raw_ostream.h"
+#अन्तर्भाव <vector>
+using नामाकाश llvm;
 
-namespace {
+नामाकाश {
 
-struct Plugins {
-  sys::SmartMutex<true> Lock;
+संरचना Plugins {
+  sys::SmartMutex<सत्य> Lock;
   std::vector<std::string> List;
 };
 
 Plugins &getPlugins() {
-  static Plugins P;
-  return P;
+  स्थिर Plugins P;
+  फर्काऊ P;
 }
 
 } // anonymous namespace
 
-void PluginLoader::operator=(const std::string &Filename) {
-  auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
+शून्य PluginLoader::चालक=(अचर std::string &Filename) {
+  स्वतः &P = getPlugins();
+  sys::SmartScopedLock<सत्य> Lock(P.Lock);
   std::string Error;
-  if (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
+  यदि (sys::DynamicLibrary::LoadLibraryPermanently(Filename.c_str(), &Error)) {
     errs() << "Error opening '" << Filename << "': " << Error
            << "\n  -load request ignored.\n";
-  } else {
-    P.List.push_back(Filename);
+  } अन्यथा {
+    P.List.थप_back(Filename);
   }
 }
 
-unsigned PluginLoader::getNumPlugins() {
-  auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
-  return P.List.size();
+अचिन्हित PluginLoader::get_अङ्क_Plugins() {
+  स्वतः &P = getPlugins();
+  sys::SmartScopedLock<सत्य> Lock(P.Lock);
+  फर्काऊ P.List.size();
 }
 
-std::string &PluginLoader::getPlugin(unsigned num) {
-  auto &P = getPlugins();
-  sys::SmartScopedLock<true> Lock(P.Lock);
-  assert(num < P.List.size() && "Asking for an out of bounds plugin");
-  return P.List[num];
+std::string &PluginLoader::getPlugin(अचिन्हित अङ्क_2) {
+  स्वतः &P = getPlugins();
+  sys::SmartScopedLock<सत्य> Lock(P.Lock);
+  प्रतिज्ञा(अङ्क_2 < P.List.size() && "Asking for an out of bounds plugin");
+  फर्काऊ P.List[अङ्क_2];
 }

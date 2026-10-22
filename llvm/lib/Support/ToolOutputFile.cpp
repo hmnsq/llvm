@@ -10,27 +10,27 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ToolOutputFile.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Signals.h"
-using namespace llvm;
+#अन्तर्भाव "llvm/Support/ToolOutputFile.h"
+#अन्तर्भाव "llvm/Support/FileSystem.h"
+#अन्तर्भाव "llvm/Support/Signals.h"
+using नामाकाश llvm;
 
-static bool isStdout(StringRef Filename) { return Filename == "-"; }
+स्थिर तार्किक isStdout(StringRef Filename) { फर्काऊ Filename == "-"; }
 
 CleanupInstaller::CleanupInstaller(StringRef Filename)
-    : Filename(std::string(Filename)), Keep(false) {
+    : Filename(std::string(Filename)), Keep(असत्य) {
   // Arrange for the file to be deleted if the process is killed.
-  if (!isStdout(Filename))
+  यदि (!isStdout(Filename))
     sys::RemoveFileOnSignal(Filename);
 }
 
 CleanupInstaller::~CleanupInstaller() {
-  if (isStdout(Filename))
-    return;
+  यदि (isStdout(Filename))
+    फर्काऊ;
 
   // Delete the file if the client hasn't told us not to.
-  if (!Keep)
-    sys::fs::remove(Filename);
+  यदि (!Keep)
+    sys::fs::हटाओ(Filename);
 
   // Ok, the file is successfully written and closed, or deleted. There's no
   // further need to clean it up on signals.
@@ -40,20 +40,20 @@ CleanupInstaller::~CleanupInstaller() {
 ToolOutputFile::ToolOutputFile(StringRef Filename, std::error_code &EC,
                                sys::fs::OpenFlags Flags)
     : Installer(Filename) {
-  if (isStdout(Filename)) {
+  यदि (isStdout(Filename)) {
     OS = &outs();
     EC = std::error_code();
-    return;
+    फर्काऊ;
   }
   OSHolder.emplace(Filename, EC, Flags);
   OS = &*OSHolder;
   // If open fails, no cleanup is needed.
-  if (EC)
-    Installer.Keep = true;
+  यदि (EC)
+    Installer.Keep = सत्य;
 }
 
-ToolOutputFile::ToolOutputFile(StringRef Filename, int FD)
+ToolOutputFile::ToolOutputFile(StringRef Filename, पूर्णाङ्क FD)
     : Installer(Filename) {
-  OSHolder.emplace(FD, true);
+  OSHolder.emplace(FD, सत्य);
   OS = &*OSHolder;
 }

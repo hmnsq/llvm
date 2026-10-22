@@ -6,18 +6,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Error.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Support/ErrorHandling.h"
-#include <system_error>
+#अन्तर्भाव "llvm/Support/Error.h"
+#अन्तर्भाव "llvm/ADT/SmallVector.h"
+#अन्तर्भाव "llvm/ADT/StringExtras.h"
+#अन्तर्भाव "llvm/ADT/Twine.h"
+#अन्तर्भाव "llvm/Support/ErrorHandling.h"
+#अन्तर्भाव <system_error>
 
-using namespace llvm;
+using नामाकाश llvm;
 
-namespace {
+नामाकाश {
 
-enum class ErrorErrorCode : int {
+गणना वर्ग ErrorErrorCode : पूर्णाङ्क {
   MultipleErrors = 1,
   FileError,
   InconvertibleError
@@ -26,43 +26,43 @@ enum class ErrorErrorCode : int {
 // FIXME: This class is only here to support the transition to llvm::Error. It
 // will be removed once this transition is complete. Clients should prefer to
 // deal with the Error value directly, rather than converting to error_code.
-class ErrorErrorCategory : public std::error_category {
-public:
-  const char *name() const noexcept override { return "Error"; }
+वर्ग ErrorErrorCategory : सार्वजनिक std::error_category {
+सार्वजनिक:
+  अचर वर्ण *name() अचर noexcept override { फर्काऊ "Error"; }
 
-  std::string message(int condition) const override {
-    switch (static_cast<ErrorErrorCode>(condition)) {
-    case ErrorErrorCode::MultipleErrors:
-      return "Multiple errors";
-    case ErrorErrorCode::InconvertibleError:
-      return "Inconvertible error value. An error has occurred that could not "
+  std::string message(पूर्णाङ्क condition) अचर override {
+    विकल्प (static_cast<ErrorErrorCode>(condition)) {
+    पक्ष ErrorErrorCode::MultipleErrors:
+      फर्काऊ "Multiple errors";
+    पक्ष ErrorErrorCode::InconvertibleError:
+      फर्काऊ "Inconvertible error value. An error has occurred that could not "
              "be converted to a known std::error_code. Please file a bug.";
-    case ErrorErrorCode::FileError:
-      return "A file error occurred.";
+    पक्ष ErrorErrorCode::FileError:
+      फर्काऊ "A file error occurred.";
     }
     llvm_unreachable("Unhandled error code");
   }
 };
 }
 
-static ErrorErrorCategory &getErrorErrorCat() {
-  static ErrorErrorCategory ErrorErrorCat;
-  return ErrorErrorCat;
+स्थिर ErrorErrorCategory &getErrorErrorCat() {
+  स्थिर ErrorErrorCategory ErrorErrorCat;
+  फर्काऊ ErrorErrorCat;
 }
 
-void ErrorInfoBase::anchor() {}
-char ErrorInfoBase::ID = 0;
-char ErrorList::ID = 0;
-void ECError::anchor() {}
-char ECError::ID = 0;
-char StringError::ID = 0;
-char FileError::ID = 0;
+शून्य ErrorInfoBase::anchor() {}
+वर्ण ErrorInfoBase::ID = 0;
+वर्ण ErrorList::ID = 0;
+शून्य ECError::anchor() {}
+वर्ण ECError::ID = 0;
+वर्ण StringError::ID = 0;
+वर्ण FileError::ID = 0;
 
-void llvm::logAllUnhandledErrors(Error E, raw_ostream &OS, Twine ErrorBanner) {
-  if (!E)
-    return;
+शून्य llvm::logAllUnhandledErrors(Error E, raw_ostream &OS, Twine ErrorBanner) {
+  यदि (!E)
+    फर्काऊ;
   OS << ErrorBanner;
-  handleAllErrors(std::move(E), [&](const ErrorInfoBase &EI) {
+  handleAllErrors(std::move(E), [&](अचर ErrorInfoBase &EI) {
     EI.log(OS);
     OS << "\n";
   });
@@ -72,136 +72,136 @@ void llvm::logAllUnhandledErrors(Error E, raw_ostream &OS, Twine ErrorBanner) {
 /// is used to separate error messages.
 std::string llvm::toString(Error E) {
   SmallVector<std::string, 2> Errors;
-  handleAllErrors(std::move(E), [&Errors](const ErrorInfoBase &EI) {
-    Errors.push_back(EI.message());
+  handleAllErrors(std::move(E), [&Errors](अचर ErrorInfoBase &EI) {
+    Errors.थप_back(EI.message());
   });
-  return join(Errors.begin(), Errors.end(), "\n");
+  फर्काऊ join(Errors.begin(), Errors.end(), "\n");
 }
 
-std::string llvm::toStringWithoutConsuming(const Error &E) {
+std::string llvm::toStringWithoutConsuming(अचर Error &E) {
   SmallVector<std::string, 2> Errors;
-  visitErrors(E, [&Errors](const ErrorInfoBase &EI) {
-    Errors.push_back(EI.message());
+  visitErrors(E, [&Errors](अचर ErrorInfoBase &EI) {
+    Errors.थप_back(EI.message());
   });
-  return join(Errors.begin(), Errors.end(), "\n");
+  फर्काऊ join(Errors.begin(), Errors.end(), "\n");
 }
 
-std::error_code ErrorList::convertToErrorCode() const {
-  return std::error_code(static_cast<int>(ErrorErrorCode::MultipleErrors),
+std::error_code ErrorList::convertToErrorCode() अचर {
+  फर्काऊ std::error_code(static_cast<पूर्णाङ्क>(ErrorErrorCode::MultipleErrors),
                          getErrorErrorCat());
 }
 
 std::error_code llvm::inconvertibleErrorCode() {
-  return std::error_code(static_cast<int>(ErrorErrorCode::InconvertibleError),
+  फर्काऊ std::error_code(static_cast<पूर्णाङ्क>(ErrorErrorCode::InconvertibleError),
                          getErrorErrorCat());
 }
 
-std::error_code FileError::convertToErrorCode() const {
+std::error_code FileError::convertToErrorCode() अचर {
   std::error_code NestedEC = Err->convertToErrorCode();
-  if (NestedEC == inconvertibleErrorCode())
-    return std::error_code(static_cast<int>(ErrorErrorCode::FileError),
+  यदि (NestedEC == inconvertibleErrorCode())
+    फर्काऊ std::error_code(static_cast<पूर्णाङ्क>(ErrorErrorCode::FileError),
                            getErrorErrorCat());
-  return NestedEC;
+  फर्काऊ NestedEC;
 }
 
 Error llvm::errorCodeToError(std::error_code EC) {
-  if (!EC)
-    return Error::success();
-  return Error(std::make_unique<ECError>(ECError(EC)));
+  यदि (!EC)
+    फर्काऊ Error::success();
+  फर्काऊ Error(std::make_unique<ECError>(ECError(EC)));
 }
 
 std::error_code llvm::errorToErrorCode(Error Err) {
   std::error_code EC;
-  handleAllErrors(std::move(Err), [&](const ErrorInfoBase &EI) {
+  handleAllErrors(std::move(Err), [&](अचर ErrorInfoBase &EI) {
     EC = EI.convertToErrorCode();
   });
-  if (EC == inconvertibleErrorCode())
+  यदि (EC == inconvertibleErrorCode())
     report_fatal_error(Twine(EC.message()));
-  return EC;
+  फर्काऊ EC;
 }
 
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
-void Error::fatalUncheckedError() const {
+#यदि LLVM_ENABLE_ABI_BREAKING_CHECKS
+शून्य Error::fatalUncheckedError() अचर {
   dbgs() << "Program aborted due to an unhandled Error:\n";
-  if (getPtr()) {
+  यदि (getPtr()) {
     getPtr()->log(dbgs());
     dbgs() << "\n";
-  }else
+  }अन्यथा
     dbgs() << "Error value was Success. (Note: Success values must still be "
               "checked prior to being destroyed).\n";
-  abort();
+  पात();
 }
 #endif
 
-StringError::StringError(std::error_code EC, const Twine &S)
-    : Msg(S.str()), EC(EC) {}
+StringError::StringError(std::error_code EC, अचर Twine &S)
+    : सन्देश_2(S.str()), EC(EC) {}
 
-StringError::StringError(const Twine &S, std::error_code EC)
-    : Msg(S.str()), EC(EC), PrintMsgOnly(true) {}
+StringError::StringError(अचर Twine &S, std::error_code EC)
+    : सन्देश_2(S.str()), EC(EC), Print_सन्देश_Only(सत्य) {}
 
-StringError::StringError(std::string &&S, std::error_code EC, bool PrintMsgOnly)
-    : Msg(std::move(S)), EC(EC), PrintMsgOnly(PrintMsgOnly) {}
+StringError::StringError(std::string &&S, std::error_code EC, तार्किक Print_सन्देश_Only)
+    : सन्देश_2(std::move(S)), EC(EC), Print_सन्देश_Only(Print_सन्देश_Only) {}
 
-void StringError::log(raw_ostream &OS) const {
-  if (PrintMsgOnly) {
-    OS << Msg;
-  } else {
+शून्य StringError::log(raw_ostream &OS) अचर {
+  यदि (Print_सन्देश_Only) {
+    OS << सन्देश_2;
+  } अन्यथा {
     OS << EC.message();
-    if (!Msg.empty())
-      OS << (" " + Msg);
+    यदि (!सन्देश_2.empty())
+      OS << (" " + सन्देश_2);
   }
 }
 
-std::error_code StringError::convertToErrorCode() const {
-  return EC;
+std::error_code StringError::convertToErrorCode() अचर {
+  फर्काऊ EC;
 }
 
-Error llvm::createStringError(std::string &&Msg, std::error_code EC) {
-  return make_error<StringError>(std::move(Msg), EC, true);
+Error llvm::createStringError(std::string &&सन्देश_2, std::error_code EC) {
+  फर्काऊ make_error<StringError>(std::move(सन्देश_2), EC, सत्य);
 }
 
-void llvm::report_fatal_error(Error Err, bool GenCrashDiag) {
-  assert(Err && "report_fatal_error called with success value");
-  std::string ErrMsg;
+शून्य llvm::report_fatal_error(Error Err, तार्किक GenCrashDiag) {
+  प्रतिज्ञा(Err && "report_fatal_error called with success value");
+  std::string Err_सन्देश;
   {
-    raw_string_ostream ErrStream(ErrMsg);
+    raw_string_ostream ErrStream(Err_सन्देश);
     logAllUnhandledErrors(std::move(Err), ErrStream);
   }
-  report_fatal_error(Twine(ErrMsg), GenCrashDiag);
+  report_fatal_error(Twine(Err_सन्देश), GenCrashDiag);
 }
 
-void llvm::reportFatalInternalError(Error Err) {
-  report_fatal_error(std::move(Err), /*GenCrashDiag=*/true);
+शून्य llvm::reportFatalInternalError(Error Err) {
+  report_fatal_error(std::move(Err), /*GenCrashDiag=*/सत्य);
 }
 
-void llvm::reportFatalUsageError(Error Err) {
-  report_fatal_error(std::move(Err), /*GenCrashDiag=*/false);
+शून्य llvm::reportFatalUsageError(Error Err) {
+  report_fatal_error(std::move(Err), /*GenCrashDiag=*/असत्य);
 }
 
 LLVMErrorTypeId LLVMGetErrorTypeId(LLVMErrorRef Err) {
-  return reinterpret_cast<ErrorInfoBase *>(Err)->dynamicClassID();
+  फर्काऊ reinterpret_cast<ErrorInfoBase *>(Err)->dynamicClassID();
 }
 
-void LLVMConsumeError(LLVMErrorRef Err) { consumeError(unwrap(Err)); }
+शून्य LLVMConsumeError(LLVMErrorRef Err) { consumeError(unwrap(Err)); }
 
-void LLVMCantFail(LLVMErrorRef Err) {
+शून्य LLVMCantFail(LLVMErrorRef Err) {
   cantFail(unwrap(Err));
 }
 
-char *LLVMGetErrorMessage(LLVMErrorRef Err) {
+वर्ण *LLVMGetErrorMessage(LLVMErrorRef Err) {
   std::string Tmp = toString(unwrap(Err));
-  char *ErrMsg = new char[Tmp.size() + 1];
-  memcpy(ErrMsg, Tmp.data(), Tmp.size());
-  ErrMsg[Tmp.size()] = '\0';
-  return ErrMsg;
+  वर्ण *Err_सन्देश = नूतन वर्ण[Tmp.size() + 1];
+  स_नकल(Err_सन्देश, Tmp.data(), Tmp.size());
+  Err_सन्देश[Tmp.size()] = '\0';
+  फर्काऊ Err_सन्देश;
 }
 
-void LLVMDisposeErrorMessage(char *ErrMsg) { delete[] ErrMsg; }
+शून्य LLVMDisposeErrorMessage(वर्ण *Err_सन्देश) { delete[] Err_सन्देश; }
 
 LLVMErrorTypeId LLVMGetStringErrorTypeId() {
-  return reinterpret_cast<void *>(&StringError::ID);
+  फर्काऊ reinterpret_cast<शून्य *>(&StringError::ID);
 }
 
-LLVMErrorRef LLVMCreateStringError(const char *ErrMsg) {
-  return wrap(make_error<StringError>(ErrMsg, inconvertibleErrorCode()));
+LLVMErrorRef LLVMCreateStringError(अचर वर्ण *Err_सन्देश) {
+  फर्काऊ wrap(make_error<StringError>(Err_सन्देश, inconvertibleErrorCode()));
 }

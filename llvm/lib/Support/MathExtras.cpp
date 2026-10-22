@@ -10,48 +10,48 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/MathExtras.h"
+#अन्तर्भाव "llvm/Support/MathExtras.h"
 
 #ifdef _MSC_VER
-#include <limits>
-#else
-#include <cmath>
+#अन्तर्भाव <limits>
+#अन्यथा
+#अन्तर्भाव <cmath>
 #endif
 
-namespace llvm {
+नामाकाश llvm {
 
-#if defined(_MSC_VER)
+#यदि defined(_MSC_VER)
   // Visual Studio defines the HUGE_VAL class of macros using purposeful
   // constant arithmetic overflow, which it then warns on when encountered.
-  const float huge_valf = std::numeric_limits<float>::infinity();
-#else
-  const float huge_valf = HUGE_VALF;
+  अचर भिन्न huge_valf = std::numeric_limits<भिन्न>::infinity();
+#अन्यथा
+  अचर भिन्न huge_valf = HUGE_VALF;
 #endif
 
   /// Returns the number of digits in the given integer.
-  int NumDigitsBase10(uint64_t X) {
-    static constexpr struct ConstexprData {
+  पूर्णाङ्क अङ्क_Digits_Base10(uint64_t X) {
+    स्थिर constexpr संरचना ConstexprData {
       uint8_t AtLeast[65] = {};
       uint64_t Boundaries[20] = {};
-      static constexpr int NumDigitsConstexpr(uint64_t N) {
-        int res = 1;
-        while (N >= 10) {
+      स्थिर constexpr पूर्णाङ्क अङ्क_Digits_Constexpr(uint64_t N) {
+        पूर्णाङ्क res = 1;
+        जबसम्म (N >= 10) {
           res++;
           N /= 10;
         }
-        return res;
+        फर्काऊ res;
       }
       constexpr ConstexprData() {
         uint64_t Val = ~0ull;
-        for (uint64_t i = 0; i <= 64; i++) {
-          uint64_t Digits = NumDigitsConstexpr(Val) - 1;
+        लागि (uint64_t i = 0; i <= 64; i++) {
+          uint64_t Digits = अङ्क_Digits_Constexpr(Val) - 1;
           AtLeast[i] = Digits;
           Val >>= 1;
         }
         // Special case because X=0 should return 1 and not 0
         Boundaries[0] = 0;
         Val = 10;
-        for (uint64_t i = 1; i < 20; i++) {
+        लागि (uint64_t i = 1; i < 20; i++) {
           Boundaries[i] = Val;
           Val *= 10;
         }
@@ -60,7 +60,7 @@ namespace llvm {
 
     uint64_t Base2 = X ? countl_zero(X) : 64;
     uint64_t Digits = Data.AtLeast[Base2];
-    return Digits + (X >= Data.Boundaries[Digits]);
+    फर्काऊ Digits + (X >= Data.Boundaries[Digits]);
   }
 
 } // namespace llvm

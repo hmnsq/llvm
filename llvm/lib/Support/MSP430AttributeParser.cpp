@@ -6,11 +6,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/MSP430AttributeParser.h"
-#include "llvm/ADT/ArrayRef.h"
+#अन्तर्भाव "llvm/Support/MSP430AttributeParser.h"
+#अन्तर्भाव "llvm/ADT/ArrayRef.h"
 
-using namespace llvm;
-using namespace llvm::MSP430Attrs;
+using नामाकाश llvm;
+using नामाकाश llvm::MSP430Attrs;
 
 constexpr std::array<MSP430AttributeParser::DisplayHandler, 4>
     MSP430AttributeParser::DisplayRoutines{
@@ -20,36 +20,36 @@ constexpr std::array<MSP430AttributeParser::DisplayHandler, 4>
          {MSP430Attrs::TagEnumSize, &MSP430AttributeParser::parseEnumSize}}};
 
 Error MSP430AttributeParser::parseISA(AttrType Tag) {
-  static const char *const StringVals[] = {"None", "MSP430", "MSP430X"};
-  return parseStringAttribute("ISA", Tag, ArrayRef(StringVals));
+  स्थिर अचर वर्ण *अचर StringVals[] = {"None", "MSP430", "MSP430X"};
+  फर्काऊ parseStringAttribute("ISA", Tag, ArrayRef(StringVals));
 }
 
 Error MSP430AttributeParser::parseCodeModel(AttrType Tag) {
-  static const char *const StringVals[] = {"None", "Small", "Large"};
-  return parseStringAttribute("Code Model", Tag, ArrayRef(StringVals));
+  स्थिर अचर वर्ण *अचर StringVals[] = {"None", "Small", "Large"};
+  फर्काऊ parseStringAttribute("Code Model", Tag, ArrayRef(StringVals));
 }
 
 Error MSP430AttributeParser::parseDataModel(AttrType Tag) {
-  static const char *const StringVals[] = {"None", "Small", "Large",
+  स्थिर अचर वर्ण *अचर StringVals[] = {"None", "Small", "Large",
                                            "Restricted"};
-  return parseStringAttribute("Data Model", Tag, ArrayRef(StringVals));
+  फर्काऊ parseStringAttribute("Data Model", Tag, ArrayRef(StringVals));
 }
 
 Error MSP430AttributeParser::parseEnumSize(AttrType Tag) {
-  static const char *const StringVals[] = {"None", "Small", "Integer",
+  स्थिर अचर वर्ण *अचर StringVals[] = {"None", "Small", "Integer",
                                            "Don't Care"};
-  return parseStringAttribute("Enum Size", Tag, ArrayRef(StringVals));
+  फर्काऊ parseStringAttribute("Enum Size", Tag, ArrayRef(StringVals));
 }
 
-Error MSP430AttributeParser::handler(uint64_t Tag, bool &Handled) {
-  Handled = false;
-  for (const DisplayHandler &Disp : DisplayRoutines) {
-    if (uint64_t(Disp.Attribute) != Tag)
-      continue;
-    if (Error E = (this->*Disp.Routine)(static_cast<AttrType>(Tag)))
-      return E;
-    Handled = true;
-    break;
+Error MSP430AttributeParser::handler(uint64_t Tag, तार्किक &Handled) {
+  Handled = असत्य;
+  लागि (अचर DisplayHandler &Disp : DisplayRoutines) {
+    यदि (uint64_t(Disp.Attribute) != Tag)
+      जारी;
+    यदि (Error E = (एतत्->*Disp.Routine)(static_cast<AttrType>(Tag)))
+      फर्काऊ E;
+    Handled = सत्य;
+    रोक;
   }
-  return Error::success();
+  फर्काऊ Error::success();
 }

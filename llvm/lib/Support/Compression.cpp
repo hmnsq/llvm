@@ -10,28 +10,28 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Compression.h"
-#include "llvm/ADT/ScopeExit.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Config/config.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ErrorHandling.h"
-#include <limits>
-#include <optional>
-#if LLVM_ENABLE_ZLIB
-#include <zlib.h>
+#अन्तर्भाव "llvm/Support/Compression.h"
+#अन्तर्भाव "llvm/ADT/ScopeExit.h"
+#अन्तर्भाव "llvm/ADT/SmallVector.h"
+#अन्तर्भाव "llvm/ADT/StringRef.h"
+#अन्तर्भाव "llvm/Config/config.h"
+#अन्तर्भाव "llvm/Support/Compiler.h"
+#अन्तर्भाव "llvm/Support/Error.h"
+#अन्तर्भाव "llvm/Support/ErrorHandling.h"
+#अन्तर्भाव <limits>
+#अन्तर्भाव <optional>
+#यदि LLVM_ENABLE_ZLIB
+#अन्तर्भाव <zlib.h>
 #endif
-#if LLVM_ENABLE_ZSTD
-#include <zstd.h>
+#यदि LLVM_ENABLE_ZSTD
+#अन्तर्भाव <zstd.h>
 #endif
-#if LLVM_ENABLE_LZMA
-#include <lzma.h>
+#यदि LLVM_ENABLE_LZMA
+#अन्तर्भाव <lzma.h>
 #endif
 
-using namespace llvm;
-using namespace llvm::compression;
+using नामाकाश llvm;
+using नामाकाश llvm::compression;
 
 // RFC 1950 section 2.2 zlib wrapper. Two-byte header CMF then FLG:
 //   CMF: CM (bits 0-3) must be 8 (deflate). CINFO (bits 4-7) is
@@ -39,376 +39,376 @@ using namespace llvm::compression;
 //   FLG: FCHECK (bits 0-4) is chosen so CMF*256+FLG is a multiple of 31;
 //        FDICT (bit 5) marks a preset dictionary; FLEVEL (bits 6-7) is a
 //        compressor hint. This only identifies the wrapper.
-static bool isZlibHeader(ArrayRef<uint8_t> Input) {
-  if (Input.size() < 2)
-    return false;
-  unsigned CMF = Input[0];
-  unsigned FLG = Input[1];
-  if ((CMF & 0x0f) != 8 || (CMF >> 4) > 7)
-    return false;
-  return (CMF * 256 + FLG) % 31 == 0;
+स्थिर तार्किक isZlibHeader(ArrayRef<uint8_t> आगत) {
+  यदि (आगत.size() < 2)
+    फर्काऊ असत्य;
+  अचिन्हित CMF = आगत[0];
+  अचिन्हित FLG = आगत[1];
+  यदि ((CMF & 0x0f) != 8 || (CMF >> 4) > 7)
+    फर्काऊ असत्य;
+  फर्काऊ (CMF * 256 + FLG) % 31 == 0;
 }
 
 // RFC 8878 section 3.1.1: Zstandard frame magic 0xFD2FB528, little-endian.
-static bool isZstdMagic(ArrayRef<uint8_t> Input) {
-  static constexpr uint8_t Magic[] = {0x28, 0xb5, 0x2f, 0xfd};
-  return Input.take_front(4) == ArrayRef(Magic);
+स्थिर तार्किक isZstdMagic(ArrayRef<uint8_t> आगत) {
+  स्थिर constexpr uint8_t Magic[] = {0x28, 0xb5, 0x2f, 0xfd};
+  फर्काऊ आगत.take_front(4) == ArrayRef(Magic);
 }
 
 // Check zstd first: 0x28 is a valid zlib CMF (CINFO=2, 1KiB window).
-static std::optional<Format> identifyFormat(ArrayRef<uint8_t> Input) {
-  if (isZstdMagic(Input))
-    return Format::Zstd;
-  if (isZlibHeader(Input))
-    return Format::Zlib;
-  return std::nullopt;
+स्थिर std::optional<Format> identifyFormat(ArrayRef<uint8_t> आगत) {
+  यदि (isZstdMagic(आगत))
+    फर्काऊ Format::Zstd;
+  यदि (isZlibHeader(आगत))
+    फर्काऊ Format::Zlib;
+  फर्काऊ std::nullopt;
 }
 
-const char *compression::getReasonIfUnsupported(compression::Format F) {
-  switch (F) {
-  case compression::Format::Zlib:
-    if (zlib::isAvailable())
-      return nullptr;
-    return "LLVM was not built with LLVM_ENABLE_ZLIB or did not find zlib at "
+अचर वर्ण *compression::getReasonIfUnsupported(compression::Format F) {
+  विकल्प (F) {
+  पक्ष compression::Format::Zlib:
+    यदि (zlib::isAvailable())
+      फर्काऊ nullptr;
+    फर्काऊ "LLVM was not built with LLVM_ENABLE_ZLIB or did not find zlib at "
            "build time";
-  case compression::Format::Zstd:
-    if (zstd::isAvailable())
-      return nullptr;
-    return "LLVM was not built with LLVM_ENABLE_ZSTD or did not find zstd at "
+  पक्ष compression::Format::Zstd:
+    यदि (zstd::isAvailable())
+      फर्काऊ nullptr;
+    फर्काऊ "LLVM was not built with LLVM_ENABLE_ZSTD or did not find zstd at "
            "build time";
   }
   llvm_unreachable("");
 }
 
-const char *compression::getReasonIfUnsupported(ArrayRef<uint8_t> Input) {
-  if (std::optional<Format> F = identifyFormat(Input))
-    return getReasonIfUnsupported(*F);
-  return "unknown compression format";
+अचर वर्ण *compression::getReasonIfUnsupported(ArrayRef<uint8_t> आगत) {
+  यदि (std::optional<Format> F = identifyFormat(आगत))
+    फर्काऊ getReasonIfUnsupported(*F);
+  फर्काऊ "unknown compression format";
 }
 
-void compression::compress(Params P, ArrayRef<uint8_t> Input,
+शून्य compression::compress(Params P, ArrayRef<uint8_t> आगत,
                            SmallVectorImpl<uint8_t> &Output) {
-  switch (P.format) {
-  case compression::Format::Zlib:
-    zlib::compress(Input, Output, P.level);
-    break;
-  case compression::Format::Zstd:
-    zstd::compress(Input, Output, P.level, P.zstdEnableLdm);
-    break;
+  विकल्प (P.format) {
+  पक्ष compression::Format::Zlib:
+    zlib::compress(आगत, Output, P.level);
+    रोक;
+  पक्ष compression::Format::Zstd:
+    zstd::compress(आगत, Output, P.level, P.zstdEnableLdm);
+    रोक;
   }
 }
 
-Error compression::decompress(DebugCompressionType T, ArrayRef<uint8_t> Input,
-                              uint8_t *Output, size_t UncompressedSize) {
-  switch (formatFor(T)) {
-  case compression::Format::Zlib:
-    return zlib::decompress(Input, Output, UncompressedSize);
-  case compression::Format::Zstd:
-    return zstd::decompress(Input, Output, UncompressedSize);
-  }
-  llvm_unreachable("");
-}
-
-Error compression::decompress(compression::Format F, ArrayRef<uint8_t> Input,
-                              SmallVectorImpl<uint8_t> &Output,
-                              size_t UncompressedSize) {
-  switch (F) {
-  case compression::Format::Zlib:
-    return zlib::decompress(Input, Output, UncompressedSize);
-  case compression::Format::Zstd:
-    return zstd::decompress(Input, Output, UncompressedSize);
+Error compression::decompress(DebugCompressionType T, ArrayRef<uint8_t> आगत,
+                              uint8_t *Output, माप_प्रकार UncompressedSize) {
+  विकल्प (formatFor(T)) {
+  पक्ष compression::Format::Zlib:
+    फर्काऊ zlib::decompress(आगत, Output, UncompressedSize);
+  पक्ष compression::Format::Zstd:
+    फर्काऊ zstd::decompress(आगत, Output, UncompressedSize);
   }
   llvm_unreachable("");
 }
 
-Error compression::decompress(DebugCompressionType T, ArrayRef<uint8_t> Input,
+Error compression::decompress(compression::Format F, ArrayRef<uint8_t> आगत,
                               SmallVectorImpl<uint8_t> &Output,
-                              size_t UncompressedSize) {
-  return decompress(formatFor(T), Input, Output, UncompressedSize);
+                              माप_प्रकार UncompressedSize) {
+  विकल्प (F) {
+  पक्ष compression::Format::Zlib:
+    फर्काऊ zlib::decompress(आगत, Output, UncompressedSize);
+  पक्ष compression::Format::Zstd:
+    फर्काऊ zstd::decompress(आगत, Output, UncompressedSize);
+  }
+  llvm_unreachable("");
 }
 
-Error compression::decompress(ArrayRef<uint8_t> Input,
+Error compression::decompress(DebugCompressionType T, ArrayRef<uint8_t> आगत,
                               SmallVectorImpl<uint8_t> &Output,
-                              size_t UncompressedSize) {
-  std::optional<Format> F = identifyFormat(Input);
-  if (const char *Reason =
+                              माप_प्रकार UncompressedSize) {
+  फर्काऊ decompress(formatFor(T), आगत, Output, UncompressedSize);
+}
+
+Error compression::decompress(ArrayRef<uint8_t> आगत,
+                              SmallVectorImpl<uint8_t> &Output,
+                              माप_प्रकार UncompressedSize) {
+  std::optional<Format> F = identifyFormat(आगत);
+  यदि (अचर वर्ण *Reason =
           F ? getReasonIfUnsupported(*F) : "unknown compression format")
-    return createStringError(Reason);
-  return decompress(*F, Input, Output, UncompressedSize);
+    फर्काऊ createStringError(Reason);
+  फर्काऊ decompress(*F, आगत, Output, UncompressedSize);
 }
 
-#if LLVM_ENABLE_ZLIB
+#यदि LLVM_ENABLE_ZLIB
 
-static StringRef convertZlibCodeToString(int Code) {
-  switch (Code) {
-  case Z_MEM_ERROR:
-    return "zlib error: Z_MEM_ERROR";
-  case Z_BUF_ERROR:
-    return "zlib error: Z_BUF_ERROR";
-  case Z_STREAM_ERROR:
-    return "zlib error: Z_STREAM_ERROR";
-  case Z_DATA_ERROR:
-    return "zlib error: Z_DATA_ERROR";
-  case Z_OK:
-  default:
+स्थिर StringRef convertZlibCodeToString(पूर्णाङ्क Code) {
+  विकल्प (Code) {
+  पक्ष Z_MEM_ERROR:
+    फर्काऊ "zlib error: Z_MEM_ERROR";
+  पक्ष Z_BUF_ERROR:
+    फर्काऊ "zlib error: Z_BUF_ERROR";
+  पक्ष Z_STREAM_ERROR:
+    फर्काऊ "zlib error: Z_STREAM_ERROR";
+  पक्ष Z_DATA_ERROR:
+    फर्काऊ "zlib error: Z_DATA_ERROR";
+  पक्ष Z_OK:
+  स्वभाव:
     llvm_unreachable("unknown or unexpected zlib status code");
   }
 }
 
-bool zlib::isAvailable() { return true; }
+तार्किक zlib::isAvailable() { फर्काऊ सत्य; }
 
-void zlib::compress(ArrayRef<uint8_t> Input,
-                    SmallVectorImpl<uint8_t> &CompressedBuffer, int Level) {
-  unsigned long CompressedSize = ::compressBound(Input.size());
+शून्य zlib::compress(ArrayRef<uint8_t> आगत,
+                    SmallVectorImpl<uint8_t> &CompressedBuffer, पूर्णाङ्क Level) {
+  अचिन्हित दीर्घ CompressedSize = ::compressBound(आगत.size());
   CompressedBuffer.resize_for_overwrite(CompressedSize);
-  int Res = ::compress2((Bytef *)CompressedBuffer.data(), &CompressedSize,
-                        (const Bytef *)Input.data(), Input.size(), Level);
-  if (Res == Z_MEM_ERROR)
+  पूर्णाङ्क Res = ::compress2((Bytef *)CompressedBuffer.data(), &CompressedSize,
+                        (अचर Bytef *)आगत.data(), आगत.size(), Level);
+  यदि (Res == Z_MEM_ERROR)
     report_bad_alloc_error("Allocation failed");
-  assert(Res == Z_OK);
+  प्रतिज्ञा(Res == Z_OK);
   // Tell MemorySanitizer that zlib output buffer is fully initialized.
   // This avoids a false report when running LLVM with uninstrumented ZLib.
   __msan_unpoison(CompressedBuffer.data(), CompressedSize);
-  if (CompressedSize < CompressedBuffer.size())
+  यदि (CompressedSize < CompressedBuffer.size())
     CompressedBuffer.truncate(CompressedSize);
 }
 
-Error zlib::decompress(ArrayRef<uint8_t> Input, uint8_t *Output,
-                       size_t &UncompressedSize) {
-  int Res = ::uncompress((Bytef *)Output, (uLongf *)&UncompressedSize,
-                         (const Bytef *)Input.data(), Input.size());
+Error zlib::decompress(ArrayRef<uint8_t> आगत, uint8_t *Output,
+                       माप_प्रकार &UncompressedSize) {
+  पूर्णाङ्क Res = ::uncompress((Bytef *)Output, (uLongf *)&UncompressedSize,
+                         (अचर Bytef *)आगत.data(), आगत.size());
   // Tell MemorySanitizer that zlib output buffer is fully initialized.
   // This avoids a false report when running LLVM with uninstrumented ZLib.
   __msan_unpoison(Output, UncompressedSize);
-  return Res ? make_error<StringError>(convertZlibCodeToString(Res),
+  फर्काऊ Res ? make_error<StringError>(convertZlibCodeToString(Res),
                                        inconvertibleErrorCode())
              : Error::success();
 }
 
-Error zlib::decompress(ArrayRef<uint8_t> Input,
+Error zlib::decompress(ArrayRef<uint8_t> आगत,
                        SmallVectorImpl<uint8_t> &Output,
-                       size_t UncompressedSize) {
+                       माप_प्रकार UncompressedSize) {
   Output.resize_for_overwrite(UncompressedSize);
-  Error E = zlib::decompress(Input, Output.data(), UncompressedSize);
-  if (UncompressedSize < Output.size())
+  Error E = zlib::decompress(आगत, Output.data(), UncompressedSize);
+  यदि (UncompressedSize < Output.size())
     Output.truncate(UncompressedSize);
-  return E;
+  फर्काऊ E;
 }
 
-#else
-bool zlib::isAvailable() { return false; }
-void zlib::compress(ArrayRef<uint8_t> Input,
-                    SmallVectorImpl<uint8_t> &CompressedBuffer, int Level) {
+#अन्यथा
+तार्किक zlib::isAvailable() { फर्काऊ असत्य; }
+शून्य zlib::compress(ArrayRef<uint8_t> आगत,
+                    SmallVectorImpl<uint8_t> &CompressedBuffer, पूर्णाङ्क Level) {
   llvm_unreachable("zlib::compress is unavailable");
 }
-Error zlib::decompress(ArrayRef<uint8_t> Input, uint8_t *UncompressedBuffer,
-                       size_t &UncompressedSize) {
+Error zlib::decompress(ArrayRef<uint8_t> आगत, uint8_t *UncompressedBuffer,
+                       माप_प्रकार &UncompressedSize) {
   llvm_unreachable("zlib::decompress is unavailable");
 }
-Error zlib::decompress(ArrayRef<uint8_t> Input,
+Error zlib::decompress(ArrayRef<uint8_t> आगत,
                        SmallVectorImpl<uint8_t> &UncompressedBuffer,
-                       size_t UncompressedSize) {
+                       माप_प्रकार UncompressedSize) {
   llvm_unreachable("zlib::decompress is unavailable");
 }
 #endif
 
-#if LLVM_ENABLE_ZSTD
+#यदि LLVM_ENABLE_ZSTD
 
-bool zstd::isAvailable() { return true; }
+तार्किक zstd::isAvailable() { फर्काऊ सत्य; }
 
-#include <zstd.h> // Ensure ZSTD library is included
+#अन्तर्भाव <zstd.h> // Ensure ZSTD library is included
 
-void zstd::compress(ArrayRef<uint8_t> Input,
-                    SmallVectorImpl<uint8_t> &CompressedBuffer, int Level,
-                    bool EnableLdm) {
+शून्य zstd::compress(ArrayRef<uint8_t> आगत,
+                    SmallVectorImpl<uint8_t> &CompressedBuffer, पूर्णाङ्क Level,
+                    तार्किक EnableLdm) {
   ZSTD_CCtx *Cctx = ZSTD_createCCtx();
-  if (!Cctx)
+  यदि (!Cctx)
     report_bad_alloc_error("Failed to create ZSTD_CCtx");
 
-  if (ZSTD_isError(ZSTD_CCtx_setParameter(
+  यदि (ZSTD_isError(ZSTD_CCtx_setParameter(
           Cctx, ZSTD_c_enableLongDistanceMatching, EnableLdm ? 1 : 0))) {
     ZSTD_freeCCtx(Cctx);
     report_bad_alloc_error("Failed to set ZSTD_c_enableLongDistanceMatching");
   }
 
-  if (ZSTD_isError(
+  यदि (ZSTD_isError(
           ZSTD_CCtx_setParameter(Cctx, ZSTD_c_compressionLevel, Level))) {
     ZSTD_freeCCtx(Cctx);
     report_bad_alloc_error("Failed to set ZSTD_c_compressionLevel");
   }
 
-  unsigned long CompressedBufferSize = ZSTD_compressBound(Input.size());
+  अचिन्हित दीर्घ CompressedBufferSize = ZSTD_compressBound(आगत.size());
   CompressedBuffer.resize_for_overwrite(CompressedBufferSize);
 
-  size_t const CompressedSize =
+  माप_प्रकार अचर CompressedSize =
       ZSTD_compress2(Cctx, CompressedBuffer.data(), CompressedBufferSize,
-                     Input.data(), Input.size());
+                     आगत.data(), आगत.size());
 
   ZSTD_freeCCtx(Cctx);
 
-  if (ZSTD_isError(CompressedSize))
+  यदि (ZSTD_isError(CompressedSize))
     report_bad_alloc_error("Compression failed");
 
   __msan_unpoison(CompressedBuffer.data(), CompressedSize);
-  if (CompressedSize < CompressedBuffer.size())
+  यदि (CompressedSize < CompressedBuffer.size())
     CompressedBuffer.truncate(CompressedSize);
 }
 
-Error zstd::decompress(ArrayRef<uint8_t> Input, uint8_t *Output,
-                       size_t &UncompressedSize) {
-  const size_t Res = ::ZSTD_decompress(
-      Output, UncompressedSize, (const uint8_t *)Input.data(), Input.size());
+Error zstd::decompress(ArrayRef<uint8_t> आगत, uint8_t *Output,
+                       माप_प्रकार &UncompressedSize) {
+  अचर माप_प्रकार Res = ::ZSTD_decompress(
+      Output, UncompressedSize, (अचर uint8_t *)आगत.data(), आगत.size());
   UncompressedSize = Res;
-  if (ZSTD_isError(Res))
-    return make_error<StringError>(ZSTD_getErrorName(Res),
+  यदि (ZSTD_isError(Res))
+    फर्काऊ make_error<StringError>(ZSTD_getErrorName(Res),
                                    inconvertibleErrorCode());
   // Tell MemorySanitizer that zstd output buffer is fully initialized.
   // This avoids a false report when running LLVM with uninstrumented ZLib.
   __msan_unpoison(Output, UncompressedSize);
-  return Error::success();
+  फर्काऊ Error::success();
 }
 
-Error zstd::decompress(ArrayRef<uint8_t> Input,
+Error zstd::decompress(ArrayRef<uint8_t> आगत,
                        SmallVectorImpl<uint8_t> &Output,
-                       size_t UncompressedSize) {
+                       माप_प्रकार UncompressedSize) {
   Output.resize_for_overwrite(UncompressedSize);
-  Error E = zstd::decompress(Input, Output.data(), UncompressedSize);
-  if (UncompressedSize < Output.size())
+  Error E = zstd::decompress(आगत, Output.data(), UncompressedSize);
+  यदि (UncompressedSize < Output.size())
     Output.truncate(UncompressedSize);
-  return E;
+  फर्काऊ E;
 }
 
-#else
-bool zstd::isAvailable() { return false; }
-void zstd::compress(ArrayRef<uint8_t> Input,
-                    SmallVectorImpl<uint8_t> &CompressedBuffer, int Level,
-                    bool EnableLdm) {
+#अन्यथा
+तार्किक zstd::isAvailable() { फर्काऊ असत्य; }
+शून्य zstd::compress(ArrayRef<uint8_t> आगत,
+                    SmallVectorImpl<uint8_t> &CompressedBuffer, पूर्णाङ्क Level,
+                    तार्किक EnableLdm) {
   llvm_unreachable("zstd::compress is unavailable");
 }
-Error zstd::decompress(ArrayRef<uint8_t> Input, uint8_t *Output,
-                       size_t &UncompressedSize) {
+Error zstd::decompress(ArrayRef<uint8_t> आगत, uint8_t *Output,
+                       माप_प्रकार &UncompressedSize) {
   llvm_unreachable("zstd::decompress is unavailable");
 }
-Error zstd::decompress(ArrayRef<uint8_t> Input,
+Error zstd::decompress(ArrayRef<uint8_t> आगत,
                        SmallVectorImpl<uint8_t> &Output,
-                       size_t UncompressedSize) {
+                       माप_प्रकार UncompressedSize) {
   llvm_unreachable("zstd::decompress is unavailable");
 }
 #endif
 
-#if LLVM_ENABLE_LZMA
+#यदि LLVM_ENABLE_LZMA
 
-bool xz::isAvailable() { return true; }
+तार्किक xz::isAvailable() { फर्काऊ सत्य; }
 
 // Returns a C string rather than a StringRef because every caller feeds the
 // result to a printf-style "%s", which requires NUL termination.
-static const char *convertLZMACodeToString(lzma_ret Code) {
-  switch (Code) {
-  case LZMA_STREAM_END:
-    return "lzma error: LZMA_STREAM_END";
-  case LZMA_NO_CHECK:
-    return "lzma error: LZMA_NO_CHECK";
-  case LZMA_UNSUPPORTED_CHECK:
-    return "lzma error: LZMA_UNSUPPORTED_CHECK";
-  case LZMA_GET_CHECK:
-    return "lzma error: LZMA_GET_CHECK";
-  case LZMA_MEM_ERROR:
-    return "lzma error: LZMA_MEM_ERROR";
-  case LZMA_MEMLIMIT_ERROR:
-    return "lzma error: LZMA_MEMLIMIT_ERROR";
-  case LZMA_FORMAT_ERROR:
-    return "lzma error: LZMA_FORMAT_ERROR";
-  case LZMA_OPTIONS_ERROR:
-    return "lzma error: LZMA_OPTIONS_ERROR";
-  case LZMA_DATA_ERROR:
-    return "lzma error: LZMA_DATA_ERROR";
-  case LZMA_BUF_ERROR:
-    return "lzma error: LZMA_BUF_ERROR";
-  case LZMA_PROG_ERROR:
-    return "lzma error: LZMA_PROG_ERROR";
-  default:
+स्थिर अचर वर्ण *convertLZMACodeToString(lzma_ret Code) {
+  विकल्प (Code) {
+  पक्ष LZMA_STREAM_END:
+    फर्काऊ "lzma error: LZMA_STREAM_END";
+  पक्ष LZMA_NO_CHECK:
+    फर्काऊ "lzma error: LZMA_NO_CHECK";
+  पक्ष LZMA_UNSUPPORTED_CHECK:
+    फर्काऊ "lzma error: LZMA_UNSUPPORTED_CHECK";
+  पक्ष LZMA_GET_CHECK:
+    फर्काऊ "lzma error: LZMA_GET_CHECK";
+  पक्ष LZMA_MEM_ERROR:
+    फर्काऊ "lzma error: LZMA_MEM_ERROR";
+  पक्ष LZMA_MEMLIMIT_ERROR:
+    फर्काऊ "lzma error: LZMA_MEMLIMIT_ERROR";
+  पक्ष LZMA_FORMAT_ERROR:
+    फर्काऊ "lzma error: LZMA_FORMAT_ERROR";
+  पक्ष LZMA_OPTIONS_ERROR:
+    फर्काऊ "lzma error: LZMA_OPTIONS_ERROR";
+  पक्ष LZMA_DATA_ERROR:
+    फर्काऊ "lzma error: LZMA_DATA_ERROR";
+  पक्ष LZMA_BUF_ERROR:
+    फर्काऊ "lzma error: LZMA_BUF_ERROR";
+  पक्ष LZMA_PROG_ERROR:
+    फर्काऊ "lzma error: LZMA_PROG_ERROR";
+  स्वभाव:
     llvm_unreachable("unknown or unexpected lzma status code");
   }
 }
 
 /// Read the uncompressed size recorded in the xz stream's index.
-static Expected<uint64_t> getUncompressedSize(ArrayRef<uint8_t> Input) {
-  if (Input.size() < LZMA_STREAM_HEADER_SIZE)
-    return createStringError(
+स्थिर Expected<uint64_t> getUncompressedSize(ArrayRef<uint8_t> आगत) {
+  यदि (आगत.size() < LZMA_STREAM_HEADER_SIZE)
+    फर्काऊ createStringError(
         "size of xz-compressed blob (%zu bytes) is smaller than the "
         "LZMA_STREAM_HEADER_SIZE (%zu bytes)",
-        Input.size(), size_t(LZMA_STREAM_HEADER_SIZE));
+        आगत.size(), माप_प्रकार(LZMA_STREAM_HEADER_SIZE));
 
   // Decode the xz footer.
   lzma_stream_flags FooterFlags{};
   lzma_ret Ret = lzma_stream_footer_decode(
-      &FooterFlags, Input.take_back(LZMA_STREAM_HEADER_SIZE).data());
-  if (Ret != LZMA_OK)
-    return createStringError("lzma_stream_footer_decode()=%s",
+      &FooterFlags, आगत.take_back(LZMA_STREAM_HEADER_SIZE).data());
+  यदि (Ret != LZMA_OK)
+    फर्काऊ createStringError("lzma_stream_footer_decode()=%s",
                              convertLZMACodeToString(Ret));
 
   // A stream is the header, block data, index and stream footer
   uint64_t MinSize = FooterFlags.backward_size + 2 * LZMA_STREAM_HEADER_SIZE;
-  if (Input.size() < MinSize)
-    return createStringError(
+  यदि (आगत.size() < MinSize)
+    फर्काऊ createStringError(
         "xz-compressed buffer size (%zu bytes) too small (required at "
         "least %" PRIu64 " bytes)",
-        Input.size(), MinSize);
+        आगत.size(), MinSize);
 
   // Decode xz index.
   // liblzma stores null on failure, and lzma_index_end() ignores null.
   lzma_index *Index = nullptr;
   llvm::scope_exit FreeIndex([&] { lzma_index_end(Index, nullptr); });
   uint64_t MemLimit = UINT64_MAX;
-  size_t InPos = 0;
+  माप_प्रकार InPos = 0;
   Ret = lzma_index_buffer_decode(
       &Index, &MemLimit, nullptr,
-      Input.take_back(LZMA_STREAM_HEADER_SIZE + FooterFlags.backward_size)
+      आगत.take_back(LZMA_STREAM_HEADER_SIZE + FooterFlags.backward_size)
           .data(),
-      &InPos, Input.size());
-  if (Ret != LZMA_OK)
-    return createStringError("lzma_index_buffer_decode()=%s",
+      &InPos, आगत.size());
+  यदि (Ret != LZMA_OK)
+    फर्काऊ createStringError("lzma_index_buffer_decode()=%s",
                              convertLZMACodeToString(Ret));
 
-  return lzma_index_uncompressed_size(Index);
+  फर्काऊ lzma_index_uncompressed_size(Index);
 }
 
-Error xz::decompress(ArrayRef<uint8_t> Input,
+Error xz::decompress(ArrayRef<uint8_t> आगत,
                      SmallVectorImpl<uint8_t> &Output) {
   // Hand back nothing unless the whole stream decodes.
   Output.clear();
 
-  Expected<uint64_t> UncompressedSize = getUncompressedSize(Input);
-  if (!UncompressedSize)
-    return UncompressedSize.takeError();
+  Expected<uint64_t> UncompressedSize = getUncompressedSize(आगत);
+  यदि (!UncompressedSize)
+    फर्काऊ UncompressedSize.takeError();
 
-  if (*UncompressedSize > std::numeric_limits<size_t>::max())
-    return createStringError("xz uncompressed size (%" PRIu64
+  यदि (*UncompressedSize > std::numeric_limits<माप_प्रकार>::max())
+    फर्काऊ createStringError("xz uncompressed size (%" PRIu64
                              " bytes) exceeds addressable memory",
                              *UncompressedSize);
 
   // Concatenated streams are unsupported: liblzma decodes only the first and
   // still reports LZMA_OK, leaving the rest of Output zero-filled.
-  Output.resize(static_cast<size_t>(*UncompressedSize));
+  Output.resize(static_cast<माप_प्रकार>(*UncompressedSize));
   uint64_t MemLimit = UINT64_MAX;
-  size_t InPos = 0;
-  size_t OutPos = 0;
+  माप_प्रकार InPos = 0;
+  माप_प्रकार OutPos = 0;
   lzma_ret Ret = lzma_stream_buffer_decode(
-      &MemLimit, /*flags=*/0, nullptr, Input.data(), &InPos, Input.size(),
+      &MemLimit, /*flags=*/0, nullptr, आगत.data(), &InPos, आगत.size(),
       Output.data(), &OutPos, Output.size());
-  if (Ret != LZMA_OK) {
+  यदि (Ret != LZMA_OK) {
     Output.clear();
-    return createStringError("lzma_stream_buffer_decode()=%s",
+    फर्काऊ createStringError("lzma_stream_buffer_decode()=%s",
                              convertLZMACodeToString(Ret));
   }
 
-  return Error::success();
+  फर्काऊ Error::success();
 }
 
-#else
+#अन्यथा
 
-bool xz::isAvailable() { return false; }
-Error xz::decompress(ArrayRef<uint8_t> Input,
+तार्किक xz::isAvailable() { फर्काऊ असत्य; }
+Error xz::decompress(ArrayRef<uint8_t> आगत,
                      SmallVectorImpl<uint8_t> &Output) {
   llvm_unreachable("xz::decompress is unavailable");
 }

@@ -6,281 +6,281 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/DataExtractor.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/LEB128.h"
-#include "llvm/Support/SwapByteOrder.h"
+#अन्तर्भाव "llvm/Support/DataExtractor.h"
+#अन्तर्भाव "llvm/ADT/StringExtras.h"
+#अन्तर्भाव "llvm/Support/Errc.h"
+#अन्तर्भाव "llvm/Support/ErrorHandling.h"
+#अन्तर्भाव "llvm/Support/LEB128.h"
+#अन्तर्भाव "llvm/Support/SwapByteOrder.h"
 
-using namespace llvm;
+using नामाकाश llvm;
 
-bool DataExtractor::prepareRead(uint64_t Offset, uint64_t Size,
-                                Error *E) const {
-  if (isValidOffsetForDataOfSize(Offset, Size))
-    return true;
-  if (E) {
-    if (Offset <= Data.size())
+तार्किक DataExtractor::prepareRead(uint64_t Offset, uint64_t Size,
+                                Error *E) अचर {
+  यदि (isValidOffsetForDataOfSize(Offset, Size))
+    फर्काऊ सत्य;
+  यदि (E) {
+    यदि (Offset <= Data.size())
       *E = createStringError(
           errc::illegal_byte_sequence,
           "unexpected end of data at offset 0x%zx while reading [0x%" PRIx64
           ", 0x%" PRIx64 ")",
           Data.size(), Offset, Offset + Size);
-    else
+    अन्यथा
       *E = createStringError(errc::invalid_argument,
                              "offset 0x%" PRIx64
                              " is beyond the end of data at 0x%zx",
                              Offset, Data.size());
   }
-  return false;
+  फर्काऊ असत्य;
 }
 
-static bool isError(Error *E) { return E && *E; }
+स्थिर तार्किक isError(Error *E) { फर्काऊ E && *E; }
 
-template <typename T>
-T DataExtractor::getU(uint64_t *offset_ptr, Error *Err) const {
+ढाँचा <typename T>
+T DataExtractor::getU(uint64_t *offset_ptr, Error *Err) अचर {
   ErrorAsOutParameter ErrAsOut(Err);
   T val = 0;
-  if (isError(Err))
-    return val;
+  यदि (isError(Err))
+    फर्काऊ val;
 
   uint64_t offset = *offset_ptr;
-  if (!prepareRead(offset, sizeof(T), Err))
-    return val;
-  std::memcpy(&val, &Data.data()[offset], sizeof(val));
-  if (sys::IsLittleEndianHost != IsLittleEndian)
+  यदि (!prepareRead(offset, परिमाण(T), Err))
+    फर्काऊ val;
+  std::स_नकल(&val, &Data.data()[offset], परिमाण(val));
+  यदि (sys::IsLittleEndianHost != IsLittleEndian)
     sys::swapByteOrder(val);
 
   // Advance the offset
-  *offset_ptr += sizeof(val);
-  return val;
+  *offset_ptr += परिमाण(val);
+  फर्काऊ val;
 }
 
-template <typename T>
-T *DataExtractor::getUs(uint64_t *offset_ptr, T *dst, uint32_t count,
-                        Error *Err) const {
+ढाँचा <typename T>
+T *DataExtractor::getUs(uint64_t *offset_ptr, T *dst, uint32_t गन्ती,
+                        Error *Err) अचर {
   ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return nullptr;
+  यदि (isError(Err))
+    फर्काऊ nullptr;
 
   uint64_t offset = *offset_ptr;
 
-  if (!prepareRead(offset, sizeof(*dst) * count, Err))
-    return nullptr;
-  for (T *value_ptr = dst, *end = dst + count; value_ptr != end;
-       ++value_ptr, offset += sizeof(*dst))
-    *value_ptr = getU<T>(offset_ptr, Err);
+  यदि (!prepareRead(offset, परिमाण(*dst) * गन्ती, Err))
+    फर्काऊ nullptr;
+  लागि (T *मान_ptr = dst, *end = dst + गन्ती; मान_ptr != end;
+       ++मान_ptr, offset += परिमाण(*dst))
+    *मान_ptr = getU<T>(offset_ptr, Err);
   // Advance the offset
   *offset_ptr = offset;
   // Return a non-NULL pointer to the converted data as an indicator of
   // success
-  return dst;
+  फर्काऊ dst;
 }
 
-uint8_t DataExtractor::getU8(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint8_t>(offset_ptr, Err);
+uint8_t DataExtractor::getU8(uint64_t *offset_ptr, llvm::Error *Err) अचर {
+  फर्काऊ getU<uint8_t>(offset_ptr, Err);
 }
 
 uint8_t *DataExtractor::getU8(uint64_t *offset_ptr, uint8_t *dst,
-                              uint32_t count) const {
-  return getUs<uint8_t>(offset_ptr, dst, count, nullptr);
+                              uint32_t गन्ती) अचर {
+  फर्काऊ getUs<uint8_t>(offset_ptr, dst, गन्ती, nullptr);
 }
 
-uint8_t *DataExtractor::getU8(Cursor &C, uint8_t *Dst, uint32_t Count) const {
-  return getUs<uint8_t>(&C.Offset, Dst, Count, &C.Err);
+uint8_t *DataExtractor::getU8(Cursor &C, uint8_t *Dst, uint32_t गन्ती_2) अचर {
+  फर्काऊ getUs<uint8_t>(&C.Offset, Dst, गन्ती_2, &C.Err);
 }
 
-uint16_t DataExtractor::getU16(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint16_t>(offset_ptr, Err);
+uint16_t DataExtractor::getU16(uint64_t *offset_ptr, llvm::Error *Err) अचर {
+  फर्काऊ getU<uint16_t>(offset_ptr, Err);
 }
 
 uint16_t *DataExtractor::getU16(uint64_t *offset_ptr, uint16_t *dst,
-                                uint32_t count) const {
-  return getUs<uint16_t>(offset_ptr, dst, count, nullptr);
+                                uint32_t गन्ती) अचर {
+  फर्काऊ getUs<uint16_t>(offset_ptr, dst, गन्ती, nullptr);
 }
 
-uint32_t DataExtractor::getU24(uint64_t *OffsetPtr, Error *Err) const {
+uint32_t DataExtractor::getU24(uint64_t *OffsetPtr, Error *Err) अचर {
   uint24_t ExtractedVal = getU<uint24_t>(OffsetPtr, Err);
   // The 3 bytes are in the correct byte order for the host.
-  return ExtractedVal.getAsUint32(sys::IsLittleEndianHost);
+  फर्काऊ ExtractedVal.getAsUint32(sys::IsLittleEndianHost);
 }
 
-uint32_t DataExtractor::getU32(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint32_t>(offset_ptr, Err);
+uint32_t DataExtractor::getU32(uint64_t *offset_ptr, llvm::Error *Err) अचर {
+  फर्काऊ getU<uint32_t>(offset_ptr, Err);
 }
 
 uint32_t *DataExtractor::getU32(uint64_t *offset_ptr, uint32_t *dst,
-                                uint32_t count) const {
-  return getUs<uint32_t>(offset_ptr, dst, count, nullptr);
+                                uint32_t गन्ती) अचर {
+  फर्काऊ getUs<uint32_t>(offset_ptr, dst, गन्ती, nullptr);
 }
 
-uint64_t DataExtractor::getU64(uint64_t *offset_ptr, llvm::Error *Err) const {
-  return getU<uint64_t>(offset_ptr, Err);
+uint64_t DataExtractor::getU64(uint64_t *offset_ptr, llvm::Error *Err) अचर {
+  फर्काऊ getU<uint64_t>(offset_ptr, Err);
 }
 
 uint64_t *DataExtractor::getU64(uint64_t *offset_ptr, uint64_t *dst,
-                                uint32_t count) const {
-  return getUs<uint64_t>(offset_ptr, dst, count, nullptr);
+                                uint32_t गन्ती) अचर {
+  फर्काऊ getUs<uint64_t>(offset_ptr, dst, गन्ती, nullptr);
 }
 
 uint64_t DataExtractor::getUnsigned(uint64_t *offset_ptr, uint32_t byte_size,
-                                    llvm::Error *Err) const {
-  switch (byte_size) {
-  case 1:
-    return getU8(offset_ptr, Err);
-  case 2:
-    return getU16(offset_ptr, Err);
-  case 4:
-    return getU32(offset_ptr, Err);
-  case 8:
-    return getU64(offset_ptr, Err);
+                                    llvm::Error *Err) अचर {
+  विकल्प (byte_size) {
+  पक्ष 1:
+    फर्काऊ getU8(offset_ptr, Err);
+  पक्ष 2:
+    फर्काऊ getU16(offset_ptr, Err);
+  पक्ष 4:
+    फर्काऊ getU32(offset_ptr, Err);
+  पक्ष 8:
+    फर्काऊ getU64(offset_ptr, Err);
   }
 
   // For any other byte size, read the bytes and swap/shift if necessary.
   ErrorAsOutParameter ErrAsOut(Err);
   uint64_t val = 0;
-  if (isError(Err))
-    return val;
+  यदि (isError(Err))
+    फर्काऊ val;
   uint64_t offset = *offset_ptr;
-  if (!prepareRead(offset, byte_size, Err))
-    return val;
+  यदि (!prepareRead(offset, byte_size, Err))
+    फर्काऊ val;
   // Copy into the least significant bytes of val regardless of host
   // endianness.
-  std::memcpy(reinterpret_cast<char *>(&val) +
+  std::स_नकल(reinterpret_cast<वर्ण *>(&val) +
                   (sys::IsLittleEndianHost ? 0 : 8 - byte_size),
               &Data.data()[offset], byte_size);
   // Swap the least significant bytes of val if endianness doesn't match.
-  if (sys::IsLittleEndianHost != IsLittleEndian)
+  यदि (sys::IsLittleEndianHost != IsLittleEndian)
     val = sys::getSwappedBytes(val) >> (8 * (8 - byte_size));
 
   *offset_ptr += byte_size;
-  return val;
+  फर्काऊ val;
 }
 
 int64_t
-DataExtractor::getSigned(uint64_t *offset_ptr, uint32_t byte_size) const {
-  switch (byte_size) {
-  case 1:
-    return getS8(offset_ptr);
-  case 2:
-    return getS16(offset_ptr);
-  case 4:
-    return getS32(offset_ptr);
-  case 8:
-    return getS64(offset_ptr);
+DataExtractor::getSigned(uint64_t *offset_ptr, uint32_t byte_size) अचर {
+  विकल्प (byte_size) {
+  पक्ष 1:
+    फर्काऊ getS8(offset_ptr);
+  पक्ष 2:
+    फर्काऊ getS16(offset_ptr);
+  पक्ष 4:
+    फर्काऊ getS32(offset_ptr);
+  पक्ष 8:
+    फर्काऊ getS64(offset_ptr);
   }
   llvm_unreachable("getSigned unhandled case!");
 }
 
-StringRef DataExtractor::getCStrRef(uint64_t *OffsetPtr, Error *Err) const {
+StringRef DataExtractor::getCStrRef(uint64_t *OffsetPtr, Error *Err) अचर {
   ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return StringRef();
+  यदि (isError(Err))
+    फर्काऊ StringRef();
 
   uint64_t Start = *OffsetPtr;
   StringRef::size_type Pos = Data.find('\0', Start);
-  if (Pos != StringRef::npos) {
+  यदि (Pos != StringRef::npos) {
     *OffsetPtr = Pos + 1;
-    return StringRef(Data.data() + Start, Pos - Start);
+    फर्काऊ StringRef(Data.data() + Start, Pos - Start);
   }
-  if (Err)
+  यदि (Err)
     *Err = createStringError(errc::illegal_byte_sequence,
                              "no null terminated string at offset 0x%" PRIx64,
                              Start);
-  return StringRef();
+  फर्काऊ StringRef();
 }
 
 StringRef DataExtractor::getFixedLengthString(uint64_t *OffsetPtr,
                                               uint64_t Length,
-                                              StringRef TrimChars) const {
+                                              StringRef TrimChars) अचर {
   StringRef Bytes(getBytes(OffsetPtr, Length));
-  return Bytes.trim(TrimChars);
+  फर्काऊ Bytes.trim(TrimChars);
 }
 
 StringRef DataExtractor::getBytes(uint64_t *OffsetPtr, uint64_t Length,
-                                  Error *Err) const {
+                                  Error *Err) अचर {
   ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return StringRef();
+  यदि (isError(Err))
+    फर्काऊ StringRef();
 
-  if (!prepareRead(*OffsetPtr, Length, Err))
-    return StringRef();
+  यदि (!prepareRead(*OffsetPtr, Length, Err))
+    फर्काऊ StringRef();
 
   StringRef Result = Data.substr(*OffsetPtr, Length);
   *OffsetPtr += Length;
-  return Result;
+  फर्काऊ Result;
 }
 
-template <typename T>
-static T getLEB128(StringRef Data, uint64_t *OffsetPtr, Error *Err,
-                   T (&Decoder)(const uint8_t *p, unsigned *n,
-                                const uint8_t *end, const char **error)) {
+ढाँचा <typename T>
+स्थिर T getLEB128(StringRef Data, uint64_t *OffsetPtr, Error *Err,
+                   T (&Decoder)(अचर uint8_t *p, अचिन्हित *n,
+                                अचर uint8_t *end, अचर वर्ण **error)) {
   ArrayRef<uint8_t> Bytes = arrayRefFromStringRef(Data);
-  assert(*OffsetPtr <= Bytes.size());
+  प्रतिज्ञा(*OffsetPtr <= Bytes.size());
   ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return T();
+  यदि (isError(Err))
+    फर्काऊ T();
 
-  const char *error = nullptr;
-  unsigned bytes_read;
+  अचर वर्ण *error = nullptr;
+  अचिन्हित bytes_read;
   T result =
       Decoder(Bytes.data() + *OffsetPtr, &bytes_read, Bytes.end(), &error);
-  if (error) {
-    if (Err)
+  यदि (error) {
+    यदि (Err)
       *Err = createStringError(errc::illegal_byte_sequence,
                                "unable to decode LEB128 at offset 0x%8.8" PRIx64
                                ": %s",
                                *OffsetPtr, error);
-    return T();
+    फर्काऊ T();
   }
   *OffsetPtr += bytes_read;
-  return result;
+  फर्काऊ result;
 }
 
-uint64_t DataExtractor::getULEB128(uint64_t *offset_ptr, Error *Err) const {
-  return getLEB128(Data, offset_ptr, Err, decodeULEB128);
+uint64_t DataExtractor::getULEB128(uint64_t *offset_ptr, Error *Err) अचर {
+  फर्काऊ getLEB128(Data, offset_ptr, Err, decodeULEB128);
 }
 
-int64_t DataExtractor::getSLEB128(uint64_t *offset_ptr, Error *Err) const {
-  return getLEB128(Data, offset_ptr, Err, decodeSLEB128);
+int64_t DataExtractor::getSLEB128(uint64_t *offset_ptr, Error *Err) अचर {
+  फर्काऊ getLEB128(Data, offset_ptr, Err, decodeSLEB128);
 }
 
-APSInt DataExtractor::getSLEB128APSInt(uint64_t *OffsetPtr, Error *Err) const {
+APSInt DataExtractor::getSLEB128APSInt(uint64_t *OffsetPtr, Error *Err) अचर {
   ErrorAsOutParameter ErrAsOut(Err);
-  if (isError(Err))
-    return APSInt();
+  यदि (isError(Err))
+    फर्काऊ APSInt();
 
   uint64_t Offset = *OffsetPtr;
-  APInt Value;
-  unsigned Shift = 0;
+  APInt मान;
+  अचिन्हित Shift = 0;
   uint8_t Byte;
-  do {
-    if (!prepareRead(Offset, 1, Err))
-      return APSInt();
+  गर {
+    यदि (!prepareRead(Offset, 1, Err))
+      फर्काऊ APSInt();
     Byte = Data[Offset++];
     APInt Slice(7, Byte & 0x7f);
-    if (Shift == 0)
-      Value = Slice;
-    else {
-      Value = Value.zext(Shift + 7);
-      Value.insertBits(Slice, Shift);
+    यदि (Shift == 0)
+      मान = Slice;
+    अन्यथा {
+      मान = मान.zext(Shift + 7);
+      मान.घुसाउ_Bits(Slice, Shift);
     }
     Shift += 7;
-  } while (Byte & 0x80);
+  } जबसम्म (Byte & 0x80);
 
   // Sign extend Value to at least 64 bits to match getSLEB128.
-  if (Shift < 64)
-    Value = Value.sext(64);
+  यदि (Shift < 64)
+    मान = मान.sext(64);
 
   *OffsetPtr = Offset;
-  return APSInt(std::move(Value), /*isUnsigned=*/false);
+  फर्काऊ APSInt(std::move(मान), /*isUnsigned=*/असत्य);
 }
 
-void DataExtractor::skip(Cursor &C, uint64_t Length) const {
+शून्य DataExtractor::skip(Cursor &C, uint64_t Length) अचर {
   ErrorAsOutParameter ErrAsOut(C.Err);
-  if (isError(&C.Err))
-    return;
+  यदि (isError(&C.Err))
+    फर्काऊ;
 
-  if (prepareRead(C.Offset, Length, &C.Err))
+  यदि (prepareRead(C.Offset, Length, &C.Err))
     C.Offset += Length;
 }
