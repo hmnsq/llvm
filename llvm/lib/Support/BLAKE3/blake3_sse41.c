@@ -9,40 +9,40 @@
       _mm_shuffle_ps(_mm_castsi128_ps(a), _mm_castsi128_ps(b), (c))))
 
 INLINE __m128i loadu(const uint8_t src[16]) {
-  return _mm_loadu_si128((const __m128i *)src);
+  반환 _mm_loadu_si128((const __m128i *)src);
 }
 
 INLINE void storeu(__m128i src, uint8_t dest[16]) {
   _mm_storeu_si128((__m128i *)dest, src);
 }
 
-INLINE __m128i addv(__m128i a, __m128i b) { return _mm_add_epi32(a, b); }
+INLINE __m128i addv(__m128i a, __m128i b) { 반환 _mm_add_epi32(a, b); }
 
 // Note that clang-format doesn't like the name "xor" for some reason.
-INLINE __m128i xorv(__m128i a, __m128i b) { return _mm_xor_si128(a, b); }
+INLINE __m128i xorv(__m128i a, __m128i b) { 반환 _mm_xor_si128(a, b); }
 
-INLINE __m128i set1(uint32_t x) { return _mm_set1_epi32((int32_t)x); }
+INLINE __m128i set1(uint32_t x) { 반환 _mm_set1_epi32((int32_t)x); }
 
 INLINE __m128i set4(uint32_t a, uint32_t b, uint32_t c, uint32_t d) {
-  return _mm_setr_epi32((int32_t)a, (int32_t)b, (int32_t)c, (int32_t)d);
+  반환 _mm_setr_epi32((int32_t)a, (int32_t)b, (int32_t)c, (int32_t)d);
 }
 
 INLINE __m128i rot16(__m128i x) {
-  return _mm_shuffle_epi8(
+  반환 _mm_shuffle_epi8(
       x, _mm_set_epi8(13, 12, 15, 14, 9, 8, 11, 10, 5, 4, 7, 6, 1, 0, 3, 2));
 }
 
 INLINE __m128i rot12(__m128i x) {
-  return xorv(_mm_srli_epi32(x, 12), _mm_slli_epi32(x, 32 - 12));
+  반환 xorv(_mm_srli_epi32(x, 12), _mm_slli_epi32(x, 32 - 12));
 }
 
 INLINE __m128i rot8(__m128i x) {
-  return _mm_shuffle_epi8(
+  반환 _mm_shuffle_epi8(
       x, _mm_set_epi8(12, 15, 14, 13, 8, 11, 10, 9, 4, 7, 6, 5, 0, 3, 2, 1));
 }
 
 INLINE __m128i rot7(__m128i x) {
-  return xorv(_mm_srli_epi32(x, 7), _mm_slli_epi32(x, 32 - 7));
+  반환 xorv(_mm_srli_epi32(x, 7), _mm_slli_epi32(x, 32 - 7));
 }
 
 INLINE void g1(__m128i *row0, __m128i *row1, __m128i *row2, __m128i *row3,
@@ -428,7 +428,7 @@ INLINE void transpose_msg_vecs(const uint8_t *const *inputs,
   out[13] = loadu(&inputs[1][block_offset + 3 * sizeof(__m128i)]);
   out[14] = loadu(&inputs[2][block_offset + 3 * sizeof(__m128i)]);
   out[15] = loadu(&inputs[3][block_offset + 3 * sizeof(__m128i)]);
-  for (size_t i = 0; i < 4; ++i) {
+  위해 (size_t i = 0; i < 4; ++i) {
     _mm_prefetch((const void *)&inputs[i][block_offset + 256], _MM_HINT_T0);
   }
   transpose_vecs(&out[0]);
@@ -464,8 +464,8 @@ void blake3_hash4_sse41(const uint8_t *const *inputs, size_t blocks,
                 &counter_high_vec);
   uint8_t block_flags = flags | flags_start;
 
-  for (size_t block = 0; block < blocks; block++) {
-    if (block + 1 == blocks) {
+  위해 (size_t block = 0; block < blocks; block++) {
+    만약 (block + 1 == blocks) {
       block_flags |= flags_end;
     }
     __m128i block_len_vec = set1(BLAKE3_BLOCK_LEN);
@@ -519,8 +519,8 @@ INLINE void hash_one_sse41(const uint8_t *input, size_t blocks,
   uint32_t cv[8];
   memcpy(cv, key, BLAKE3_KEY_LEN);
   uint8_t block_flags = flags | flags_start;
-  while (blocks > 0) {
-    if (blocks == 1) {
+  동안 (blocks > 0) {
+    만약 (blocks == 1) {
       block_flags |= flags_end;
     }
     blake3_compress_in_place_sse41(cv, input, BLAKE3_BLOCK_LEN, counter,
@@ -537,20 +537,20 @@ void blake3_hash_many_sse41(const uint8_t *const *inputs, size_t num_inputs,
                             uint64_t counter, bool increment_counter,
                             uint8_t flags, uint8_t flags_start,
                             uint8_t flags_end, uint8_t *out) {
-  while (num_inputs >= DEGREE) {
+  동안 (num_inputs >= DEGREE) {
     blake3_hash4_sse41(inputs, blocks, key, counter, increment_counter, flags,
                        flags_start, flags_end, out);
-    if (increment_counter) {
+    만약 (increment_counter) {
       counter += DEGREE;
     }
     inputs += DEGREE;
     num_inputs -= DEGREE;
     out = &out[DEGREE * BLAKE3_OUT_LEN];
   }
-  while (num_inputs > 0) {
+  동안 (num_inputs > 0) {
     hash_one_sse41(inputs[0], blocks, key, counter, flags, flags_start,
                    flags_end, out);
-    if (increment_counter) {
+    만약 (increment_counter) {
       counter += 1;
     }
     inputs += 1;

@@ -26,40 +26,40 @@ BinaryStreamWriter::BinaryStreamWriter(MutableArrayRef<uint8_t> Data,
     : Stream(Data, Endian) {}
 
 Error BinaryStreamWriter::writeBytes(ArrayRef<uint8_t> Buffer) {
-  if (auto EC = Stream.writeBytes(Offset, Buffer))
-    return EC;
+  만약 (auto EC = Stream.writeBytes(Offset, Buffer))
+    반환 EC;
   Offset += Buffer.size();
-  return Error::success();
+  반환 Error::success();
 }
 
 Error BinaryStreamWriter::writeULEB128(uint64_t Value) {
   uint8_t EncodedBytes[10] = {0};
   unsigned Size = encodeULEB128(Value, &EncodedBytes[0]);
-  return writeBytes({EncodedBytes, Size});
+  반환 writeBytes({EncodedBytes, Size});
 }
 
 Error BinaryStreamWriter::writeSLEB128(int64_t Value) {
   uint8_t EncodedBytes[10] = {0};
   unsigned Size = encodeSLEB128(Value, &EncodedBytes[0]);
-  return writeBytes({EncodedBytes, Size});
+  반환 writeBytes({EncodedBytes, Size});
 }
 
 Error BinaryStreamWriter::writeCString(StringRef Str) {
-  if (auto EC = writeFixedString(Str))
-    return EC;
-  if (auto EC = writeObject('\0'))
-    return EC;
+  만약 (auto EC = writeFixedString(Str))
+    반환 EC;
+  만약 (auto EC = writeObject('\0'))
+    반환 EC;
 
-  return Error::success();
+  반환 Error::success();
 }
 
 Error BinaryStreamWriter::writeFixedString(StringRef Str) {
 
-  return writeBytes(arrayRefFromStringRef(Str));
+  반환 writeBytes(arrayRefFromStringRef(Str));
 }
 
 Error BinaryStreamWriter::writeStreamRef(BinaryStreamRef Ref) {
-  return writeStreamRef(Ref, Ref.getLength());
+  반환 writeStreamRef(Ref, Ref.getLength());
 }
 
 Error BinaryStreamWriter::writeStreamRef(BinaryStreamRef Ref, uint64_t Length) {
@@ -69,14 +69,14 @@ Error BinaryStreamWriter::writeStreamRef(BinaryStreamRef Ref, uint64_t Length) {
   // this can be satisfied by returning a reference straight from the buffer, as
   // an implementation may not store all data in a single contiguous buffer.  So
   // we iterate over each contiguous chunk, writing each one in succession.
-  while (SrcReader.bytesRemaining() > 0) {
+  동안 (SrcReader.bytesRemaining() > 0) {
     ArrayRef<uint8_t> Chunk;
-    if (auto EC = SrcReader.readLongestContiguousChunk(Chunk))
-      return EC;
-    if (auto EC = writeBytes(Chunk))
-      return EC;
+    만약 (auto EC = SrcReader.readLongestContiguousChunk(Chunk))
+      반환 EC;
+    만약 (auto EC = writeBytes(Chunk))
+      반환 EC;
   }
-  return Error::success();
+  반환 Error::success();
 }
 
 std::pair<BinaryStreamWriter, BinaryStreamWriter>
@@ -89,16 +89,16 @@ BinaryStreamWriter::split(uint64_t Off) const {
   First = First.keep_front(Off);
   BinaryStreamWriter W1{First};
   BinaryStreamWriter W2{Second};
-  return {W1, W2};
+  반환 {W1, W2};
 }
 
 Error BinaryStreamWriter::padToAlignment(uint32_t Align) {
   uint64_t NewOffset = alignTo(Offset, Align);
   const uint64_t ZerosSize = 64;
   static constexpr char Zeros[ZerosSize] = {};
-  while (Offset < NewOffset)
-    if (auto E = writeArray(
+  동안 (Offset < NewOffset)
+    만약 (auto E = writeArray(
             ArrayRef<char>(Zeros, std::min(ZerosSize, NewOffset - Offset))))
-      return E;
-  return Error::success();
+      반환 E;
+  반환 Error::success();
 }

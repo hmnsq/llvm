@@ -49,10 +49,10 @@
 #define snprintf _snprintf
 #endif
 
-static const char *regatoi(const llvm_regex_t *, char *, int);
+static const char *regatoi(const llvm_regex_t *, char *, 정수);
 
 static struct rerr {
-	int code;
+	정수 code;
 	const char *name;
 	const char *explain;
 } rerrs[] = {
@@ -81,55 +81,55 @@ static struct rerr {
  */
 /* ARGSUSED */
 size_t
-llvm_regerror(int errcode, const llvm_regex_t *preg, char *errbuf, size_t errbuf_size)
+llvm_regerror(정수 errcode, const llvm_regex_t *preg, char *errbuf, size_t errbuf_size)
 {
 	struct rerr *r;
 	size_t len;
-	int target = errcode &~ REG_ITOA;
+	정수 target = errcode &~ REG_ITOA;
 	const char *s;
 	char convbuf[50];
 
-	if (errcode == REG_ATOI)
+	만약 (errcode == REG_ATOI)
 		s = regatoi(preg, convbuf, sizeof convbuf);
-	else {
-		for (r = rerrs; r->code != 0; r++)
-			if (r->code == target)
+	아니면 {
+		위해 (r = rerrs; r->code != 0; r++)
+			만약 (r->code == target)
 				break;
 	
-		if (errcode&REG_ITOA) {
-			if (r->code != 0) {
+		만약 (errcode&REG_ITOA) {
+			만약 (r->code != 0) {
 				assert(strlen(r->name) < sizeof(convbuf));
 				(void) llvm_strlcpy(convbuf, r->name, sizeof convbuf);
-			} else
+			} 아니면
 				(void)snprintf(convbuf, sizeof convbuf,
 				    "REG_0x%x", target);
 			s = convbuf;
-		} else
+		} 아니면
 			s = r->explain;
 	}
 
 	len = strlen(s) + 1;
-	if (errbuf_size > 0) {
+	만약 (errbuf_size > 0) {
 		llvm_strlcpy(errbuf, s, errbuf_size);
 	}
 
-	return(len);
+	반환(len);
 }
 
 /*
  - regatoi - internal routine to implement REG_ATOI
  */
 static const char *
-regatoi(const llvm_regex_t *preg, char *localbuf, int localbufsize)
+regatoi(const llvm_regex_t *preg, char *localbuf, 정수 localbufsize)
 {
 	struct rerr *r;
 
-	for (r = rerrs; r->code != 0; r++)
-		if (strcmp(r->name, preg->re_endp) == 0)
+	위해 (r = rerrs; r->code != 0; r++)
+		만약 (strcmp(r->name, preg->re_endp) == 0)
 			break;
-	if (r->code == 0)
-		return("0");
+	만약 (r->code == 0)
+		반환("0");
 
 	(void)snprintf(localbuf, localbufsize, "%d", r->code);
-	return(localbuf);
+	반환(localbuf);
 }

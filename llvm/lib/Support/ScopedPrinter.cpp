@@ -13,28 +13,28 @@ using namespace llvm;
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, const HexNumber &Value) {
   OS << "0x" << utohexstr(Value.Value);
-  return OS;
+  반환 OS;
 }
 
 void ScopedPrinter::printBinaryImpl(StringRef Label, StringRef Str,
                                     ArrayRef<uint8_t> Data, bool Block,
                                     uint32_t StartOffset) {
-  if (Data.size() > 16)
+  만약 (Data.size() > 16)
     Block = true;
 
-  if (Block) {
+  만약 (Block) {
     startLine() << Label;
-    if (!Str.empty())
+    만약 (!Str.empty())
       OS << ": " << Str;
     OS << " (\n";
-    if (!Data.empty())
+    만약 (!Data.empty())
       OS << format_bytes_with_ascii(Data, StartOffset, 16, 4,
                                     (IndentLevel + 1) * 2, true)
          << "\n";
     startLine() << ")\n";
-  } else {
+  } 아니면 {
     startLine() << Label << ":";
-    if (!Str.empty())
+    만약 (!Str.empty())
       OS << " " << Str;
     OS << " (" << format_bytes(Data, std::nullopt, Data.size(), 1, 0, true)
        << ")\n";
@@ -47,6 +47,6 @@ JSONScopedPrinter::JSONScopedPrinter(
     : ScopedPrinter(OS, ScopedPrinter::ScopedPrinterKind::JSON),
       JOS(OS, /*Indent=*/PrettyPrint ? 2 : 0),
       OuterScope(std::move(OuterScope)) {
-  if (this->OuterScope)
+  만약 (this->OuterScope)
     this->OuterScope->setPrinter(*this);
 }

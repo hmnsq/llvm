@@ -28,14 +28,14 @@ bool matchesToolName(StringRef RegisteredName, StringRef InvokedName) {
   StringRef Filename = sys::path::filename(InvokedName);
   auto Matches = [RegisteredName](StringRef Candidate) {
     size_t Position = Candidate.rfind_insensitive(RegisteredName);
-    return Position != StringRef::npos &&
+    반환 Position != StringRef::npos &&
            (Position + RegisteredName.size() == Candidate.size() ||
             !llvm::isAlnum(Candidate[Position + RegisteredName.size()]));
   };
-  return Matches(Stem) || Matches(Filename);
+  반환 Matches(Stem) || Matches(Filename);
 }
 
-bool isMulticallName(StringRef Name) { return matchesToolName("llvm", Name); }
+bool isMulticallName(StringRef Name) { 반환 matchesToolName("llvm", Name); }
 
 } // namespace
 
@@ -44,18 +44,18 @@ struct ToolSession::Impl {
   std::string ExecutablePath;
   std::vector<std::pair<std::string, ToolMainFn>> Tools;
 
-  Impl(int &Argc, char **&Argv, ArrayRef<CallableTool> RegisteredTools,
+  Impl(정수 &Argc, char **&Argv, ArrayRef<CallableTool> RegisteredTools,
        bool InstallPipeSignalExitHandler, bool NeedsPOSIXUtilitySignalHandling)
       : Initialization(Argc, Argv, InstallPipeSignalExitHandler,
                        NeedsPOSIXUtilitySignalHandling),
         ExecutablePath(Argv[0]) {
     Tools.reserve(RegisteredTools.size());
-    for (const CallableTool &Tool : RegisteredTools)
+    위해 (const CallableTool &Tool : RegisteredTools)
       Tools.emplace_back(Tool.Name.str(), Tool.Main);
   }
 };
 
-ToolSession::ToolSession(int &Argc, char **&Argv, ArrayRef<CallableTool> Tools,
+ToolSession::ToolSession(정수 &Argc, char **&Argv, ArrayRef<CallableTool> Tools,
                          bool InstallPipeSignalExitHandler,
                          bool NeedsPOSIXUtilitySignalHandling) {
   assert(Argc > 0 && Argv && Argv[0] && "ToolSession requires a valid argv[0]");
@@ -69,15 +69,15 @@ ToolSession::~ToolSession() = default;
 ErrorOr<CallableTool> ToolSession::findTool(StringRef Name) const {
   StringRef Stem = sys::path::stem(Name);
   StringRef Filename = sys::path::filename(Name);
-  for (const auto &[RegisteredName, Main] : PImpl->Tools)
-    if (Stem.equals_insensitive(RegisteredName) ||
+  위해 (const auto &[RegisteredName, Main] : PImpl->Tools)
+    만약 (Stem.equals_insensitive(RegisteredName) ||
         Filename.equals_insensitive(RegisteredName))
-      return CallableTool{RegisteredName, Main};
+      반환 CallableTool{RegisteredName, Main};
 
-  for (const auto &[RegisteredName, Main] : PImpl->Tools)
-    if (matchesToolName(RegisteredName, Name))
-      return CallableTool{RegisteredName, Main};
-  return make_error_code(std::errc::no_such_file_or_directory);
+  위해 (const auto &[RegisteredName, Main] : PImpl->Tools)
+    만약 (matchesToolName(RegisteredName, Name))
+      반환 CallableTool{RegisteredName, Main};
+  반환 make_error_code(std::errc::no_such_file_or_directory);
 }
 
 ToolContext ToolSession::makeContext(StringRef RegisteredName,
@@ -89,46 +89,46 @@ ToolContext ToolSession::makeContext(StringRef RegisteredName,
   ToolContext Context(PImpl->ExecutablePath.c_str(), PrependArg,
                       NeedsPrependArg);
   Context.Session = this;
-  return Context;
+  반환 Context;
 }
 
-ErrorOr<int> ToolSession::callTool(ArrayRef<const char *> Args) {
-  if (Args.empty())
-    return make_error_code(std::errc::invalid_argument);
+ErrorOr<정수> ToolSession::callTool(ArrayRef<const char *> Args) {
+  만약 (Args.empty())
+    반환 make_error_code(std::errc::invalid_argument);
 
   StringRef InvokedName = Args.front();
   ErrorOr<CallableTool> Tool = findTool(InvokedName);
-  if (!Tool) {
-    if (InvokedName != PImpl->ExecutablePath && !isMulticallName(InvokedName))
-      return make_error_code(std::errc::no_such_file_or_directory);
+  만약 (!Tool) {
+    만약 (InvokedName != PImpl->ExecutablePath && !isMulticallName(InvokedName))
+      반환 make_error_code(std::errc::no_such_file_or_directory);
     Args = Args.drop_front();
-    if (Args.empty())
-      return make_error_code(std::errc::invalid_argument);
+    만약 (Args.empty())
+      반환 make_error_code(std::errc::invalid_argument);
     InvokedName = Args.front();
     Tool = findTool(InvokedName);
   }
 
-  if (!Tool)
-    return Tool.getError();
+  만약 (!Tool)
+    반환 Tool.getError();
 
   std::string PrependArg = sys::path::stem(InvokedName).str();
   ToolContext Context = makeContext(Tool->Name, PrependArg.c_str());
   SmallVector<char *, 16> MutableArgs;
   MutableArgs.reserve(Args.size() + 1);
-  for (const char *Arg : Args)
+  위해 (const char *Arg : Args)
     MutableArgs.push_back(const_cast<char *>(Arg));
   MutableArgs.push_back(nullptr);
-  return Tool->Main(Args.size(), MutableArgs.data(), Context);
+  반환 Tool->Main(Args.size(), MutableArgs.data(), Context);
 }
 
 ErrorOr<CallableTool> ToolContext::getCallableTool(StringRef Name) const {
-  if (!Session)
-    return make_error_code(std::errc::operation_not_permitted);
-  return Session->findTool(Name);
+  만약 (!Session)
+    반환 make_error_code(std::errc::operation_not_permitted);
+  반환 Session->findTool(Name);
 }
 
-ErrorOr<int> ToolContext::callTool(ArrayRef<const char *> Args) const {
-  if (!Session)
-    return make_error_code(std::errc::operation_not_permitted);
-  return Session->callTool(Args);
+ErrorOr<정수> ToolContext::callTool(ArrayRef<const char *> Args) const {
+  만약 (!Session)
+    반환 make_error_code(std::errc::operation_not_permitted);
+  반환 Session->callTool(Args);
 }

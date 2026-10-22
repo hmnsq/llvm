@@ -112,7 +112,7 @@
 #define	EQ(a, b)	(memcmp(a, b, m->g->nstates) == 0)
 #define	STATEVARS	long vn; char *space
 #define	STATESETUP(m, nv)	{ (m)->space = malloc((nv)*(m)->g->nstates); \
-				if ((m)->space == NULL) return(REG_ESPACE); \
+				만약 ((m)->space == NULL) 반환(REG_ESPACE); \
 				(m)->vn = 0; }
 #define	STATETEARDOWN(m)	{ free((m)->space); }
 #define	SETUP(v)	((v) = &m->space[m->vn++ * m->g->nstates])
@@ -137,26 +137,26 @@
  * when choosing which matcher to call.  Also, by this point the matchers
  * have been prototyped.
  */
-int				/* 0 success, REG_NOMATCH failure */
+정수				/* 0 success, REG_NOMATCH failure */
 llvm_regexec(const llvm_regex_t *preg, const char *string, size_t nmatch,
-             llvm_regmatch_t pmatch[], int eflags)
+             llvm_regmatch_t pmatch[], 정수 eflags)
 {
 	struct re_guts *g = preg->re_g;
 #ifdef REDEBUG
 #	define	GOODFLAGS(f)	(f)
-#else
+#아니면
 #	define	GOODFLAGS(f)	((f)&(REG_NOTBOL|REG_NOTEOL|REG_STARTEND))
 #endif
 
-	if (preg->re_magic != MAGIC1 || g->magic != MAGIC2)
-		return(REG_BADPAT);
+	만약 (preg->re_magic != MAGIC1 || g->magic != MAGIC2)
+		반환(REG_BADPAT);
 	assert(!(g->iflags&REGEX_BAD));
-	if (g->iflags&REGEX_BAD)		/* backstop for no-debug case */
-		return(REG_BADPAT);
+	만약 (g->iflags&REGEX_BAD)		/* backstop for no-debug case */
+		반환(REG_BADPAT);
 	eflags = GOODFLAGS(eflags);
 
-	if (g->nstates <= (long)(CHAR_BIT*sizeof(states1)) && !(eflags&REG_LARGE))
-		return(smatcher(g, string, nmatch, pmatch, eflags));
-	else
-		return(lmatcher(g, string, nmatch, pmatch, eflags));
+	만약 (g->nstates <= (long)(CHAR_BIT*sizeof(states1)) && !(eflags&REG_LARGE))
+		반환(smatcher(g, string, nmatch, pmatch, eflags));
+	아니면
+		반환(lmatcher(g, string, nmatch, pmatch, eflags));
 }

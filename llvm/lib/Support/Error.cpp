@@ -17,7 +17,7 @@ using namespace llvm;
 
 namespace {
 
-enum class ErrorErrorCode : int {
+enum class ErrorErrorCode : 정수 {
   MultipleErrors = 1,
   FileError,
   InconvertibleError
@@ -28,17 +28,17 @@ enum class ErrorErrorCode : int {
 // deal with the Error value directly, rather than converting to error_code.
 class ErrorErrorCategory : public std::error_category {
 public:
-  const char *name() const noexcept override { return "Error"; }
+  const char *name() const noexcept override { 반환 "Error"; }
 
-  std::string message(int condition) const override {
+  std::string message(정수 condition) const override {
     switch (static_cast<ErrorErrorCode>(condition)) {
     case ErrorErrorCode::MultipleErrors:
-      return "Multiple errors";
+      반환 "Multiple errors";
     case ErrorErrorCode::InconvertibleError:
-      return "Inconvertible error value. An error has occurred that could not "
+      반환 "Inconvertible error value. An error has occurred that could not "
              "be converted to a known std::error_code. Please file a bug.";
     case ErrorErrorCode::FileError:
-      return "A file error occurred.";
+      반환 "A file error occurred.";
     }
     llvm_unreachable("Unhandled error code");
   }
@@ -47,7 +47,7 @@ public:
 
 static ErrorErrorCategory &getErrorErrorCat() {
   static ErrorErrorCategory ErrorErrorCat;
-  return ErrorErrorCat;
+  반환 ErrorErrorCat;
 }
 
 void ErrorInfoBase::anchor() {}
@@ -59,8 +59,8 @@ char StringError::ID = 0;
 char FileError::ID = 0;
 
 void llvm::logAllUnhandledErrors(Error E, raw_ostream &OS, Twine ErrorBanner) {
-  if (!E)
-    return;
+  만약 (!E)
+    반환;
   OS << ErrorBanner;
   handleAllErrors(std::move(E), [&](const ErrorInfoBase &EI) {
     EI.log(OS);
@@ -75,7 +75,7 @@ std::string llvm::toString(Error E) {
   handleAllErrors(std::move(E), [&Errors](const ErrorInfoBase &EI) {
     Errors.push_back(EI.message());
   });
-  return join(Errors.begin(), Errors.end(), "\n");
+  반환 join(Errors.begin(), Errors.end(), "\n");
 }
 
 std::string llvm::toStringWithoutConsuming(const Error &E) {
@@ -83,31 +83,31 @@ std::string llvm::toStringWithoutConsuming(const Error &E) {
   visitErrors(E, [&Errors](const ErrorInfoBase &EI) {
     Errors.push_back(EI.message());
   });
-  return join(Errors.begin(), Errors.end(), "\n");
+  반환 join(Errors.begin(), Errors.end(), "\n");
 }
 
 std::error_code ErrorList::convertToErrorCode() const {
-  return std::error_code(static_cast<int>(ErrorErrorCode::MultipleErrors),
+  반환 std::error_code(static_cast<정수>(ErrorErrorCode::MultipleErrors),
                          getErrorErrorCat());
 }
 
 std::error_code llvm::inconvertibleErrorCode() {
-  return std::error_code(static_cast<int>(ErrorErrorCode::InconvertibleError),
+  반환 std::error_code(static_cast<정수>(ErrorErrorCode::InconvertibleError),
                          getErrorErrorCat());
 }
 
 std::error_code FileError::convertToErrorCode() const {
   std::error_code NestedEC = Err->convertToErrorCode();
-  if (NestedEC == inconvertibleErrorCode())
-    return std::error_code(static_cast<int>(ErrorErrorCode::FileError),
+  만약 (NestedEC == inconvertibleErrorCode())
+    반환 std::error_code(static_cast<정수>(ErrorErrorCode::FileError),
                            getErrorErrorCat());
-  return NestedEC;
+  반환 NestedEC;
 }
 
 Error llvm::errorCodeToError(std::error_code EC) {
-  if (!EC)
-    return Error::success();
-  return Error(std::make_unique<ECError>(ECError(EC)));
+  만약 (!EC)
+    반환 Error::success();
+  반환 Error(std::make_unique<ECError>(ECError(EC)));
 }
 
 std::error_code llvm::errorToErrorCode(Error Err) {
@@ -115,18 +115,18 @@ std::error_code llvm::errorToErrorCode(Error Err) {
   handleAllErrors(std::move(Err), [&](const ErrorInfoBase &EI) {
     EC = EI.convertToErrorCode();
   });
-  if (EC == inconvertibleErrorCode())
+  만약 (EC == inconvertibleErrorCode())
     report_fatal_error(Twine(EC.message()));
-  return EC;
+  반환 EC;
 }
 
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
+#만약 LLVM_ENABLE_ABI_BREAKING_CHECKS
 void Error::fatalUncheckedError() const {
   dbgs() << "Program aborted due to an unhandled Error:\n";
-  if (getPtr()) {
+  만약 (getPtr()) {
     getPtr()->log(dbgs());
     dbgs() << "\n";
-  }else
+  }아니면
     dbgs() << "Error value was Success. (Note: Success values must still be "
               "checked prior to being destroyed).\n";
   abort();
@@ -143,21 +143,21 @@ StringError::StringError(std::string &&S, std::error_code EC, bool PrintMsgOnly)
     : Msg(std::move(S)), EC(EC), PrintMsgOnly(PrintMsgOnly) {}
 
 void StringError::log(raw_ostream &OS) const {
-  if (PrintMsgOnly) {
+  만약 (PrintMsgOnly) {
     OS << Msg;
-  } else {
+  } 아니면 {
     OS << EC.message();
-    if (!Msg.empty())
+    만약 (!Msg.empty())
       OS << (" " + Msg);
   }
 }
 
 std::error_code StringError::convertToErrorCode() const {
-  return EC;
+  반환 EC;
 }
 
 Error llvm::createStringError(std::string &&Msg, std::error_code EC) {
-  return make_error<StringError>(std::move(Msg), EC, true);
+  반환 make_error<StringError>(std::move(Msg), EC, true);
 }
 
 void llvm::report_fatal_error(Error Err, bool GenCrashDiag) {
@@ -179,7 +179,7 @@ void llvm::reportFatalUsageError(Error Err) {
 }
 
 LLVMErrorTypeId LLVMGetErrorTypeId(LLVMErrorRef Err) {
-  return reinterpret_cast<ErrorInfoBase *>(Err)->dynamicClassID();
+  반환 reinterpret_cast<ErrorInfoBase *>(Err)->dynamicClassID();
 }
 
 void LLVMConsumeError(LLVMErrorRef Err) { consumeError(unwrap(Err)); }
@@ -193,15 +193,15 @@ char *LLVMGetErrorMessage(LLVMErrorRef Err) {
   char *ErrMsg = new char[Tmp.size() + 1];
   memcpy(ErrMsg, Tmp.data(), Tmp.size());
   ErrMsg[Tmp.size()] = '\0';
-  return ErrMsg;
+  반환 ErrMsg;
 }
 
 void LLVMDisposeErrorMessage(char *ErrMsg) { delete[] ErrMsg; }
 
 LLVMErrorTypeId LLVMGetStringErrorTypeId() {
-  return reinterpret_cast<void *>(&StringError::ID);
+  반환 reinterpret_cast<void *>(&StringError::ID);
 }
 
 LLVMErrorRef LLVMCreateStringError(const char *ErrMsg) {
-  return wrap(make_error<StringError>(ErrMsg, inconvertibleErrorCode()));
+  반환 wrap(make_error<StringError>(ErrMsg, inconvertibleErrorCode()));
 }

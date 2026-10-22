@@ -48,7 +48,7 @@ SourceMgr &SourceMgr::operator=(SourceMgr &&) = default;
 SourceMgr::~SourceMgr() = default;
 
 IntrusiveRefCntPtr<vfs::FileSystem> SourceMgr::getVirtualFileSystem() const {
-  return FS;
+  반환 FS;
 }
 
 void SourceMgr::setVirtualFileSystem(IntrusiveRefCntPtr<vfs::FileSystem> FS) {
@@ -60,10 +60,10 @@ unsigned SourceMgr::AddIncludeFile(const std::string &Filename,
                                    std::string &IncludedFile) {
   ErrorOr<std::unique_ptr<MemoryBuffer>> NewBufOrErr =
       OpenIncludeFile(Filename, IncludedFile);
-  if (!NewBufOrErr)
-    return 0;
+  만약 (!NewBufOrErr)
+    반환 0;
 
-  return AddNewSourceBuffer(std::move(*NewBufOrErr), IncludeLoc);
+  반환 AddNewSourceBuffer(std::move(*NewBufOrErr), IncludeLoc);
 }
 
 ErrorOr<std::unique_ptr<MemoryBuffer>>
@@ -71,7 +71,7 @@ SourceMgr::OpenIncludeFile(const std::string &Filename,
                            std::string &IncludedFile,
                            bool RequiresNullTerminator) {
   auto GetFile = [this, RequiresNullTerminator](StringRef Path) {
-    return FS ? FS->getBufferForFile(Path, /*FileSize=*/-1,
+    반환 FS ? FS->getBufferForFile(Path, /*FileSize=*/-1,
                                      RequiresNullTerminator)
               : MemoryBuffer::getFile(Path, /*IsText=*/false,
                                       RequiresNullTerminator);
@@ -81,47 +81,47 @@ SourceMgr::OpenIncludeFile(const std::string &Filename,
 
   SmallString<64> Buffer(Filename);
   // If the file didn't exist directly, see if it's in an include path.
-  for (unsigned i = 0, e = IncludeDirectories.size(); i != e && !NewBufOrErr;
+  위해 (unsigned i = 0, e = IncludeDirectories.size(); i != e && !NewBufOrErr;
        ++i) {
     Buffer = IncludeDirectories[i];
     sys::path::append(Buffer, Filename);
     NewBufOrErr = GetFile(Buffer);
   }
 
-  if (NewBufOrErr)
+  만약 (NewBufOrErr)
     IncludedFile = static_cast<std::string>(Buffer);
 
-  return NewBufOrErr;
+  반환 NewBufOrErr;
 }
 
 unsigned SourceMgr::FindBufferContainingLoc(SMLoc Loc) const {
-  for (unsigned i = 0, e = Buffers.size(); i != e; ++i)
-    if (Loc.getPointer() >= Buffers[i].Buffer->getBufferStart() &&
+  위해 (unsigned i = 0, e = Buffers.size(); i != e; ++i)
+    만약 (Loc.getPointer() >= Buffers[i].Buffer->getBufferStart() &&
         // Use <= here so that a pointer to the null at the end of the buffer
         // is included as part of the buffer.
         Loc.getPointer() <= Buffers[i].Buffer->getBufferEnd())
-      return i + 1;
-  return 0;
+      반환 i + 1;
+  반환 0;
 }
 
 template <typename T>
 static std::vector<T> &GetOrCreateOffsetCache(void *&OffsetCache,
                                               MemoryBuffer *Buffer) {
-  if (OffsetCache)
-    return *static_cast<std::vector<T> *>(OffsetCache);
+  만약 (OffsetCache)
+    반환 *static_cast<std::vector<T> *>(OffsetCache);
 
   // Lazily fill in the offset cache.
   auto *Offsets = new std::vector<T>();
   size_t Sz = Buffer->getBufferSize();
   assert(Sz <= std::numeric_limits<T>::max());
   StringRef S = Buffer->getBuffer();
-  for (size_t N = 0; N < Sz; ++N) {
-    if (S[N] == '\n')
+  위해 (size_t N = 0; N < Sz; ++N) {
+    만약 (S[N] == '\n')
       Offsets->push_back(static_cast<T>(N));
   }
 
   OffsetCache = Offsets;
-  return *Offsets;
+  반환 *Offsets;
 }
 
 template <typename T>
@@ -146,7 +146,7 @@ SourceMgr::SrcBuffer::getLineAndColumnSpecialized(const char *Ptr) const {
   // the buffer) to the pointer.
   T LineStartOffs = (I == Offsets.begin()) ? 0 : (I[-1] + 1);
   unsigned ColNo = PtrOffset - LineStartOffs + 1;
-  return {LineNo, ColNo};
+  반환 {LineNo, ColNo};
 }
 
 /// Look up a given \p Ptr in the buffer, determining which line and column
@@ -154,13 +154,13 @@ SourceMgr::SrcBuffer::getLineAndColumnSpecialized(const char *Ptr) const {
 LLVM_ABI std::pair<unsigned, unsigned>
 SourceMgr::SrcBuffer::getLineAndColumn(const char *Ptr) const {
   size_t Sz = Buffer->getBufferSize();
-  if (Sz <= std::numeric_limits<uint8_t>::max())
-    return getLineAndColumnSpecialized<uint8_t>(Ptr);
-  if (Sz <= std::numeric_limits<uint16_t>::max())
-    return getLineAndColumnSpecialized<uint16_t>(Ptr);
-  if (Sz <= std::numeric_limits<uint32_t>::max())
-    return getLineAndColumnSpecialized<uint32_t>(Ptr);
-  return getLineAndColumnSpecialized<uint64_t>(Ptr);
+  만약 (Sz <= std::numeric_limits<uint8_t>::max())
+    반환 getLineAndColumnSpecialized<uint8_t>(Ptr);
+  만약 (Sz <= std::numeric_limits<uint16_t>::max())
+    반환 getLineAndColumnSpecialized<uint16_t>(Ptr);
+  만약 (Sz <= std::numeric_limits<uint32_t>::max())
+    반환 getLineAndColumnSpecialized<uint32_t>(Ptr);
+  반환 getLineAndColumnSpecialized<uint64_t>(Ptr);
 }
 
 template <typename T>
@@ -170,18 +170,18 @@ const char *SourceMgr::SrcBuffer::getPointerForLineNumberSpecialized(
       GetOrCreateOffsetCache<T>(OffsetCache, Buffer.get());
 
   // We start counting line and column numbers from 1.
-  if (LineNo != 0)
+  만약 (LineNo != 0)
     --LineNo;
 
   const char *BufStart = Buffer->getBufferStart();
 
   // The offset cache contains the location of the \n for the specified line,
   // we want the start of the line.  As such, we look for the previous entry.
-  if (LineNo == 0)
-    return BufStart;
-  if (LineNo > Offsets.size())
-    return nullptr;
-  return BufStart + Offsets[LineNo - 1] + 1;
+  만약 (LineNo == 0)
+    반환 BufStart;
+  만약 (LineNo > Offsets.size())
+    반환 nullptr;
+  반환 BufStart + Offsets[LineNo - 1] + 1;
 }
 
 /// Return a pointer to the first character of the specified line number or
@@ -189,14 +189,14 @@ const char *SourceMgr::SrcBuffer::getPointerForLineNumberSpecialized(
 const char *
 SourceMgr::SrcBuffer::getPointerForLineNumber(unsigned LineNo) const {
   size_t Sz = Buffer->getBufferSize();
-  if (Sz <= std::numeric_limits<uint8_t>::max())
-    return getPointerForLineNumberSpecialized<uint8_t>(LineNo);
-  else if (Sz <= std::numeric_limits<uint16_t>::max())
-    return getPointerForLineNumberSpecialized<uint16_t>(LineNo);
-  else if (Sz <= std::numeric_limits<uint32_t>::max())
-    return getPointerForLineNumberSpecialized<uint32_t>(LineNo);
-  else
-    return getPointerForLineNumberSpecialized<uint64_t>(LineNo);
+  만약 (Sz <= std::numeric_limits<uint8_t>::max())
+    반환 getPointerForLineNumberSpecialized<uint8_t>(LineNo);
+  아니면 만약 (Sz <= std::numeric_limits<uint16_t>::max())
+    반환 getPointerForLineNumberSpecialized<uint16_t>(LineNo);
+  아니면 만약 (Sz <= std::numeric_limits<uint32_t>::max())
+    반환 getPointerForLineNumberSpecialized<uint32_t>(LineNo);
+  아니면
+    반환 getPointerForLineNumberSpecialized<uint64_t>(LineNo);
 }
 
 SourceMgr::SrcBuffer::SrcBuffer(SourceMgr::SrcBuffer &&Other)
@@ -206,15 +206,15 @@ SourceMgr::SrcBuffer::SrcBuffer(SourceMgr::SrcBuffer &&Other)
 }
 
 SourceMgr::SrcBuffer::~SrcBuffer() {
-  if (OffsetCache) {
+  만약 (OffsetCache) {
     size_t Sz = Buffer->getBufferSize();
-    if (Sz <= std::numeric_limits<uint8_t>::max())
+    만약 (Sz <= std::numeric_limits<uint8_t>::max())
       delete static_cast<std::vector<uint8_t> *>(OffsetCache);
-    else if (Sz <= std::numeric_limits<uint16_t>::max())
+    아니면 만약 (Sz <= std::numeric_limits<uint16_t>::max())
       delete static_cast<std::vector<uint16_t> *>(OffsetCache);
-    else if (Sz <= std::numeric_limits<uint32_t>::max())
+    아니면 만약 (Sz <= std::numeric_limits<uint32_t>::max())
       delete static_cast<std::vector<uint32_t> *>(OffsetCache);
-    else
+    아니면
       delete static_cast<std::vector<uint64_t> *>(OffsetCache);
     OffsetCache = nullptr;
   }
@@ -222,14 +222,14 @@ SourceMgr::SrcBuffer::~SrcBuffer() {
 
 std::pair<unsigned, unsigned>
 SourceMgr::getLineAndColumn(SMLoc Loc, unsigned BufferID) const {
-  if (!BufferID)
+  만약 (!BufferID)
     BufferID = FindBufferContainingLoc(Loc);
   assert(BufferID && "Invalid location!");
 
   auto &SB = getBufferInfo(BufferID);
   const char *Ptr = Loc.getPointer();
 
-  return SB.getLineAndColumn(Ptr);
+  반환 SB.getLineAndColumn(Ptr);
 }
 
 // FIXME: Note that the formatting of source locations is spread between
@@ -246,12 +246,12 @@ std::string SourceMgr::getFormattedLocationNoOffset(SMLoc Loc,
   assert(BufferID && "Invalid location!");
   auto FileSpec = getBufferInfo(BufferID).Buffer->getBufferIdentifier();
 
-  if (IncludePath) {
-    return FileSpec.str() + ":" + std::to_string(FindLineNumber(Loc, BufferID));
-  } else {
+  만약 (IncludePath) {
+    반환 FileSpec.str() + ":" + std::to_string(FindLineNumber(Loc, BufferID));
+  } 아니면 {
     auto I = FileSpec.find_last_of("/\\");
     I = (I == FileSpec.size()) ? 0 : (I + 1);
-    return FileSpec.substr(I).str() + ":" +
+    반환 FileSpec.substr(I).str() + ":" +
            std::to_string(FindLineNumber(Loc, BufferID));
   }
 }
@@ -262,32 +262,32 @@ SMLoc SourceMgr::FindLocForLineAndColumn(unsigned BufferID, unsigned LineNo,
                                          unsigned ColNo) {
   auto &SB = getBufferInfo(BufferID);
   const char *Ptr = SB.getPointerForLineNumber(LineNo);
-  if (!Ptr)
-    return SMLoc();
+  만약 (!Ptr)
+    반환 SMLoc();
 
   // We start counting line and column numbers from 1.
-  if (ColNo != 0)
+  만약 (ColNo != 0)
     --ColNo;
 
   // If we have a column number, validate it.
-  if (ColNo) {
+  만약 (ColNo) {
     // Make sure the location is within the current line.
-    if (Ptr + ColNo > SB.Buffer->getBufferEnd())
-      return SMLoc();
+    만약 (Ptr + ColNo > SB.Buffer->getBufferEnd())
+      반환 SMLoc();
 
     // Make sure there is no newline in the way.
-    if (StringRef(Ptr, ColNo).find_first_of("\n\r") != StringRef::npos)
-      return SMLoc();
+    만약 (StringRef(Ptr, ColNo).find_first_of("\n\r") != StringRef::npos)
+      반환 SMLoc();
 
     Ptr += ColNo;
   }
 
-  return SMLoc::getFromPointer(Ptr);
+  반환 SMLoc::getFromPointer(Ptr);
 }
 
 void SourceMgr::PrintIncludeStack(SMLoc IncludeLoc, raw_ostream &OS) const {
-  if (IncludeLoc == SMLoc())
-    return; // Top of stack.
+  만약 (IncludeLoc == SMLoc())
+    반환; // Top of stack.
 
   unsigned CurBuf = FindBufferContainingLoc(IncludeLoc);
   assert(CurBuf && "Invalid or unspecified location!");
@@ -300,10 +300,10 @@ void SourceMgr::PrintIncludeStack(SMLoc IncludeLoc, raw_ostream &OS) const {
 
 void SourceMgr::printIncludeStackForDiagnostic(SMLoc Loc,
                                                raw_ostream &OS) const {
-  if (!Loc.isValid())
-    return;
+  만약 (!Loc.isValid())
+    반환;
   unsigned DiagCurBuffer = FindBufferContainingLoc(Loc);
-  if (DiagCurBuffer && DiagCurBuffer != getMainFileID()) {
+  만약 (DiagCurBuffer && DiagCurBuffer != getMainFileID()) {
     SMLoc ParentIncludeLoc = getParentIncludeLoc(DiagCurBuffer);
     // Ignore macro instantiation buffers to avoid redundant include stacks.
     PrintIncludeStack(ParentIncludeLoc, OS);
@@ -320,7 +320,7 @@ SMDiagnostic SourceMgr::GetMessage(SMLoc Loc, SourceMgr::DiagKind Kind,
   StringRef BufferID = "<unknown>";
   StringRef LineStr;
 
-  if (Loc.isValid()) {
+  만약 (Loc.isValid()) {
     unsigned CurBuf = FindBufferContainingLoc(Loc);
     assert(CurBuf && "Invalid or unspecified location!");
 
@@ -330,31 +330,31 @@ SMDiagnostic SourceMgr::GetMessage(SMLoc Loc, SourceMgr::DiagKind Kind,
     // Scan backward to find the start of the line.
     const char *LineStart = Loc.getPointer();
     const char *BufStart = CurMB->getBufferStart();
-    while (LineStart != BufStart && LineStart[-1] != '\n' &&
+    동안 (LineStart != BufStart && LineStart[-1] != '\n' &&
            LineStart[-1] != '\r')
       --LineStart;
 
     // Get the end of the line.
     const char *LineEnd = Loc.getPointer();
     const char *BufEnd = CurMB->getBufferEnd();
-    while (LineEnd != BufEnd && LineEnd[0] != '\n' && LineEnd[0] != '\r')
+    동안 (LineEnd != BufEnd && LineEnd[0] != '\n' && LineEnd[0] != '\r')
       ++LineEnd;
     LineStr = StringRef(LineStart, LineEnd - LineStart);
 
     // Convert any ranges to column ranges that only intersect the line of the
     // location.
-    for (SMRange R : Ranges) {
-      if (!R.isValid())
+    위해 (SMRange R : Ranges) {
+      만약 (!R.isValid())
         continue;
 
       // If the line doesn't contain any part of the range, then ignore it.
-      if (R.Start.getPointer() > LineEnd || R.End.getPointer() < LineStart)
+      만약 (R.Start.getPointer() > LineEnd || R.End.getPointer() < LineStart)
         continue;
 
       // Ignore pieces of the range that go onto other lines.
-      if (R.Start.getPointer() < LineStart)
+      만약 (R.Start.getPointer() < LineStart)
         R.Start = SMLoc::getFromPointer(LineStart);
-      if (R.End.getPointer() > LineEnd)
+      만약 (R.End.getPointer() > LineEnd)
         R.End = SMLoc::getFromPointer(LineEnd);
 
       // Translate from SMLoc ranges to column ranges.
@@ -366,7 +366,7 @@ SMDiagnostic SourceMgr::GetMessage(SMLoc Loc, SourceMgr::DiagKind Kind,
     LineAndCol = getLineAndColumn(Loc, CurBuf);
   }
 
-  return SMDiagnostic(*this, Loc, BufferID, LineAndCol.first,
+  반환 SMDiagnostic(*this, Loc, BufferID, LineAndCol.first,
                       LineAndCol.second - 1, Kind, Msg.str(), LineStr,
                       ColRanges, FixIts);
 }
@@ -374,12 +374,12 @@ SMDiagnostic SourceMgr::GetMessage(SMLoc Loc, SourceMgr::DiagKind Kind,
 void SourceMgr::PrintMessage(raw_ostream &OS, const SMDiagnostic &Diagnostic,
                              bool ShowColors) const {
   // Report the message with the diagnostic handler if present.
-  if (DiagHandler) {
+  만약 (DiagHandler) {
     DiagHandler(Diagnostic, DiagContext);
-    return;
+    반환;
   }
 
-  if (Diagnostic.getLoc().isValid()) {
+  만약 (Diagnostic.getLoc().isValid()) {
     unsigned CurBuf = FindBufferContainingLoc(Diagnostic.getLoc());
     assert(CurBuf && "Invalid or unspecified location!");
     PrintIncludeStack(getBufferInfo(CurBuf).IncludeLoc, OS);
@@ -414,8 +414,8 @@ SMFixIt::SMFixIt(SMRange R, const Twine &Replacement)
 // SMDiagnostic Implementation
 //===----------------------------------------------------------------------===//
 
-SMDiagnostic::SMDiagnostic(const SourceMgr &sm, SMLoc L, StringRef FN, int Line,
-                           int Col, SourceMgr::DiagKind Kind, StringRef Msg,
+SMDiagnostic::SMDiagnostic(const SourceMgr &sm, SMLoc L, StringRef FN, 정수 Line,
+                           정수 Col, SourceMgr::DiagKind Kind, StringRef Msg,
                            StringRef LineStr,
                            ArrayRef<std::pair<unsigned, unsigned>> Ranges,
                            ArrayRef<SMFixIt> Hints)
@@ -428,32 +428,32 @@ SMDiagnostic::SMDiagnostic(const SourceMgr &sm, SMLoc L, StringRef FN, int Line,
 static void buildFixItLine(std::string &CaretLine, std::string &FixItLine,
                            ArrayRef<SMFixIt> FixIts,
                            ArrayRef<char> SourceLine) {
-  if (FixIts.empty())
-    return;
+  만약 (FixIts.empty())
+    반환;
 
   const char *LineStart = SourceLine.begin();
   const char *LineEnd = SourceLine.end();
 
   size_t PrevHintEndCol = 0;
 
-  for (const llvm::SMFixIt &Fixit : FixIts) {
+  위해 (const llvm::SMFixIt &Fixit : FixIts) {
     // If the fixit contains a newline or tab, ignore it.
-    if (Fixit.getText().find_first_of("\n\r\t") != StringRef::npos)
+    만약 (Fixit.getText().find_first_of("\n\r\t") != StringRef::npos)
       continue;
 
     SMRange R = Fixit.getRange();
 
     // If the line doesn't contain any part of the range, then ignore it.
-    if (R.Start.getPointer() > LineEnd || R.End.getPointer() < LineStart)
+    만약 (R.Start.getPointer() > LineEnd || R.End.getPointer() < LineStart)
       continue;
 
     // Translate from SMLoc to column.
     // Ignore pieces of the range that go onto other lines.
     // FIXME: Handle multibyte characters in the source line.
     unsigned FirstCol;
-    if (R.Start.getPointer() < LineStart)
+    만약 (R.Start.getPointer() < LineStart)
       FirstCol = 0;
-    else
+    아니면
       FirstCol = R.Start.getPointer() - LineStart;
 
     // If we inserted a long previous hint, push this one forwards, and add
@@ -464,7 +464,7 @@ static void buildFixItLine(std::string &CaretLine, std::string &FixItLine,
     // Note that if this hint is located immediately after the previous
     // hint, no space will be added, since the location is more important.
     unsigned HintCol = FirstCol;
-    if (HintCol < PrevHintEndCol)
+    만약 (HintCol < PrevHintEndCol)
       HintCol = PrevHintEndCol + 1;
 
     // FIXME: This assertion is intended to catch unintended use of multibyte
@@ -475,7 +475,7 @@ static void buildFixItLine(std::string &CaretLine, std::string &FixItLine,
 
     // This relies on one byte per column in our fixit hints.
     unsigned LastColumnModified = HintCol + Fixit.getText().size();
-    if (LastColumnModified > FixItLine.size())
+    만약 (LastColumnModified > FixItLine.size())
       FixItLine.resize(LastColumnModified, ' ');
 
     llvm::copy(Fixit.getText(), FixItLine.begin() + HintCol);
@@ -485,9 +485,9 @@ static void buildFixItLine(std::string &CaretLine, std::string &FixItLine,
     // For replacements, mark the removal range with '~'.
     // FIXME: Handle multibyte characters in the source line.
     unsigned LastCol;
-    if (R.End.getPointer() >= LineEnd)
+    만약 (R.End.getPointer() >= LineEnd)
       LastCol = LineEnd - LineStart;
-    else
+    아니면
       LastCol = R.End.getPointer() - LineStart;
 
     std::fill(&CaretLine[FirstCol], &CaretLine[LastCol], '~');
@@ -496,10 +496,10 @@ static void buildFixItLine(std::string &CaretLine, std::string &FixItLine,
 
 static void printSourceLine(raw_ostream &S, StringRef LineContents) {
   // Print out the source line one character at a time, so we can expand tabs.
-  for (unsigned i = 0, e = LineContents.size(), OutCol = 0; i != e; ++i) {
+  위해 (unsigned i = 0, e = LineContents.size(), OutCol = 0; i != e; ++i) {
     size_t NextTab = LineContents.find('\t', i);
     // If there were no tabs left, print the rest, we are done.
-    if (NextTab == StringRef::npos) {
+    만약 (NextTab == StringRef::npos) {
       S << LineContents.drop_front(i);
       break;
     }
@@ -513,12 +513,12 @@ static void printSourceLine(raw_ostream &S, StringRef LineContents) {
     do {
       S << ' ';
       ++OutCol;
-    } while ((OutCol % TabStop) != 0);
+    } 동안 ((OutCol % TabStop) != 0);
   }
   S << '\n';
 }
 
-static bool isNonASCII(char c) { return c & 0x80; }
+static bool isNonASCII(char c) { 반환 c & 0x80; }
 
 void SMDiagnostic::print(const char *ProgName, raw_ostream &OS, bool ShowColors,
                          bool ShowKindLabel, bool ShowLocation) const {
@@ -527,25 +527,25 @@ void SMDiagnostic::print(const char *ProgName, raw_ostream &OS, bool ShowColors,
   {
     WithColor S(OS, raw_ostream::SAVEDCOLOR, true, false, Mode);
 
-    if (ProgName && ProgName[0])
+    만약 (ProgName && ProgName[0])
       S << ProgName << ": ";
 
-    if (ShowLocation && !Filename.empty()) {
-      if (Filename == "-")
+    만약 (ShowLocation && !Filename.empty()) {
+      만약 (Filename == "-")
         S << "<stdin>";
-      else
+      아니면
         S << Filename;
 
-      if (LineNo != -1) {
+      만약 (LineNo != -1) {
         S << ':' << LineNo;
-        if (ColumnNo != -1)
+        만약 (ColumnNo != -1)
           S << ':' << (ColumnNo + 1);
       }
       S << ": ";
     }
   }
 
-  if (ShowKindLabel) {
+  만약 (ShowKindLabel) {
     switch (Kind) {
     case SourceMgr::DK_Error:
       WithColor::error(OS, "", !ShowColors);
@@ -564,17 +564,17 @@ void SMDiagnostic::print(const char *ProgName, raw_ostream &OS, bool ShowColors,
 
   WithColor(OS, raw_ostream::SAVEDCOLOR, true, false, Mode) << Message << '\n';
 
-  if (LineNo == -1 || ColumnNo == -1)
-    return;
+  만약 (LineNo == -1 || ColumnNo == -1)
+    반환;
 
   // FIXME: If there are multibyte or multi-column characters in the source, all
   // our ranges will be wrong. To do this properly, we'll need a byte-to-column
   // map like Clang's TextDiagnostic. For now, we'll just handle tabs by
   // expanding them later, and bail out rather than show incorrect ranges and
   // misaligned fixits for any other odd characters.
-  if (any_of(LineContents, isNonASCII)) {
+  만약 (any_of(LineContents, isNonASCII)) {
     printSourceLine(OS, LineContents);
-    return;
+    반환;
   }
   size_t NumColumns = LineContents.size();
 
@@ -582,7 +582,7 @@ void SMDiagnostic::print(const char *ProgName, raw_ostream &OS, bool ShowColors,
   std::string CaretLine(NumColumns + 1, ' ');
 
   // Expand any ranges.
-  for (const std::pair<unsigned, unsigned> &R : Ranges)
+  위해 (const std::pair<unsigned, unsigned> &R : Ranges)
     std::fill(&CaretLine[R.first],
               &CaretLine[std::min((size_t)R.second, CaretLine.size())], '~');
 
@@ -593,9 +593,9 @@ void SMDiagnostic::print(const char *ProgName, raw_ostream &OS, bool ShowColors,
                  ArrayRef(Loc.getPointer() - ColumnNo, LineContents.size()));
 
   // Finally, plop on the caret.
-  if (unsigned(ColumnNo) <= NumColumns)
+  만약 (unsigned(ColumnNo) <= NumColumns)
     CaretLine[ColumnNo] = '^';
-  else
+  아니면
     CaretLine[NumColumns] = '^';
 
   // ... and remove trailing whitespace so the output doesn't wrap for it.  We
@@ -610,8 +610,8 @@ void SMDiagnostic::print(const char *ProgName, raw_ostream &OS, bool ShowColors,
     WithColor S(OS, raw_ostream::GREEN, true, false, Mode);
 
     // Print out the caret line, matching tabs in the source line.
-    for (unsigned i = 0, e = CaretLine.size(), OutCol = 0; i != e; ++i) {
-      if (i >= LineContents.size() || LineContents[i] != '\t') {
+    위해 (unsigned i = 0, e = CaretLine.size(), OutCol = 0; i != e; ++i) {
+      만약 (i >= LineContents.size() || LineContents[i] != '\t') {
         S << CaretLine[i];
         ++OutCol;
         continue;
@@ -621,17 +621,17 @@ void SMDiagnostic::print(const char *ProgName, raw_ostream &OS, bool ShowColors,
       do {
         S << CaretLine[i];
         ++OutCol;
-      } while ((OutCol % TabStop) != 0);
+      } 동안 ((OutCol % TabStop) != 0);
     }
     S << '\n';
   }
 
   // Print out the replacement line, matching tabs in the source line.
-  if (FixItInsertionLine.empty())
-    return;
+  만약 (FixItInsertionLine.empty())
+    반환;
 
-  for (size_t i = 0, e = FixItInsertionLine.size(), OutCol = 0; i < e; ++i) {
-    if (i >= LineContents.size() || LineContents[i] != '\t') {
+  위해 (size_t i = 0, e = FixItInsertionLine.size(), OutCol = 0; i < e; ++i) {
+    만약 (i >= LineContents.size() || LineContents[i] != '\t') {
       OS << FixItInsertionLine[i];
       ++OutCol;
       continue;
@@ -645,10 +645,10 @@ void SMDiagnostic::print(const char *ProgName, raw_ostream &OS, bool ShowColors,
       // fix-it replacements are exactly adjacent, or if a fix-it contains a
       // space. Really we should be precomputing column widths, which we'll
       // need anyway for multibyte chars.
-      if (FixItInsertionLine[i] != ' ')
+      만약 (FixItInsertionLine[i] != ' ')
         ++i;
       ++OutCol;
-    } while (((OutCol % TabStop) != 0) && i != e);
+    } 동안 (((OutCol % TabStop) != 0) && i != e);
   }
   OS << '\n';
 }

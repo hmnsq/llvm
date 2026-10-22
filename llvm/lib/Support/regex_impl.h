@@ -46,7 +46,7 @@ typedef struct {
 } llvm_regmatch_t;
 
 typedef struct llvm_regex {
-  int re_magic;
+  정수 re_magic;
   size_t re_nsub;		/* number of parenthesized subexpressions */
   const char *re_endp;	/* end pointer for REG_PEND */
   struct re_guts *re_g;	/* none of your business :-) */
@@ -94,10 +94,10 @@ typedef struct llvm_regex {
 extern "C" {
 #endif
 
-int	llvm_regcomp(llvm_regex_t *, const char *, int);
-size_t	llvm_regerror(int, const llvm_regex_t *, char *, size_t);
-int	llvm_regexec(const llvm_regex_t *, const char *, size_t,
-                     llvm_regmatch_t [], int);
+정수	llvm_regcomp(llvm_regex_t *, const char *, 정수);
+size_t	llvm_regerror(정수, const llvm_regex_t *, char *, size_t);
+정수	llvm_regexec(const llvm_regex_t *, const char *, size_t,
+                     llvm_regmatch_t [], 정수);
 void	llvm_regfree(llvm_regex_t *);
 size_t  llvm_strlcpy(char *dst, const char *src, size_t siz);
 

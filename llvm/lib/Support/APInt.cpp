@@ -35,50 +35,50 @@ using namespace llvm;
 /// A utility function for allocating memory, checking for allocation failures,
 /// and ensuring the contents are zeroed.
 inline static uint64_t* getClearedMemory(unsigned numWords) {
-  return new uint64_t[numWords]();
+  반환 new uint64_t[numWords]();
 }
 
 /// A utility function for allocating memory and checking for allocation
 /// failure.  The content is not zeroed.
 inline static uint64_t* getMemory(unsigned numWords) {
-  return new uint64_t[numWords];
+  반환 new uint64_t[numWords];
 }
 
 /// A utility function that converts a character to a digit.
 inline static unsigned getDigit(char cdigit, uint8_t radix) {
   unsigned r;
 
-  if (radix == 16 || radix == 36) {
+  만약 (radix == 16 || radix == 36) {
     r = cdigit - '0';
-    if (r <= 9)
-      return r;
+    만약 (r <= 9)
+      반환 r;
 
     r = cdigit - 'A';
-    if (r <= radix - 11U)
-      return r + 10;
+    만약 (r <= radix - 11U)
+      반환 r + 10;
 
     r = cdigit - 'a';
-    if (r <= radix - 11U)
-      return r + 10;
+    만약 (r <= radix - 11U)
+      반환 r + 10;
 
     radix = 10;
   }
 
   r = cdigit - '0';
-  if (r < radix)
-    return r;
+  만약 (r < radix)
+    반환 r;
 
-  return UINT_MAX;
+  반환 UINT_MAX;
 }
 
 
 void APInt::initSlowCase(uint64_t val, bool isSigned) {
-  if (isSigned && int64_t(val) < 0) {
+  만약 (isSigned && int64_t(val) < 0) {
     U.pVal = getMemory(getNumWords());
     U.pVal[0] = val;
     memset(&U.pVal[1], 0xFF, APINT_WORD_SIZE * (getNumWords() - 1));
     clearUnusedBits();
-  } else {
+  } 아니면 {
     U.pVal = getClearedMemory(getNumWords());
     U.pVal[0] = val;
   }
@@ -91,9 +91,9 @@ void APInt::initSlowCase(const APInt& that) {
 
 void APInt::initFromArray(ArrayRef<uint64_t> bigVal) {
   assert(bigVal.data() && "Null pointer detected!");
-  if (LLVM_LIKELY(isSingleWord()))
+  만약 (LLVM_LIKELY(isSingleWord()))
     U.VAL = bigVal[0];
-  else {
+  아니면 {
     // Get memory, cleared to 0
     U.pVal = getClearedMemory(getNumWords());
     // Calculate the number of words to copy
@@ -116,35 +116,35 @@ APInt::APInt(unsigned numbits, StringRef Str, uint8_t radix)
 
 void APInt::reallocate(unsigned NewBitWidth) {
   // If the number of words is the same we can just change the width and stop.
-  if (getNumWords() == getNumWords(NewBitWidth)) {
+  만약 (getNumWords() == getNumWords(NewBitWidth)) {
     BitWidth = NewBitWidth;
-    return;
+    반환;
   }
 
   // If we have an allocation, delete it.
-  if (LLVM_UNLIKELY(!isSingleWord()))
+  만약 (LLVM_UNLIKELY(!isSingleWord()))
     delete [] U.pVal;
 
   // Update BitWidth.
   BitWidth = NewBitWidth;
 
   // If we are supposed to have an allocation, create it.
-  if (LLVM_UNLIKELY(!isSingleWord()))
+  만약 (LLVM_UNLIKELY(!isSingleWord()))
     U.pVal = getMemory(getNumWords());
 }
 
 void APInt::assignSlowCase(const APInt &RHS) {
   // Don't do anything for X = X
-  if (this == &RHS)
-    return;
+  만약 (this == &RHS)
+    반환;
 
   // Adjust the bit width and handle allocations as necessary.
   reallocate(RHS.getBitWidth());
 
   // Copy the data.
-  if (LLVM_LIKELY(isSingleWord()))
+  만약 (LLVM_LIKELY(isSingleWord()))
     U.VAL = RHS.U.VAL;
-  else
+  아니면
     memcpy(U.pVal, RHS.U.pVal, getNumWords() * APINT_WORD_SIZE);
 }
 
@@ -152,40 +152,40 @@ void APInt::assignSlowCase(const APInt &RHS) {
 void APInt::Profile(FoldingSetNodeID& ID) const {
   ID.AddInteger(BitWidth);
 
-  if (LLVM_LIKELY(isSingleWord())) {
+  만약 (LLVM_LIKELY(isSingleWord())) {
     ID.AddInteger(U.VAL);
-    return;
+    반환;
   }
 
   unsigned NumWords = getNumWords();
-  for (unsigned i = 0; i < NumWords; ++i)
+  위해 (unsigned i = 0; i < NumWords; ++i)
     ID.AddInteger(U.pVal[i]);
 }
 
 bool APInt::isAligned(Align A) const {
-  if (isZero())
-    return true;
+  만약 (isZero())
+    반환 true;
   const unsigned TrailingZeroes = countr_zero();
   const unsigned MinimumTrailingZeroes = Log2(A);
-  return TrailingZeroes >= MinimumTrailingZeroes;
+  반환 TrailingZeroes >= MinimumTrailingZeroes;
 }
 
 /// Prefix increment operator. Increments the APInt by one.
 APInt& APInt::operator++() {
-  if (LLVM_LIKELY(isSingleWord()))
+  만약 (LLVM_LIKELY(isSingleWord()))
     ++U.VAL;
-  else
+  아니면
     tcIncrement(U.pVal, getNumWords());
-  return clearUnusedBits();
+  반환 clearUnusedBits();
 }
 
 /// Prefix decrement operator. Decrements the APInt by one.
 APInt& APInt::operator--() {
-  if (LLVM_LIKELY(isSingleWord()))
+  만약 (LLVM_LIKELY(isSingleWord()))
     --U.VAL;
-  else
+  아니면
     tcDecrement(U.pVal, getNumWords());
-  return clearUnusedBits();
+  반환 clearUnusedBits();
 }
 
 /// Adds the RHS APInt to this APInt.
@@ -193,19 +193,19 @@ APInt& APInt::operator--() {
 /// Addition assignment operator.
 APInt& APInt::operator+=(const APInt& RHS) {
   assert(BitWidth == RHS.BitWidth && "Bit widths must be the same");
-  if (LLVM_LIKELY(isSingleWord()))
+  만약 (LLVM_LIKELY(isSingleWord()))
     U.VAL += RHS.U.VAL;
-  else
+  아니면
     tcAdd(U.pVal, RHS.U.pVal, 0, getNumWords());
-  return clearUnusedBits();
+  반환 clearUnusedBits();
 }
 
 APInt& APInt::operator+=(uint64_t RHS) {
-  if (LLVM_LIKELY(isSingleWord()))
+  만약 (LLVM_LIKELY(isSingleWord()))
     U.VAL += RHS;
-  else
+  아니면
     tcAddPart(U.pVal, RHS, getNumWords());
-  return clearUnusedBits();
+  반환 clearUnusedBits();
 }
 
 /// Subtracts the RHS APInt from this APInt
@@ -213,96 +213,96 @@ APInt& APInt::operator+=(uint64_t RHS) {
 /// Subtraction assignment operator.
 APInt& APInt::operator-=(const APInt& RHS) {
   assert(BitWidth == RHS.BitWidth && "Bit widths must be the same");
-  if (LLVM_LIKELY(isSingleWord()))
+  만약 (LLVM_LIKELY(isSingleWord()))
     U.VAL -= RHS.U.VAL;
-  else
+  아니면
     tcSubtract(U.pVal, RHS.U.pVal, 0, getNumWords());
-  return clearUnusedBits();
+  반환 clearUnusedBits();
 }
 
 APInt& APInt::operator-=(uint64_t RHS) {
-  if (LLVM_LIKELY(isSingleWord()))
+  만약 (LLVM_LIKELY(isSingleWord()))
     U.VAL -= RHS;
-  else
+  아니면
     tcSubtractPart(U.pVal, RHS, getNumWords());
-  return clearUnusedBits();
+  반환 clearUnusedBits();
 }
 
 APInt APInt::operator*(const APInt& RHS) const {
   assert(BitWidth == RHS.BitWidth && "Bit widths must be the same");
-  if (LLVM_LIKELY(isSingleWord()))
-    return APInt(BitWidth, U.VAL * RHS.U.VAL, /*isSigned=*/false,
+  만약 (LLVM_LIKELY(isSingleWord()))
+    반환 APInt(BitWidth, U.VAL * RHS.U.VAL, /*isSigned=*/false,
                  /*implicitTrunc=*/true);
 
   APInt Result(getMemory(getNumWords()), getBitWidth());
   tcMultiply(Result.U.pVal, U.pVal, RHS.U.pVal, getNumWords());
   Result.clearUnusedBits();
-  return Result;
+  반환 Result;
 }
 
 void APInt::andAssignSlowCase(const APInt &RHS) {
   WordType *dst = U.pVal, *rhs = RHS.U.pVal;
-  for (size_t i = 0, e = getNumWords(); i != e; ++i)
+  위해 (size_t i = 0, e = getNumWords(); i != e; ++i)
     dst[i] &= rhs[i];
 }
 
 void APInt::orAssignSlowCase(const APInt &RHS) {
   WordType *dst = U.pVal, *rhs = RHS.U.pVal;
-  for (size_t i = 0, e = getNumWords(); i != e; ++i)
+  위해 (size_t i = 0, e = getNumWords(); i != e; ++i)
     dst[i] |= rhs[i];
 }
 
 void APInt::xorAssignSlowCase(const APInt &RHS) {
   WordType *dst = U.pVal, *rhs = RHS.U.pVal;
-  for (size_t i = 0, e = getNumWords(); i != e; ++i)
+  위해 (size_t i = 0, e = getNumWords(); i != e; ++i)
     dst[i] ^= rhs[i];
 }
 
 APInt &APInt::operator*=(const APInt &RHS) {
   *this = *this * RHS;
-  return *this;
+  반환 *this;
 }
 
 APInt& APInt::operator*=(uint64_t RHS) {
-  if (LLVM_LIKELY(isSingleWord())) {
+  만약 (LLVM_LIKELY(isSingleWord())) {
     U.VAL *= RHS;
-  } else {
+  } 아니면 {
     unsigned NumWords = getNumWords();
     tcMultiplyPart(U.pVal, U.pVal, RHS, 0, NumWords, NumWords, false);
   }
-  return clearUnusedBits();
+  반환 clearUnusedBits();
 }
 
 bool APInt::equalSlowCase(const APInt &RHS) const {
-  return std::equal(U.pVal, U.pVal + getNumWords(), RHS.U.pVal);
+  반환 std::equal(U.pVal, U.pVal + getNumWords(), RHS.U.pVal);
 }
 
-int APInt::compare(const APInt& RHS) const {
+정수 APInt::compare(const APInt& RHS) const {
   assert(BitWidth == RHS.BitWidth && "Bit widths must be same for comparison");
-  if (LLVM_LIKELY(isSingleWord()))
-    return U.VAL < RHS.U.VAL ? -1 : U.VAL > RHS.U.VAL;
+  만약 (LLVM_LIKELY(isSingleWord()))
+    반환 U.VAL < RHS.U.VAL ? -1 : U.VAL > RHS.U.VAL;
 
-  return tcCompare(U.pVal, RHS.U.pVal, getNumWords());
+  반환 tcCompare(U.pVal, RHS.U.pVal, getNumWords());
 }
 
-int APInt::compareSigned(const APInt& RHS) const {
+정수 APInt::compareSigned(const APInt& RHS) const {
   assert(BitWidth == RHS.BitWidth && "Bit widths must be same for comparison");
-  if (LLVM_LIKELY(isSingleWord())) {
+  만약 (LLVM_LIKELY(isSingleWord())) {
     int64_t lhsSext = SignExtend64(U.VAL, BitWidth);
     int64_t rhsSext = SignExtend64(RHS.U.VAL, BitWidth);
-    return lhsSext < rhsSext ? -1 : lhsSext > rhsSext;
+    반환 lhsSext < rhsSext ? -1 : lhsSext > rhsSext;
   }
 
   bool lhsNeg = isNegative();
   bool rhsNeg = RHS.isNegative();
 
   // If the sign bits don't match, then (LHS < RHS) if LHS is negative
-  if (lhsNeg != rhsNeg)
-    return lhsNeg ? -1 : 1;
+  만약 (lhsNeg != rhsNeg)
+    반환 lhsNeg ? -1 : 1;
 
   // Otherwise we can just use an unsigned comparison, because even negative
   // numbers compare correctly this way if both have the same signed-ness.
-  return tcCompare(U.pVal, RHS.U.pVal, getNumWords());
+  반환 tcCompare(U.pVal, RHS.U.pVal, getNumWords());
 }
 
 void APInt::setBitsSlowCase(unsigned loBit, unsigned hiBit) {
@@ -314,21 +314,21 @@ void APInt::setBitsSlowCase(unsigned loBit, unsigned hiBit) {
 
   // If hiBit is not aligned, we need a high mask.
   unsigned hiShiftAmt = whichBit(hiBit);
-  if (hiShiftAmt != 0) {
+  만약 (hiShiftAmt != 0) {
     // Create a high mask with zeros above hiBit.
     uint64_t hiMask = WORDTYPE_MAX >> (APINT_BITS_PER_WORD - hiShiftAmt);
     // If loWord and hiWord are equal, then we combine the masks. Otherwise,
     // set the bits in hiWord.
-    if (hiWord == loWord)
+    만약 (hiWord == loWord)
       loMask &= hiMask;
-    else
+    아니면
       U.pVal[hiWord] |= hiMask;
   }
   // Apply the mask to the low word.
   U.pVal[loWord] |= loMask;
 
   // Fill any words between loWord and hiWord with all ones.
-  for (unsigned word = loWord + 1; word < hiWord; ++word)
+  위해 (unsigned word = loWord + 1; word < hiWord; ++word)
     U.pVal[word] = WORDTYPE_MAX;
 }
 
@@ -341,27 +341,27 @@ void APInt::clearBitsSlowCase(unsigned LoBit, unsigned HiBit) {
 
   // If HiBit is not aligned, we need a high mask.
   unsigned HiShiftAmt = whichBit(HiBit);
-  if (HiShiftAmt != 0) {
+  만약 (HiShiftAmt != 0) {
     // Create a high mask with ones above HiBit.
     uint64_t HiMask = ~(WORDTYPE_MAX >> (APINT_BITS_PER_WORD - HiShiftAmt));
     // If LoWord and HiWord are equal, then we combine the masks. Otherwise,
     // clear the bits in HiWord.
-    if (HiWord == LoWord)
+    만약 (HiWord == LoWord)
       LoMask |= HiMask;
-    else
+    아니면
       U.pVal[HiWord] &= HiMask;
   }
   // Apply the mask to the low word.
   U.pVal[LoWord] &= LoMask;
 
   // Fill any words between LoWord and HiWord with all zeros.
-  for (unsigned Word = LoWord + 1; Word < HiWord; ++Word)
+  위해 (unsigned Word = LoWord + 1; Word < HiWord; ++Word)
     U.pVal[Word] = 0;
 }
 
 // Complement a bignum in-place.
 static void tcComplement(APInt::WordType *dst, unsigned parts) {
-  for (unsigned i = 0; i < parts; i++)
+  위해 (unsigned i = 0; i < parts; i++)
     dst[i] = ~dst[i];
 }
 
@@ -379,7 +379,7 @@ APInt APInt::concatSlowCase(const APInt &NewLSB) const {
   unsigned NewWidth = getBitWidth() + NewLSB.getBitWidth();
   APInt Result = NewLSB.zext(NewWidth);
   Result.insertBits(*this, NewLSB.getBitWidth());
-  return Result;
+  반환 Result;
 }
 
 /// Toggle a given bit to its opposite value whose position is given
@@ -395,21 +395,21 @@ void APInt::insertBits(const APInt &subBits, unsigned bitPosition) {
   assert((subBitWidth + bitPosition) <= BitWidth && "Illegal bit insertion");
 
   // inserting no bits is a noop.
-  if (subBitWidth == 0)
-    return;
+  만약 (subBitWidth == 0)
+    반환;
 
   // Insertion is a direct copy.
-  if (subBitWidth == BitWidth) {
+  만약 (subBitWidth == BitWidth) {
     *this = subBits;
-    return;
+    반환;
   }
 
   // Single word result can be done as a direct bitmask.
-  if (LLVM_LIKELY(isSingleWord())) {
+  만약 (LLVM_LIKELY(isSingleWord())) {
     uint64_t mask = WORDTYPE_MAX >> (APINT_BITS_PER_WORD - subBitWidth);
     U.VAL &= ~(mask << bitPosition);
     U.VAL |= (subBits.U.VAL << bitPosition);
-    return;
+    반환;
   }
 
   unsigned loBit = whichBit(bitPosition);
@@ -417,15 +417,15 @@ void APInt::insertBits(const APInt &subBits, unsigned bitPosition) {
   unsigned hi1Word = whichWord(bitPosition + subBitWidth - 1);
 
   // Insertion within a single word can be done as a direct bitmask.
-  if (loWord == hi1Word) {
+  만약 (loWord == hi1Word) {
     uint64_t mask = WORDTYPE_MAX >> (APINT_BITS_PER_WORD - subBitWidth);
     U.pVal[loWord] &= ~(mask << loBit);
     U.pVal[loWord] |= (subBits.U.VAL << loBit);
-    return;
+    반환;
   }
 
   // Insert on word boundaries.
-  if (loBit == 0) {
+  만약 (loBit == 0) {
     // Direct copy whole words.
     unsigned numWholeSubWords = subBitWidth / APINT_BITS_PER_WORD;
     memcpy(U.pVal + loWord, subBits.getRawData(),
@@ -433,37 +433,37 @@ void APInt::insertBits(const APInt &subBits, unsigned bitPosition) {
 
     // Mask+insert remaining bits.
     unsigned remainingBits = subBitWidth % APINT_BITS_PER_WORD;
-    if (remainingBits != 0) {
+    만약 (remainingBits != 0) {
       uint64_t mask = WORDTYPE_MAX >> (APINT_BITS_PER_WORD - remainingBits);
       U.pVal[hi1Word] &= ~mask;
       U.pVal[hi1Word] |= subBits.getWord(subBitWidth - 1);
     }
-    return;
+    반환;
   }
 
   // General case - set/clear individual bits in dst based on src.
   // TODO - there is scope for optimization here, but at the moment this code
   // path is barely used so prefer readability over performance.
-  for (unsigned i = 0; i != subBitWidth; ++i)
+  위해 (unsigned i = 0; i != subBitWidth; ++i)
     setBitVal(bitPosition + i, subBits[i]);
 }
 
 void APInt::insertBits(uint64_t subBits, unsigned bitPosition, unsigned numBits) {
   uint64_t maskBits = maskTrailingOnes<uint64_t>(numBits);
   subBits &= maskBits;
-  if (LLVM_LIKELY(isSingleWord())) {
+  만약 (LLVM_LIKELY(isSingleWord())) {
     U.VAL &= ~(maskBits << bitPosition);
     U.VAL |= subBits << bitPosition;
-    return;
+    반환;
   }
 
   unsigned loBit = whichBit(bitPosition);
   unsigned loWord = whichWord(bitPosition);
   unsigned hiWord = whichWord(bitPosition + numBits - 1);
-  if (loWord == hiWord) {
+  만약 (loWord == hiWord) {
     U.pVal[loWord] &= ~(maskBits << loBit);
     U.pVal[loWord] |= subBits << loBit;
-    return;
+    반환;
   }
 
   static_assert(8 * sizeof(WordType) <= 64, "This code assumes only two words affected");
@@ -479,8 +479,8 @@ APInt APInt::extractBits(unsigned numBits, unsigned bitPosition) const {
   assert(bitPosition < BitWidth && (numBits + bitPosition) <= BitWidth &&
          "Illegal bit extraction");
 
-  if (LLVM_LIKELY(isSingleWord()))
-    return APInt(numBits, U.VAL >> bitPosition, /*isSigned=*/false,
+  만약 (LLVM_LIKELY(isSingleWord()))
+    반환 APInt(numBits, U.VAL >> bitPosition, /*isSigned=*/false,
                  /*implicitTrunc=*/true);
 
   unsigned loBit = whichBit(bitPosition);
@@ -488,14 +488,14 @@ APInt APInt::extractBits(unsigned numBits, unsigned bitPosition) const {
   unsigned hiWord = whichWord(bitPosition + numBits - 1);
 
   // Single word result extracting bits from a single word source.
-  if (loWord == hiWord)
-    return APInt(numBits, U.pVal[loWord] >> loBit, /*isSigned=*/false,
+  만약 (loWord == hiWord)
+    반환 APInt(numBits, U.pVal[loWord] >> loBit, /*isSigned=*/false,
                  /*implicitTrunc=*/true);
 
   // Extracting bits that start on a source word boundary can be done
   // as a fast memory copy.
-  if (loBit == 0)
-    return APInt(numBits, ArrayRef(U.pVal + loWord, 1 + hiWord - loWord));
+  만약 (loBit == 0)
+    반환 APInt(numBits, ArrayRef(U.pVal + loWord, 1 + hiWord - loWord));
 
   // General case - shift + copy source words directly into place.
   APInt Result(numBits, 0);
@@ -504,14 +504,14 @@ APInt APInt::extractBits(unsigned numBits, unsigned bitPosition) const {
 
   uint64_t *DestPtr =
       LLVM_LIKELY(Result.isSingleWord()) ? &Result.U.VAL : Result.U.pVal;
-  for (unsigned word = 0; word < NumDstWords; ++word) {
+  위해 (unsigned word = 0; word < NumDstWords; ++word) {
     uint64_t w0 = U.pVal[loWord + word];
     uint64_t w1 =
         (loWord + word + 1) < NumSrcWords ? U.pVal[loWord + word + 1] : 0;
     DestPtr[word] = (w0 >> loBit) | (w1 << (APINT_BITS_PER_WORD - loBit));
   }
 
-  return Result.clearUnusedBits();
+  반환 Result.clearUnusedBits();
 }
 
 uint64_t APInt::extractBitsAsZExtValue(unsigned numBits,
@@ -521,21 +521,21 @@ uint64_t APInt::extractBitsAsZExtValue(unsigned numBits,
   assert(numBits <= 64 && "Illegal bit extraction");
 
   uint64_t maskBits = maskTrailingOnes<uint64_t>(numBits);
-  if (LLVM_LIKELY(isSingleWord()))
-    return (U.VAL >> bitPosition) & maskBits;
+  만약 (LLVM_LIKELY(isSingleWord()))
+    반환 (U.VAL >> bitPosition) & maskBits;
 
   static_assert(APINT_BITS_PER_WORD >= 64,
                 "This code assumes only two words affected");
   unsigned loBit = whichBit(bitPosition);
   unsigned loWord = whichWord(bitPosition);
   unsigned hiWord = whichWord(bitPosition + numBits - 1);
-  if (loWord == hiWord)
-    return (U.pVal[loWord] >> loBit) & maskBits;
+  만약 (loWord == hiWord)
+    반환 (U.pVal[loWord] >> loBit) & maskBits;
 
   uint64_t retBits = U.pVal[loWord] >> loBit;
   retBits |= U.pVal[hiWord] << (APINT_BITS_PER_WORD - loBit);
   retBits &= maskBits;
-  return retBits;
+  반환 retBits;
 }
 
 unsigned APInt::getSufficientBitsNeeded(StringRef Str, uint8_t Radix) {
@@ -544,7 +544,7 @@ unsigned APInt::getSufficientBitsNeeded(StringRef Str, uint8_t Radix) {
 
   // Each computation below needs to know if it's negative.
   unsigned IsNegative = false;
-  if (Str[0] == '-' || Str[0] == '+') {
+  만약 (Str[0] == '-' || Str[0] == '+') {
     IsNegative = Str[0] == '-';
     StrLen--;
     assert(StrLen && "String is only a sign, needs a value.");
@@ -552,22 +552,22 @@ unsigned APInt::getSufficientBitsNeeded(StringRef Str, uint8_t Radix) {
 
   // For radixes of power-of-two values, the bits required is accurately and
   // easily computed.
-  if (Radix == 2)
-    return StrLen + IsNegative;
-  if (Radix == 8)
-    return StrLen * 3 + IsNegative;
-  if (Radix == 16)
-    return StrLen * 4 + IsNegative;
+  만약 (Radix == 2)
+    반환 StrLen + IsNegative;
+  만약 (Radix == 8)
+    반환 StrLen * 3 + IsNegative;
+  만약 (Radix == 16)
+    반환 StrLen * 4 + IsNegative;
 
   // Compute a sufficient number of bits that is always large enough but might
   // be too large. This avoids the assertion in the constructor. This
   // calculation doesn't work appropriately for the numbers 0-9, so just use 4
   // bits in that case.
-  if (Radix == 10)
-    return (StrLen == 1 ? 4 : StrLen * 64 / 18) + IsNegative;
+  만약 (Radix == 10)
+    반환 (StrLen == 1 ? 4 : StrLen * 64 / 18) + IsNegative;
 
   assert(Radix == 36);
-  return (StrLen == 1 ? 7 : StrLen * 16 / 3) + IsNegative;
+  반환 (StrLen == 1 ? 7 : StrLen * 16 / 3) + IsNegative;
 }
 
 unsigned APInt::getBitsNeeded(StringRef str, uint8_t radix) {
@@ -577,8 +577,8 @@ unsigned APInt::getBitsNeeded(StringRef str, uint8_t radix) {
 
   // For bases 2, 8, and 16, the sufficient number of bits is exact and we can
   // return the value directly. For bases 10 and 36, we need to do extra work.
-  if (radix == 2 || radix == 8 || radix == 16)
-    return sufficient;
+  만약 (radix == 2 || radix == 8 || radix == 16)
+    반환 sufficient;
 
   // This is grossly inefficient but accurate. We could probably do something
   // with a computation of roughly slen*64/20 and then adjust by the value of
@@ -588,7 +588,7 @@ unsigned APInt::getBitsNeeded(StringRef str, uint8_t radix) {
   // Each computation below needs to know if it's negative.
   StringRef::iterator p = str.begin();
   unsigned isNegative = *p == '-';
-  if (*p == '-' || *p == '+') {
+  만약 (*p == '-' || *p == '+') {
     p++;
     slen--;
     assert(slen && "String is only a sign, needs a value.");
@@ -602,26 +602,26 @@ unsigned APInt::getBitsNeeded(StringRef str, uint8_t radix) {
   // just bit. If the log is exact and value is negative, then the value is
   // MinSignedValue with (log + 1) bits.
   unsigned log = tmp.logBase2();
-  if (log == (unsigned)-1) {
-    return isNegative + 1;
-  } else if (isNegative && tmp.isPowerOf2()) {
-    return isNegative + log;
-  } else {
-    return isNegative + log + 1;
+  만약 (log == (unsigned)-1) {
+    반환 isNegative + 1;
+  } 아니면 만약 (isNegative && tmp.isPowerOf2()) {
+    반환 isNegative + log;
+  } 아니면 {
+    반환 isNegative + log + 1;
   }
 }
 
 hash_code llvm::hash_value(const APInt &Arg) {
-  if (LLVM_LIKELY(Arg.isSingleWord()))
-    return hash_combine(Arg.BitWidth, Arg.U.VAL);
+  만약 (LLVM_LIKELY(Arg.isSingleWord()))
+    반환 hash_combine(Arg.BitWidth, Arg.U.VAL);
 
-  return hash_combine(
+  반환 hash_combine(
       Arg.BitWidth,
       hash_combine_range(Arg.U.pVal, Arg.U.pVal + Arg.getNumWords()));
 }
 
 unsigned DenseMapInfo<APInt, void>::getHashValue(const APInt &Key) {
-  return static_cast<unsigned>(hash_value(Key));
+  반환 static_cast<unsigned>(hash_value(Key));
 }
 
 bool APInt::isSplat(unsigned SplatSizeInBits) const {
@@ -629,19 +629,19 @@ bool APInt::isSplat(unsigned SplatSizeInBits) const {
          "SplatSizeInBits must divide width!");
   // We can check that all parts of an integer are equal by making use of a
   // little trick: rotate and check if it's still the same value.
-  return *this == rotl(SplatSizeInBits);
+  반환 *this == rotl(SplatSizeInBits);
 }
 
 /// This function returns the high "numBits" bits of this APInt.
 APInt APInt::getHiBits(unsigned numBits) const {
-  return this->lshr(BitWidth - numBits);
+  반환 this->lshr(BitWidth - numBits);
 }
 
 /// This function returns the low "numBits" bits of this APInt.
 APInt APInt::getLoBits(unsigned numBits) const {
   APInt Result(getLowBitsSet(BitWidth, numBits));
   Result &= *this;
-  return Result;
+  반환 Result;
 }
 
 /// Return a value containing V broadcasted over NewLen bits.
@@ -649,19 +649,19 @@ APInt APInt::getSplat(unsigned NewLen, const APInt &V) {
   assert(NewLen >= V.getBitWidth() && "Can't splat to smaller bit width!");
 
   APInt Val = V.zext(NewLen);
-  for (unsigned I = V.getBitWidth(); I < NewLen; I <<= 1)
+  위해 (unsigned I = V.getBitWidth(); I < NewLen; I <<= 1)
     Val |= Val << I;
 
-  return Val;
+  반환 Val;
 }
 
 unsigned APInt::countLeadingZerosSlowCase() const {
   unsigned Count = 0;
-  for (int i = getNumWords() - 1; i >= 0; --i) {
+  위해 (정수 i = getNumWords() - 1; i >= 0; --i) {
     uint64_t V = U.pVal[i];
-    if (V == 0)
+    만약 (V == 0)
       Count += APINT_BITS_PER_WORD;
-    else {
+    아니면 {
       Count += llvm::countl_zero(V);
       break;
     }
@@ -669,136 +669,136 @@ unsigned APInt::countLeadingZerosSlowCase() const {
   // Adjust for unused bits in the most significant word (they are zero).
   unsigned Mod = BitWidth % APINT_BITS_PER_WORD;
   Count -= Mod > 0 ? APINT_BITS_PER_WORD - Mod : 0;
-  return Count;
+  반환 Count;
 }
 
 unsigned APInt::countLeadingOnesSlowCase() const {
   unsigned highWordBits = BitWidth % APINT_BITS_PER_WORD;
   unsigned shift;
-  if (!highWordBits) {
+  만약 (!highWordBits) {
     highWordBits = APINT_BITS_PER_WORD;
     shift = 0;
-  } else {
+  } 아니면 {
     shift = APINT_BITS_PER_WORD - highWordBits;
   }
-  int i = getNumWords() - 1;
+  정수 i = getNumWords() - 1;
   unsigned Count = llvm::countl_one(U.pVal[i] << shift);
-  if (Count == highWordBits) {
-    for (i--; i >= 0; --i) {
-      if (U.pVal[i] == WORDTYPE_MAX)
+  만약 (Count == highWordBits) {
+    위해 (i--; i >= 0; --i) {
+      만약 (U.pVal[i] == WORDTYPE_MAX)
         Count += APINT_BITS_PER_WORD;
-      else {
+      아니면 {
         Count += llvm::countl_one(U.pVal[i]);
         break;
       }
     }
   }
-  return Count;
+  반환 Count;
 }
 
 unsigned APInt::countTrailingZerosSlowCase() const {
   unsigned Count = 0;
   unsigned i = 0;
-  for (; i < getNumWords() && U.pVal[i] == 0; ++i)
+  위해 (; i < getNumWords() && U.pVal[i] == 0; ++i)
     Count += APINT_BITS_PER_WORD;
-  if (i < getNumWords())
+  만약 (i < getNumWords())
     Count += llvm::countr_zero(U.pVal[i]);
-  return std::min(Count, BitWidth);
+  반환 std::min(Count, BitWidth);
 }
 
 unsigned APInt::countTrailingOnesSlowCase() const {
   unsigned Count = 0;
   unsigned i = 0;
-  for (; i < getNumWords() && U.pVal[i] == WORDTYPE_MAX; ++i)
+  위해 (; i < getNumWords() && U.pVal[i] == WORDTYPE_MAX; ++i)
     Count += APINT_BITS_PER_WORD;
-  if (i < getNumWords())
+  만약 (i < getNumWords())
     Count += llvm::countr_one(U.pVal[i]);
   assert(Count <= BitWidth);
-  return Count;
+  반환 Count;
 }
 
 unsigned APInt::countPopulationSlowCase() const {
   unsigned Count = 0;
-  for (unsigned i = 0; i < getNumWords(); ++i)
+  위해 (unsigned i = 0; i < getNumWords(); ++i)
     Count += llvm::popcount(U.pVal[i]);
-  return Count;
+  반환 Count;
 }
 
 bool APInt::isPowerOf2SlowCase() const {
   unsigned Count = 0;
-  for (unsigned i = 0; i < getNumWords(); ++i) {
+  위해 (unsigned i = 0; i < getNumWords(); ++i) {
     Count += llvm::popcount(U.pVal[i]);
-    if (Count > 1)
-      return false;
+    만약 (Count > 1)
+      반환 false;
   }
-  return Count == 1;
+  반환 Count == 1;
 }
 
 bool APInt::intersectsSlowCase(const APInt &RHS) const {
-  for (unsigned i = 0, e = getNumWords(); i != e; ++i)
-    if ((U.pVal[i] & RHS.U.pVal[i]) != 0)
-      return true;
+  위해 (unsigned i = 0, e = getNumWords(); i != e; ++i)
+    만약 ((U.pVal[i] & RHS.U.pVal[i]) != 0)
+      반환 true;
 
-  return false;
+  반환 false;
 }
 
 bool APInt::isSubsetOfSlowCase(const APInt &RHS) const {
-  for (unsigned i = 0, e = getNumWords(); i != e; ++i)
-    if ((U.pVal[i] & ~RHS.U.pVal[i]) != 0)
-      return false;
+  위해 (unsigned i = 0, e = getNumWords(); i != e; ++i)
+    만약 ((U.pVal[i] & ~RHS.U.pVal[i]) != 0)
+      반환 false;
 
-  return true;
+  반환 true;
 }
 
 bool APInt::isInverseOfSlowCase(const APInt &RHS) const {
   const unsigned Last = getNumWords() - 1;
-  for (unsigned I = 0; I != Last; ++I)
-    if ((U.pVal[I] ^ RHS.U.pVal[I]) != WORDTYPE_MAX)
-      return false;
+  위해 (unsigned I = 0; I != Last; ++I)
+    만약 ((U.pVal[I] ^ RHS.U.pVal[I]) != WORDTYPE_MAX)
+      반환 false;
 
   unsigned TailBits = BitWidth - Last * APINT_BITS_PER_WORD;
   WordType TailMask = llvm::maskTrailingOnes<WordType>(TailBits);
-  return (U.pVal[Last] ^ RHS.U.pVal[Last]) == TailMask;
+  반환 (U.pVal[Last] ^ RHS.U.pVal[Last]) == TailMask;
 }
 
 APInt APInt::byteSwap() const {
   assert(BitWidth >= 16 && BitWidth % 8 == 0 && "Cannot byteswap!");
-  if (BitWidth == 16)
-    return APInt(BitWidth, llvm::byteswap<uint16_t>(U.VAL));
-  if (BitWidth == 32)
-    return APInt(BitWidth, llvm::byteswap<uint32_t>(U.VAL));
-  if (BitWidth <= 64) {
+  만약 (BitWidth == 16)
+    반환 APInt(BitWidth, llvm::byteswap<uint16_t>(U.VAL));
+  만약 (BitWidth == 32)
+    반환 APInt(BitWidth, llvm::byteswap<uint32_t>(U.VAL));
+  만약 (BitWidth <= 64) {
     uint64_t Tmp1 = llvm::byteswap<uint64_t>(U.VAL);
     Tmp1 >>= (64 - BitWidth);
-    return APInt(BitWidth, Tmp1);
+    반환 APInt(BitWidth, Tmp1);
   }
 
   APInt Result(getNumWords() * APINT_BITS_PER_WORD, 0);
-  for (unsigned I = 0, N = getNumWords(); I != N; ++I)
+  위해 (unsigned I = 0, N = getNumWords(); I != N; ++I)
     Result.U.pVal[I] = llvm::byteswap<uint64_t>(U.pVal[N - I - 1]);
-  if (Result.BitWidth != BitWidth) {
+  만약 (Result.BitWidth != BitWidth) {
     Result.lshrInPlace(Result.BitWidth - BitWidth);
     Result.BitWidth = BitWidth;
   }
-  return Result;
+  반환 Result;
 }
 
 APInt APInt::reverseBits() const {
-  if (LLVM_LIKELY(isSingleWord())) {
+  만약 (LLVM_LIKELY(isSingleWord())) {
     switch (BitWidth) {
     case 64:
-      return APInt(BitWidth, llvm::reverseBits<uint64_t>(U.VAL));
+      반환 APInt(BitWidth, llvm::reverseBits<uint64_t>(U.VAL));
     case 32:
-      return APInt(BitWidth, llvm::reverseBits<uint32_t>(U.VAL));
+      반환 APInt(BitWidth, llvm::reverseBits<uint32_t>(U.VAL));
     case 16:
-      return APInt(BitWidth, llvm::reverseBits<uint16_t>(U.VAL));
+      반환 APInt(BitWidth, llvm::reverseBits<uint16_t>(U.VAL));
     case 8:
-      return APInt(BitWidth, llvm::reverseBits<uint8_t>(U.VAL));
+      반환 APInt(BitWidth, llvm::reverseBits<uint8_t>(U.VAL));
     case 1: // fallthrough
     case 0:
-      return *this;
+      반환 *this;
     default:
-      return APInt(BitWidth,
+      반환 APInt(BitWidth,
                    llvm::reverseBits<uint64_t>(U.VAL) >> (64 - BitWidth));
     }
   }
@@ -806,49 +806,49 @@ APInt APInt::reverseBits() const {
   APInt Result(BitWidth, 0);
   unsigned NumWords = getNumWords();
   unsigned ExcessBits = NumWords * APINT_BITS_PER_WORD - BitWidth;
-  if (ExcessBits == 0) {
+  만약 (ExcessBits == 0) {
     // Fast path. No cross-word shift needed.
-    for (unsigned I = 0; I < NumWords; ++I)
+    위해 (unsigned I = 0; I < NumWords; ++I)
       Result.U.pVal[I] = llvm::reverseBits<uint64_t>(U.pVal[NumWords - 1 - I]);
-    return Result;
+    반환 Result;
   }
   // Holds reversed bits of the previous (more significant) word.
   uint64_t PrevRev = llvm::reverseBits<uint64_t>(U.pVal[NumWords - 1]);
-  for (unsigned I = 0; I < NumWords - 1; ++I) {
+  위해 (unsigned I = 0; I < NumWords - 1; ++I) {
     uint64_t CurrRev = llvm::reverseBits<uint64_t>(U.pVal[NumWords - 2 - I]);
     Result.U.pVal[I] = (PrevRev >> ExcessBits) | (CurrRev << (64 - ExcessBits));
     PrevRev = CurrRev;
   }
   Result.U.pVal[NumWords - 1] = PrevRev >> ExcessBits;
-  return Result;
+  반환 Result;
 }
 
 APInt llvm::APIntOps::GreatestCommonDivisor(APInt A, APInt B, bool IsSigned) {
   // Take absolute value if IsSigned.
-  if (IsSigned) {
+  만약 (IsSigned) {
     A = A.abs();
     B = B.abs();
   }
 
   // Fast-path a common case.
-  if (A == B) return A;
+  만약 (A == B) 반환 A;
 
   // Corner cases: if either operand is zero, the other is the gcd.
-  if (!A) return B;
-  if (!B) return A;
+  만약 (!A) 반환 B;
+  만약 (!B) 반환 A;
 
   // Count common powers of 2 and remove all other powers of 2.
   unsigned Pow2;
   {
     unsigned Pow2_A = A.countr_zero();
     unsigned Pow2_B = B.countr_zero();
-    if (Pow2_A > Pow2_B) {
+    만약 (Pow2_A > Pow2_B) {
       A.lshrInPlace(Pow2_A - Pow2_B);
       Pow2 = Pow2_B;
-    } else if (Pow2_B > Pow2_A) {
+    } 아니면 만약 (Pow2_B > Pow2_A) {
       B.lshrInPlace(Pow2_B - Pow2_A);
       Pow2 = Pow2_A;
-    } else {
+    } 아니면 {
       Pow2 = Pow2_A;
     }
   }
@@ -859,17 +859,17 @@ APInt llvm::APIntOps::GreatestCommonDivisor(APInt A, APInt B, bool IsSigned) {
   //
   // This is a modified version of Stein's algorithm, taking advantage of
   // efficient countTrailingZeros().
-  while (A != B) {
-    if (A.ugt(B)) {
+  동안 (A != B) {
+    만약 (A.ugt(B)) {
       A -= B;
       A.lshrInPlace(A.countr_zero() - Pow2);
-    } else {
+    } 아니면 {
       B -= A;
       B.lshrInPlace(B.countr_zero() - Pow2);
     }
   }
 
-  return A;
+  반환 A;
 }
 
 APInt llvm::APIntOps::RoundDoubleToAPInt(double Double, unsigned width) {
@@ -882,26 +882,26 @@ APInt llvm::APIntOps::RoundDoubleToAPInt(double Double, unsigned width) {
   int64_t exp = ((I >> 52) & 0x7ff) - 1023;
 
   // If the exponent is negative, the value is < 0 so just return 0.
-  if (exp < 0)
-    return APInt(width, 0u);
+  만약 (exp < 0)
+    반환 APInt(width, 0u);
 
   // Extract the mantissa by clearing the top 12 bits (sign + exponent).
   uint64_t mantissa = (I & (~0ULL >> 12)) | 1ULL << 52;
 
   // If the exponent doesn't shift all bits out of the mantissa
-  if (exp < 52)
-    return isNeg ? -APInt(width, mantissa >> (52 - exp)) :
+  만약 (exp < 52)
+    반환 isNeg ? -APInt(width, mantissa >> (52 - exp)) :
                     APInt(width, mantissa >> (52 - exp));
 
   // If the client didn't provide enough bits for us to shift the mantissa into
   // then the result is undefined, just return 0
-  if (width <= exp - 52)
-    return APInt(width, 0);
+  만약 (width <= exp - 52)
+    반환 APInt(width, 0);
 
   // Otherwise, we have to shift the mantissa bits up to the right location
   APInt Tmp(width, mantissa);
   Tmp <<= (unsigned)exp - 52;
-  return isNeg ? -Tmp : Tmp;
+  반환 isNeg ? -Tmp : Tmp;
 }
 
 /// This function converts this APInt to a double.
@@ -914,12 +914,12 @@ APInt llvm::APIntOps::RoundDoubleToAPInt(double Double, unsigned width) {
 double APInt::roundToDouble(bool isSigned) const {
   // Handle the simple case where the value is contained in one uint64_t.
   // It is wrong to optimize getWord(0) to VAL; there might be more than one word.
-  if (LLVM_LIKELY(isSingleWord() || getActiveBits() <= APINT_BITS_PER_WORD)) {
-    if (isSigned) {
+  만약 (LLVM_LIKELY(isSingleWord() || getActiveBits() <= APINT_BITS_PER_WORD)) {
+    만약 (isSigned) {
       int64_t sext = SignExtend64(getWord(0), BitWidth);
-      return double(sext);
+      반환 double(sext);
     }
-    return double(getWord(0));
+    반환 double(getWord(0));
   }
 
   // Determine if the value is negative.
@@ -937,11 +937,11 @@ double APInt::roundToDouble(bool isSigned) const {
   uint64_t exp = n;
 
   // Return infinity for exponent overflow
-  if (exp > 1023) {
-    if (!isSigned || !isNeg)
-      return std::numeric_limits<double>::infinity();
-    else
-      return -std::numeric_limits<double>::infinity();
+  만약 (exp > 1023) {
+    만약 (!isSigned || !isNeg)
+      반환 std::numeric_limits<double>::infinity();
+    아니면
+      반환 -std::numeric_limits<double>::infinity();
   }
   exp += 1023; // Increment for 1023 bias
 
@@ -949,11 +949,11 @@ double APInt::roundToDouble(bool isSigned) const {
   // extract the high 52 bits from the correct words in pVal.
   uint64_t mantissa;
   unsigned hiWord = whichWord(n-1);
-  if (hiWord == 0) {
+  만약 (hiWord == 0) {
     mantissa = Tmp.U.pVal[0];
-    if (n > 52)
+    만약 (n > 52)
       mantissa >>= n - 52; // shift down, we want the top 52 bits.
-  } else {
+  } 아니면 {
     assert(hiWord > 0 && "huh?");
     uint64_t hibits = Tmp.U.pVal[hiWord] << (52 - n % APINT_BITS_PER_WORD);
     uint64_t lobits = Tmp.U.pVal[hiWord-1] >> (11 + n % APINT_BITS_PER_WORD);
@@ -963,33 +963,33 @@ double APInt::roundToDouble(bool isSigned) const {
   // The leading bit of mantissa is implicit, so get rid of it.
   uint64_t sign = isNeg ? (1ULL << (APINT_BITS_PER_WORD - 1)) : 0;
   uint64_t I = sign | (exp << 52) | mantissa;
-  return bit_cast<double>(I);
+  반환 bit_cast<double>(I);
 }
 
 // Truncate to new width.
 APInt APInt::trunc(unsigned width) const {
   assert(width <= BitWidth && "Invalid APInt Truncate request");
 
-  if (width <= APINT_BITS_PER_WORD)
-    return APInt(width, getRawData()[0], /*isSigned=*/false,
+  만약 (width <= APINT_BITS_PER_WORD)
+    반환 APInt(width, getRawData()[0], /*isSigned=*/false,
                  /*implicitTrunc=*/true);
 
-  if (width == BitWidth)
-    return *this;
+  만약 (width == BitWidth)
+    반환 *this;
 
   APInt Result(getMemory(getNumWords(width)), width);
 
   // Copy full words.
   unsigned i;
-  for (i = 0; i != width / APINT_BITS_PER_WORD; i++)
+  위해 (i = 0; i != width / APINT_BITS_PER_WORD; i++)
     Result.U.pVal[i] = U.pVal[i];
 
   // Truncate and copy any partial word.
   unsigned bits = (0 - width) % APINT_BITS_PER_WORD;
-  if (bits != 0)
+  만약 (bits != 0)
     Result.U.pVal[i] = U.pVal[i] << bits >> bits;
 
-  return Result;
+  반환 Result;
 }
 
 // Truncate to new width with unsigned saturation.
@@ -997,10 +997,10 @@ APInt APInt::truncUSat(unsigned width) const {
   assert(width <= BitWidth && "Invalid APInt Truncate request");
 
   // Can we just losslessly truncate it?
-  if (isIntN(width))
-    return trunc(width);
+  만약 (isIntN(width))
+    반환 trunc(width);
   // If not, then just return the new limit.
-  return APInt::getMaxValue(width);
+  반환 APInt::getMaxValue(width);
 }
 
 // Truncate to new width with signed saturation to signed result.
@@ -1008,10 +1008,10 @@ APInt APInt::truncSSat(unsigned width) const {
   assert(width <= BitWidth && "Invalid APInt Truncate request");
 
   // Can we just losslessly truncate it?
-  if (isSignedIntN(width))
-    return trunc(width);
+  만약 (isSignedIntN(width))
+    반환 trunc(width);
   // If not, then just return the new limits.
-  return isNegative() ? APInt::getSignedMinValue(width)
+  반환 isNegative() ? APInt::getSignedMinValue(width)
                       : APInt::getSignedMaxValue(width);
 }
 
@@ -1020,21 +1020,21 @@ APInt APInt::truncSSatU(unsigned width) const {
   assert(width <= BitWidth && "Invalid APInt Truncate request");
 
   // Can we just losslessly truncate it?
-  if (isIntN(width))
-    return trunc(width);
+  만약 (isIntN(width))
+    반환 trunc(width);
   // If not, then just return the new limits.
-  return isNegative() ? APInt::getZero(width) : APInt::getMaxValue(width);
+  반환 isNegative() ? APInt::getZero(width) : APInt::getMaxValue(width);
 }
 
 // Sign extend to a new width.
 APInt APInt::sext(unsigned Width) const {
   assert(Width >= BitWidth && "Invalid APInt SignExtend request");
 
-  if (Width <= APINT_BITS_PER_WORD)
-    return APInt(Width, SignExtend64(U.VAL, BitWidth), /*isSigned=*/true);
+  만약 (Width <= APINT_BITS_PER_WORD)
+    반환 APInt(Width, SignExtend64(U.VAL, BitWidth), /*isSigned=*/true);
 
-  if (Width == BitWidth)
-    return *this;
+  만약 (Width == BitWidth)
+    반환 *this;
 
   APInt Result(getMemory(getNumWords(Width)), Width);
 
@@ -1050,18 +1050,18 @@ APInt APInt::sext(unsigned Width) const {
   std::memset(Result.U.pVal + getNumWords(), isNegative() ? -1 : 0,
               (Result.getNumWords() - getNumWords()) * APINT_WORD_SIZE);
   Result.clearUnusedBits();
-  return Result;
+  반환 Result;
 }
 
 //  Zero extend to a new width.
 APInt APInt::zext(unsigned width) const {
   assert(width >= BitWidth && "Invalid APInt ZeroExtend request");
 
-  if (width <= APINT_BITS_PER_WORD)
-    return APInt(width, U.VAL);
+  만약 (width <= APINT_BITS_PER_WORD)
+    반환 APInt(width, U.VAL);
 
-  if (width == BitWidth)
-    return *this;
+  만약 (width == BitWidth)
+    반환 *this;
 
   APInt Result(getMemory(getNumWords(width)), width);
 
@@ -1072,23 +1072,23 @@ APInt APInt::zext(unsigned width) const {
   std::memset(Result.U.pVal + getNumWords(), 0,
               (Result.getNumWords() - getNumWords()) * APINT_WORD_SIZE);
 
-  return Result;
+  반환 Result;
 }
 
 APInt APInt::zextOrTrunc(unsigned width) const {
-  if (BitWidth < width)
-    return zext(width);
-  if (BitWidth > width)
-    return trunc(width);
-  return *this;
+  만약 (BitWidth < width)
+    반환 zext(width);
+  만약 (BitWidth > width)
+    반환 trunc(width);
+  반환 *this;
 }
 
 APInt APInt::sextOrTrunc(unsigned width) const {
-  if (BitWidth < width)
-    return sext(width);
-  if (BitWidth > width)
-    return trunc(width);
-  return *this;
+  만약 (BitWidth < width)
+    반환 sext(width);
+  만약 (BitWidth > width)
+    반환 trunc(width);
+  반환 *this;
 }
 
 /// Arithmetic right-shift this APInt by shiftAmt.
@@ -1101,8 +1101,8 @@ void APInt::ashrInPlace(const APInt &shiftAmt) {
 /// Arithmetic right-shift function.
 void APInt::ashrSlowCase(unsigned ShiftAmt) {
   // Don't bother performing a no-op shift.
-  if (!ShiftAmt)
-    return;
+  만약 (!ShiftAmt)
+    반환;
 
   // Save the original sign bit for later.
   bool Negative = isNegative();
@@ -1112,17 +1112,17 @@ void APInt::ashrSlowCase(unsigned ShiftAmt) {
   unsigned BitShift = ShiftAmt % APINT_BITS_PER_WORD;
 
   unsigned WordsToMove = getNumWords() - WordShift;
-  if (WordsToMove != 0) {
+  만약 (WordsToMove != 0) {
     // Sign extend the last word to fill in the unused bits.
     U.pVal[getNumWords() - 1] = SignExtend64(
         U.pVal[getNumWords() - 1], ((BitWidth - 1) % APINT_BITS_PER_WORD) + 1);
 
     // Fastpath for moving by whole words.
-    if (BitShift == 0) {
+    만약 (BitShift == 0) {
       std::memmove(U.pVal, U.pVal + WordShift, WordsToMove * APINT_WORD_SIZE);
-    } else {
+    } 아니면 {
       // Move the words containing significant bits.
-      for (unsigned i = 0; i != WordsToMove - 1; ++i)
+      위해 (unsigned i = 0; i != WordsToMove - 1; ++i)
         U.pVal[i] = (U.pVal[i + WordShift] >> BitShift) |
                     (U.pVal[i + WordShift + 1] << (APINT_BITS_PER_WORD - BitShift));
 
@@ -1156,7 +1156,7 @@ void APInt::lshrSlowCase(unsigned ShiftAmt) {
 APInt &APInt::operator<<=(const APInt &shiftAmt) {
   // It's undefined behavior in C to shift by BitWidth or greater.
   *this <<= (unsigned)shiftAmt.getLimitedValue(BitWidth);
-  return *this;
+  반환 *this;
 }
 
 void APInt::shlSlowCase(unsigned ShiftAmt) {
@@ -1166,43 +1166,43 @@ void APInt::shlSlowCase(unsigned ShiftAmt) {
 
 // Calculate the rotate amount modulo the bit width.
 static unsigned rotateModulo(unsigned BitWidth, const APInt &rotateAmt) {
-  if (LLVM_UNLIKELY(BitWidth == 0))
-    return 0;
+  만약 (LLVM_UNLIKELY(BitWidth == 0))
+    반환 0;
   unsigned rotBitWidth = rotateAmt.getBitWidth();
   APInt rot = rotateAmt;
-  if (rotBitWidth < BitWidth) {
+  만약 (rotBitWidth < BitWidth) {
     // Extend the rotate APInt, so that the urem doesn't divide by 0.
     // e.g. APInt(1, 32) would give APInt(1, 0).
     rot = rotateAmt.zext(BitWidth);
   }
   rot = rot.urem(APInt(rot.getBitWidth(), BitWidth));
-  return rot.getLimitedValue(BitWidth);
+  반환 rot.getLimitedValue(BitWidth);
 }
 
 APInt APInt::rotl(const APInt &rotateAmt) const {
-  return rotl(rotateModulo(BitWidth, rotateAmt));
+  반환 rotl(rotateModulo(BitWidth, rotateAmt));
 }
 
 APInt APInt::rotl(unsigned rotateAmt) const {
-  if (LLVM_UNLIKELY(BitWidth == 0))
-    return *this;
+  만약 (LLVM_UNLIKELY(BitWidth == 0))
+    반환 *this;
   rotateAmt %= BitWidth;
-  if (rotateAmt == 0)
-    return *this;
-  return shl(rotateAmt) | lshr(BitWidth - rotateAmt);
+  만약 (rotateAmt == 0)
+    반환 *this;
+  반환 shl(rotateAmt) | lshr(BitWidth - rotateAmt);
 }
 
 APInt APInt::rotr(const APInt &rotateAmt) const {
-  return rotr(rotateModulo(BitWidth, rotateAmt));
+  반환 rotr(rotateModulo(BitWidth, rotateAmt));
 }
 
 APInt APInt::rotr(unsigned rotateAmt) const {
-  if (BitWidth == 0)
-    return *this;
+  만약 (BitWidth == 0)
+    반환 *this;
   rotateAmt %= BitWidth;
-  if (rotateAmt == 0)
-    return *this;
-  return lshr(rotateAmt) | shl(BitWidth - rotateAmt);
+  만약 (rotateAmt == 0)
+    반환 *this;
+  반환 lshr(rotateAmt) | shl(BitWidth - rotateAmt);
 }
 
 /// \returns the nearest log base 2 of this APInt. Ties round up.
@@ -1218,12 +1218,12 @@ unsigned APInt::nearestLogBase2() const {
   // Special case when we have a bitwidth of 1. If VAL is 1, then we
   // get 0. If VAL is 0, we get WORDTYPE_MAX which gets truncated to
   // UINT32_MAX.
-  if (BitWidth == 1)
-    return U.VAL - 1;
+  만약 (BitWidth == 1)
+    반환 U.VAL - 1;
 
   // Handle the zero case.
-  if (isZero())
-    return UINT32_MAX;
+  만약 (isZero())
+    반환 UINT32_MAX;
 
   // The non-zero case is handled by computing:
   //
@@ -1231,7 +1231,7 @@ unsigned APInt::nearestLogBase2() const {
   //
   // where x[i] is referring to the value of the ith bit of x.
   unsigned lg = logBase2();
-  return lg + unsigned((*this)[lg - 1]);
+  반환 lg + unsigned((*this)[lg - 1]);
 }
 
 // Square Root - this method computes and returns the square root of "this".
@@ -1248,7 +1248,7 @@ APInt APInt::sqrtFloor() const {
 
   // Use a fast table for some small values. This also gets rid of some
   // rounding errors in libc sqrt for small values.
-  if (magnitude <= 5) {
+  만약 (magnitude <= 5) {
     static const uint8_t results[32] = {
         /*     0 */ 0,
         /*  1- 3 */ 1, 1, 1,
@@ -1257,7 +1257,7 @@ APInt APInt::sqrtFloor() const {
         /* 16-24 */ 4, 4, 4, 4, 4, 4, 4, 4, 4,
         /* 25-31 */ 5, 5, 5, 5, 5, 5, 5,
     };
-    return APInt(BitWidth,
+    반환 APInt(BitWidth,
                  results[(LLVM_LIKELY(isSingleWord()) ? U.VAL : U.pVal[0])]);
   }
 
@@ -1265,8 +1265,8 @@ APInt APInt::sqrtFloor() const {
   // an IEEE double precision floating point value), then we can use the
   // libc sqrt function which will probably use a hardware sqrt computation.
   // This should be faster than the algorithm below.
-  if (magnitude < 52) {
-    return APInt(BitWidth,
+  만약 (magnitude < 52) {
+    반환 APInt(BitWidth,
                  uint64_t(::floor(::sqrt(double(
                      LLVM_LIKELY(isSingleWord()) ? U.VAL : U.pVal[0])))));
   }
@@ -1283,20 +1283,20 @@ APInt APInt::sqrtFloor() const {
   APInt two(BitWidth, 2);
 
   // Select a good starting value using binary logarithms.
-  for (;; i += 2, testy = testy.shl(2))
-    if (i >= nbits || this->ule(testy)) {
+  위해 (;; i += 2, testy = testy.shl(2))
+    만약 (i >= nbits || this->ule(testy)) {
       x_old = x_old.shl(i / 2);
       break;
     }
 
   // Use the Babylonian method to arrive at the integer square root:
-  for (;;) {
+  위해 (;;) {
     x_new = (this->udiv(x_old) + x_old).udiv(two);
-    if (x_old.ule(x_new))
+    만약 (x_old.ule(x_new))
       break;
     x_old = x_new;
   }
-  return x_old;
+  반환 x_old;
 }
 
 /// \returns the multiplicative inverse of an odd APInt modulo 2^BitWidth.
@@ -1307,9 +1307,9 @@ APInt APInt::multiplicativeInverse() const {
   // Use Newton's method.
   APInt Factor = *this;
   APInt T;
-  while (!(T = *this * Factor).isOne())
+  동안 (!(T = *this * Factor).isOne())
     Factor *= 2 - std::move(T);
-  return Factor;
+  반환 Factor;
 }
 
 /// Implementation of Knuth's Algorithm D (Division of nonnegative integers)
@@ -1331,15 +1331,15 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
 // debugging this code. Disable them unless KNUTH_DEBUG is defined.
 #ifdef KNUTH_DEBUG
 #define DEBUG_KNUTH(X) LLVM_DEBUG(X)
-#else
-#define DEBUG_KNUTH(X) do {} while(false)
+#아니면
+#define DEBUG_KNUTH(X) do {} 동안(false)
 #endif
 
   DEBUG_KNUTH(dbgs() << "KnuthDiv: m=" << m << " n=" << n << '\n');
   DEBUG_KNUTH(dbgs() << "KnuthDiv: original:");
-  DEBUG_KNUTH(for (int i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
+  DEBUG_KNUTH(위해 (정수 i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
   DEBUG_KNUTH(dbgs() << " by");
-  DEBUG_KNUTH(for (int i = n; i > 0; i--) dbgs() << " " << v[i - 1]);
+  DEBUG_KNUTH(위해 (정수 i = n; i > 0; i--) dbgs() << " " << v[i - 1]);
   DEBUG_KNUTH(dbgs() << '\n');
   // D1. [Normalize.] Set d = b / (v[n-1] + 1) and multiply all the digits of
   // u and v by d. Note that we have taken Knuth's advice here to use a power
@@ -1352,13 +1352,13 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
   unsigned shift = llvm::countl_zero(v[n - 1]);
   uint32_t v_carry = 0;
   uint32_t u_carry = 0;
-  if (shift) {
-    for (unsigned i = 0; i < m+n; ++i) {
+  만약 (shift) {
+    위해 (unsigned i = 0; i < m+n; ++i) {
       uint32_t u_tmp = u[i] >> (32 - shift);
       u[i] = (u[i] << shift) | u_carry;
       u_carry = u_tmp;
     }
-    for (unsigned i = 0; i < n; ++i) {
+    위해 (unsigned i = 0; i < n; ++i) {
       uint32_t v_tmp = v[i] >> (32 - shift);
       v[i] = (v[i] << shift) | v_carry;
       v_carry = v_tmp;
@@ -1367,13 +1367,13 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
   u[m+n] = u_carry;
 
   DEBUG_KNUTH(dbgs() << "KnuthDiv:   normal:");
-  DEBUG_KNUTH(for (int i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
+  DEBUG_KNUTH(위해 (정수 i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
   DEBUG_KNUTH(dbgs() << " by");
-  DEBUG_KNUTH(for (int i = n; i > 0; i--) dbgs() << " " << v[i - 1]);
+  DEBUG_KNUTH(위해 (정수 i = n; i > 0; i--) dbgs() << " " << v[i - 1]);
   DEBUG_KNUTH(dbgs() << '\n');
 
   // D2. [Initialize j.]  Set j to m. This is the loop counter over the places.
-  int j = m;
+  정수 j = m;
   do {
     DEBUG_KNUTH(dbgs() << "KnuthDiv: quotient digit #" << j << '\n');
     // D3. [Calculate q'.].
@@ -1388,10 +1388,10 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
     DEBUG_KNUTH(dbgs() << "KnuthDiv: dividend == " << dividend << '\n');
     uint64_t qp = dividend / v[n-1];
     uint64_t rp = dividend % v[n-1];
-    if (qp == b || qp*v[n-2] > b*rp + u[j+n-2]) {
+    만약 (qp == b || qp*v[n-2] > b*rp + u[j+n-2]) {
       qp--;
       rp += v[n-1];
-      if (rp < b && (qp == b || qp*v[n-2] > b*rp + u[j+n-2]))
+      만약 (rp < b && (qp == b || qp*v[n-2] > b*rp + u[j+n-2]))
         qp--;
     }
     DEBUG_KNUTH(dbgs() << "KnuthDiv: qp == " << qp << ", rp == " << rp << '\n');
@@ -1405,7 +1405,7 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
     // true value plus b**(n+1), namely as the b's complement of
     // the true value, and a "borrow" to the left should be remembered.
     int64_t borrow = 0;
-    for (unsigned i = 0; i < n; ++i) {
+    위해 (unsigned i = 0; i < n; ++i) {
       uint64_t p = qp * uint64_t(v[i]);
       int64_t subres = int64_t(u[j+i]) - borrow - Lo_32(p);
       u[j+i] = Lo_32(subres);
@@ -1417,13 +1417,13 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
     u[j+n] -= Lo_32(borrow);
 
     DEBUG_KNUTH(dbgs() << "KnuthDiv: after subtraction:");
-    DEBUG_KNUTH(for (int i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
+    DEBUG_KNUTH(위해 (정수 i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
     DEBUG_KNUTH(dbgs() << '\n');
 
     // D5. [Test remainder.] Set q[j] = qp. If the result of step D4 was
     // negative, go to step D6; otherwise go on to step D7.
     q[j] = Lo_32(qp);
-    if (isNeg) {
+    만약 (isNeg) {
       // D6. [Add back]. The probability that this step is necessary is very
       // small, on the order of only 2/b. Make sure that test data accounts for
       // this possibility. Decrease q[j] by 1
@@ -1432,7 +1432,7 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
       // A carry will occur to the left of u[j+n], and it should be ignored
       // since it cancels with the borrow that occurred in D4.
       bool carry = false;
-      for (unsigned i = 0; i < n; i++) {
+      위해 (unsigned i = 0; i < n; i++) {
         uint32_t limit = std::min(u[j+i],v[i]);
         u[j+i] += v[i] + carry;
         carry = u[j+i] < limit || (carry && u[j+i] == limit);
@@ -1440,33 +1440,33 @@ static void KnuthDiv(uint32_t *u, uint32_t *v, uint32_t *q, uint32_t* r,
       u[j+n] += carry;
     }
     DEBUG_KNUTH(dbgs() << "KnuthDiv: after correction:");
-    DEBUG_KNUTH(for (int i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
+    DEBUG_KNUTH(위해 (정수 i = m + n; i >= 0; i--) dbgs() << " " << u[i]);
     DEBUG_KNUTH(dbgs() << "\nKnuthDiv: digit result = " << q[j] << '\n');
 
     // D7. [Loop on j.]  Decrease j by one. Now if j >= 0, go back to D3.
-  } while (--j >= 0);
+  } 동안 (--j >= 0);
 
   DEBUG_KNUTH(dbgs() << "KnuthDiv: quotient:");
-  DEBUG_KNUTH(for (int i = m; i >= 0; i--) dbgs() << " " << q[i]);
+  DEBUG_KNUTH(위해 (정수 i = m; i >= 0; i--) dbgs() << " " << q[i]);
   DEBUG_KNUTH(dbgs() << '\n');
 
   // D8. [Unnormalize]. Now q[...] is the desired quotient, and the desired
   // remainder may be obtained by dividing u[...] by d. If r is non-null we
   // compute the remainder (urem uses this).
-  if (r) {
+  만약 (r) {
     // The value d is expressed by the "shift" value above since we avoided
     // multiplication by d by using a shift left. So, all we have to do is
     // shift right here.
-    if (shift) {
+    만약 (shift) {
       uint32_t carry = 0;
       DEBUG_KNUTH(dbgs() << "KnuthDiv: remainder:");
-      for (int i = n-1; i >= 0; i--) {
+      위해 (정수 i = n-1; i >= 0; i--) {
         r[i] = (u[i] >> shift) | carry;
         carry = u[i] << (32 - shift);
         DEBUG_KNUTH(dbgs() << " " << r[i]);
       }
-    } else {
-      for (int i = n-1; i >= 0; i--) {
+    } 아니면 {
+      위해 (정수 i = n-1; i >= 0; i--) {
         r[i] = u[i];
         DEBUG_KNUTH(dbgs() << " " << r[i]);
       }
@@ -1497,23 +1497,23 @@ void APInt::divide(const WordType *LHS, unsigned lhsWords, const WordType *RHS,
   uint32_t *V = nullptr;
   uint32_t *Q = nullptr;
   uint32_t *R = nullptr;
-  if ((Remainder?4:3)*n+2*m+1 <= 128) {
+  만약 ((Remainder?4:3)*n+2*m+1 <= 128) {
     U = &SPACE[0];
     V = &SPACE[m+n+1];
     Q = &SPACE[(m+n+1) + n];
-    if (Remainder)
+    만약 (Remainder)
       R = &SPACE[(m+n+1) + n + (m+n)];
-  } else {
+  } 아니면 {
     U = new uint32_t[m + n + 1];
     V = new uint32_t[n];
     Q = new uint32_t[m+n];
-    if (Remainder)
+    만약 (Remainder)
       R = new uint32_t[n];
   }
 
   // Initialize the dividend
   memset(U, 0, (m+n+1)*sizeof(uint32_t));
-  for (unsigned i = 0; i < lhsWords; ++i) {
+  위해 (unsigned i = 0; i < lhsWords; ++i) {
     uint64_t tmp = LHS[i];
     U[i * 2] = Lo_32(tmp);
     U[i * 2 + 1] = Hi_32(tmp);
@@ -1522,7 +1522,7 @@ void APInt::divide(const WordType *LHS, unsigned lhsWords, const WordType *RHS,
 
   // Initialize the divisor
   memset(V, 0, (n)*sizeof(uint32_t));
-  for (unsigned i = 0; i < rhsWords; ++i) {
+  위해 (unsigned i = 0; i < rhsWords; ++i) {
     uint64_t tmp = RHS[i];
     V[i * 2] = Lo_32(tmp);
     V[i * 2 + 1] = Hi_32(tmp);
@@ -1530,18 +1530,18 @@ void APInt::divide(const WordType *LHS, unsigned lhsWords, const WordType *RHS,
 
   // initialize the quotient and remainder
   memset(Q, 0, (m+n) * sizeof(uint32_t));
-  if (Remainder)
+  만약 (Remainder)
     memset(R, 0, n * sizeof(uint32_t));
 
   // Now, adjust m and n for the Knuth division. n is the number of words in
   // the divisor. m is the number of words by which the dividend exceeds the
   // divisor (i.e. m+n is the length of the dividend). These sizes must not
   // contain any zero words or the Knuth algorithm fails.
-  for (unsigned i = n; i > 0 && V[i-1] == 0; i--) {
+  위해 (unsigned i = n; i > 0 && V[i-1] == 0; i--) {
     n--;
     m++;
   }
-  for (unsigned i = m+n; i > 0 && U[i-1] == 0; i--)
+  위해 (unsigned i = m+n; i > 0 && U[i-1] == 0; i--)
     m--;
 
   // If we're left with only a single word for the divisor, Knuth doesn't work
@@ -1551,47 +1551,47 @@ void APInt::divide(const WordType *LHS, unsigned lhsWords, const WordType *RHS,
   // series of such operations. This is just like doing short division but we
   // are using base 2^32 instead of base 10.
   assert(n != 0 && "Divide by zero?");
-  if (n == 1) {
+  만약 (n == 1) {
     uint32_t divisor = V[0];
     uint32_t remainder = 0;
-    for (int i = m; i >= 0; i--) {
+    위해 (정수 i = m; i >= 0; i--) {
       uint64_t partial_dividend = Make_64(remainder, U[i]);
-      if (partial_dividend == 0) {
+      만약 (partial_dividend == 0) {
         Q[i] = 0;
         remainder = 0;
-      } else if (partial_dividend < divisor) {
+      } 아니면 만약 (partial_dividend < divisor) {
         Q[i] = 0;
         remainder = Lo_32(partial_dividend);
-      } else if (partial_dividend == divisor) {
+      } 아니면 만약 (partial_dividend == divisor) {
         Q[i] = 1;
         remainder = 0;
-      } else {
+      } 아니면 {
         Q[i] = Lo_32(partial_dividend / divisor);
         remainder = Lo_32(partial_dividend - (Q[i] * divisor));
       }
     }
-    if (R)
+    만약 (R)
       R[0] = remainder;
-  } else {
+  } 아니면 {
     // Now we're ready to invoke the Knuth classical divide algorithm. In this
     // case n > 1.
     KnuthDiv(U, V, Q, R, m, n);
   }
 
   // If the caller wants the quotient
-  if (Quotient) {
-    for (unsigned i = 0; i < lhsWords; ++i)
+  만약 (Quotient) {
+    위해 (unsigned i = 0; i < lhsWords; ++i)
       Quotient[i] = Make_64(Q[i*2+1], Q[i*2]);
   }
 
   // If the caller wants the remainder
-  if (Remainder) {
-    for (unsigned i = 0; i < rhsWords; ++i)
+  만약 (Remainder) {
+    위해 (unsigned i = 0; i < rhsWords; ++i)
       Remainder[i] = Make_64(R[i*2+1], R[i*2]);
   }
 
   // Clean up the memory we allocated.
-  if (U != &SPACE[0]) {
+  만약 (U != &SPACE[0]) {
     delete [] U;
     delete [] V;
     delete [] Q;
@@ -1603,9 +1603,9 @@ APInt APInt::udiv(const APInt &RHS) const {
   assert(BitWidth == RHS.BitWidth && "Bit widths must be the same");
 
   // First, deal with the easy case
-  if (LLVM_LIKELY(isSingleWord())) {
+  만약 (LLVM_LIKELY(isSingleWord())) {
     assert(RHS.U.VAL != 0 && "Divide by zero?");
-    return APInt(BitWidth, U.VAL / RHS.U.VAL);
+    반환 APInt(BitWidth, U.VAL / RHS.U.VAL);
   }
 
   // Get some facts about the LHS and RHS number of bits and words
@@ -1615,88 +1615,88 @@ APInt APInt::udiv(const APInt &RHS) const {
   assert(rhsWords && "Divided by zero???");
 
   // Deal with some degenerate cases
-  if (!lhsWords)
+  만약 (!lhsWords)
     // 0 / X ===> 0
-    return APInt(BitWidth, 0);
-  if (rhsBits == 1)
+    반환 APInt(BitWidth, 0);
+  만약 (rhsBits == 1)
     // X / 1 ===> X
-    return *this;
-  if (lhsWords < rhsWords || this->ult(RHS))
+    반환 *this;
+  만약 (lhsWords < rhsWords || this->ult(RHS))
     // X / Y ===> 0, iff X < Y
-    return APInt(BitWidth, 0);
-  if (*this == RHS)
+    반환 APInt(BitWidth, 0);
+  만약 (*this == RHS)
     // X / X ===> 1
-    return APInt(BitWidth, 1);
-  if (lhsWords == 1) // rhsWords is 1 if lhsWords is 1.
+    반환 APInt(BitWidth, 1);
+  만약 (lhsWords == 1) // rhsWords is 1 if lhsWords is 1.
     // All high words are zero, just use native divide
-    return APInt(BitWidth, this->U.pVal[0] / RHS.U.pVal[0]);
+    반환 APInt(BitWidth, this->U.pVal[0] / RHS.U.pVal[0]);
 
   // We have to compute it the hard way. Invoke the Knuth divide algorithm.
   APInt Quotient(BitWidth, 0); // to hold result.
   divide(U.pVal, lhsWords, RHS.U.pVal, rhsWords, Quotient.U.pVal, nullptr);
-  return Quotient;
+  반환 Quotient;
 }
 
 APInt APInt::udiv(uint64_t RHS) const {
   assert(RHS != 0 && "Divide by zero?");
 
   // First, deal with the easy case
-  if (LLVM_LIKELY(isSingleWord()))
-    return APInt(BitWidth, U.VAL / RHS);
+  만약 (LLVM_LIKELY(isSingleWord()))
+    반환 APInt(BitWidth, U.VAL / RHS);
 
   // Get some facts about the LHS words.
   unsigned lhsWords = getNumWords(getActiveBits());
 
   // Deal with some degenerate cases
-  if (!lhsWords)
+  만약 (!lhsWords)
     // 0 / X ===> 0
-    return APInt(BitWidth, 0);
-  if (RHS == 1)
+    반환 APInt(BitWidth, 0);
+  만약 (RHS == 1)
     // X / 1 ===> X
-    return *this;
-  if (this->ult(RHS))
+    반환 *this;
+  만약 (this->ult(RHS))
     // X / Y ===> 0, iff X < Y
-    return APInt(BitWidth, 0);
-  if (*this == RHS)
+    반환 APInt(BitWidth, 0);
+  만약 (*this == RHS)
     // X / X ===> 1
-    return APInt(BitWidth, 1);
-  if (lhsWords == 1) // rhsWords is 1 if lhsWords is 1.
+    반환 APInt(BitWidth, 1);
+  만약 (lhsWords == 1) // rhsWords is 1 if lhsWords is 1.
     // All high words are zero, just use native divide
-    return APInt(BitWidth, this->U.pVal[0] / RHS);
+    반환 APInt(BitWidth, this->U.pVal[0] / RHS);
 
   // We have to compute it the hard way. Invoke the Knuth divide algorithm.
   APInt Quotient(BitWidth, 0); // to hold result.
   divide(U.pVal, lhsWords, &RHS, 1, Quotient.U.pVal, nullptr);
-  return Quotient;
+  반환 Quotient;
 }
 
 APInt APInt::sdiv(const APInt &RHS) const {
-  if (isNegative()) {
-    if (RHS.isNegative())
-      return (-(*this)).udiv(-RHS);
-    return -((-(*this)).udiv(RHS));
+  만약 (isNegative()) {
+    만약 (RHS.isNegative())
+      반환 (-(*this)).udiv(-RHS);
+    반환 -((-(*this)).udiv(RHS));
   }
-  if (RHS.isNegative())
-    return -(this->udiv(-RHS));
-  return this->udiv(RHS);
+  만약 (RHS.isNegative())
+    반환 -(this->udiv(-RHS));
+  반환 this->udiv(RHS);
 }
 
 APInt APInt::sdiv(int64_t RHS) const {
-  if (isNegative()) {
-    if (RHS < 0)
-      return (-(*this)).udiv(-RHS);
-    return -((-(*this)).udiv(RHS));
+  만약 (isNegative()) {
+    만약 (RHS < 0)
+      반환 (-(*this)).udiv(-RHS);
+    반환 -((-(*this)).udiv(RHS));
   }
-  if (RHS < 0)
-    return -(this->udiv(-RHS));
-  return this->udiv(RHS);
+  만약 (RHS < 0)
+    반환 -(this->udiv(-RHS));
+  반환 this->udiv(RHS);
 }
 
 APInt APInt::urem(const APInt &RHS) const {
   assert(BitWidth == RHS.BitWidth && "Bit widths must be the same");
-  if (LLVM_LIKELY(isSingleWord())) {
+  만약 (LLVM_LIKELY(isSingleWord())) {
     assert(RHS.U.VAL != 0 && "Remainder by zero?");
-    return APInt(BitWidth, U.VAL % RHS.U.VAL);
+    반환 APInt(BitWidth, U.VAL % RHS.U.VAL);
   }
 
   // Get some facts about the LHS
@@ -1708,89 +1708,89 @@ APInt APInt::urem(const APInt &RHS) const {
   assert(rhsWords && "Performing remainder operation by zero ???");
 
   // Check the degenerate cases
-  if (lhsWords == 0)
+  만약 (lhsWords == 0)
     // 0 % Y ===> 0
-    return APInt(BitWidth, 0);
-  if (rhsBits == 1)
+    반환 APInt(BitWidth, 0);
+  만약 (rhsBits == 1)
     // X % 1 ===> 0
-    return APInt(BitWidth, 0);
-  if (lhsWords < rhsWords || this->ult(RHS))
+    반환 APInt(BitWidth, 0);
+  만약 (lhsWords < rhsWords || this->ult(RHS))
     // X % Y ===> X, iff X < Y
-    return *this;
-  if (*this == RHS)
+    반환 *this;
+  만약 (*this == RHS)
     // X % X == 0;
-    return APInt(BitWidth, 0);
-  if (lhsWords == 1)
+    반환 APInt(BitWidth, 0);
+  만약 (lhsWords == 1)
     // All high words are zero, just use native remainder
-    return APInt(BitWidth, U.pVal[0] % RHS.U.pVal[0]);
-  if (RHS.isPowerOf2()) {
+    반환 APInt(BitWidth, U.pVal[0] % RHS.U.pVal[0]);
+  만약 (RHS.isPowerOf2()) {
     // X % 2^w ===> X & (2^w - 1)
     APInt Result(*this);
     Result.clearBits(RHS.logBase2(), BitWidth);
-    return Result;
+    반환 Result;
   }
 
   // We have to compute it the hard way. Invoke the Knuth divide algorithm.
   APInt Remainder(BitWidth, 0);
   divide(U.pVal, lhsWords, RHS.U.pVal, rhsWords, nullptr, Remainder.U.pVal);
-  return Remainder;
+  반환 Remainder;
 }
 
 uint64_t APInt::urem(uint64_t RHS) const {
   assert(RHS != 0 && "Remainder by zero?");
 
-  if (LLVM_LIKELY(isSingleWord()))
-    return U.VAL % RHS;
+  만약 (LLVM_LIKELY(isSingleWord()))
+    반환 U.VAL % RHS;
 
   // Get some facts about the LHS
   unsigned lhsWords = getNumWords(getActiveBits());
 
   // Check the degenerate cases
-  if (lhsWords == 0)
+  만약 (lhsWords == 0)
     // 0 % Y ===> 0
-    return 0;
-  if (RHS == 1)
+    반환 0;
+  만약 (RHS == 1)
     // X % 1 ===> 0
-    return 0;
-  if (this->ult(RHS))
+    반환 0;
+  만약 (this->ult(RHS))
     // X % Y ===> X, iff X < Y
-    return getZExtValue();
-  if (*this == RHS)
+    반환 getZExtValue();
+  만약 (*this == RHS)
     // X % X == 0;
-    return 0;
-  if (lhsWords == 1)
+    반환 0;
+  만약 (lhsWords == 1)
     // All high words are zero, just use native remainder
-    return U.pVal[0] % RHS;
-  if (llvm::isPowerOf2_64(RHS))
+    반환 U.pVal[0] % RHS;
+  만약 (llvm::isPowerOf2_64(RHS))
     // X % 2^w ===> X & (2^w - 1)
-    return U.pVal[0] & (RHS - 1);
+    반환 U.pVal[0] & (RHS - 1);
 
   // We have to compute it the hard way. Invoke the Knuth divide algorithm.
   uint64_t Remainder;
   divide(U.pVal, lhsWords, &RHS, 1, nullptr, &Remainder);
-  return Remainder;
+  반환 Remainder;
 }
 
 APInt APInt::srem(const APInt &RHS) const {
-  if (isNegative()) {
-    if (RHS.isNegative())
-      return -((-(*this)).urem(-RHS));
-    return -((-(*this)).urem(RHS));
+  만약 (isNegative()) {
+    만약 (RHS.isNegative())
+      반환 -((-(*this)).urem(-RHS));
+    반환 -((-(*this)).urem(RHS));
   }
-  if (RHS.isNegative())
-    return this->urem(-RHS);
-  return this->urem(RHS);
+  만약 (RHS.isNegative())
+    반환 this->urem(-RHS);
+  반환 this->urem(RHS);
 }
 
 int64_t APInt::srem(int64_t RHS) const {
-  if (isNegative()) {
-    if (RHS < 0)
-      return -((-(*this)).urem(-RHS));
-    return -((-(*this)).urem(RHS));
+  만약 (isNegative()) {
+    만약 (RHS < 0)
+      반환 -((-(*this)).urem(-RHS));
+    반환 -((-(*this)).urem(RHS));
   }
-  if (RHS < 0)
-    return this->urem(-RHS);
-  return this->urem(RHS);
+  만약 (RHS < 0)
+    반환 this->urem(-RHS);
+  반환 this->urem(RHS);
 }
 
 void APInt::udivrem(const APInt &LHS, const APInt &RHS,
@@ -1799,13 +1799,13 @@ void APInt::udivrem(const APInt &LHS, const APInt &RHS,
   unsigned BitWidth = LHS.BitWidth;
 
   // First, deal with the easy case
-  if (LLVM_LIKELY(LHS.isSingleWord())) {
+  만약 (LLVM_LIKELY(LHS.isSingleWord())) {
     assert(RHS.U.VAL != 0 && "Divide by zero?");
     uint64_t QuotVal = LHS.U.VAL / RHS.U.VAL;
     uint64_t RemVal = LHS.U.VAL % RHS.U.VAL;
     Quotient = APInt(BitWidth, QuotVal);
     Remainder = APInt(BitWidth, RemVal);
-    return;
+    반환;
   }
 
   // Get some size facts about the dividend and divisor
@@ -1815,27 +1815,27 @@ void APInt::udivrem(const APInt &LHS, const APInt &RHS,
   assert(rhsWords && "Performing divrem operation by zero ???");
 
   // Check the degenerate cases
-  if (lhsWords == 0) {
+  만약 (lhsWords == 0) {
     Quotient = APInt(BitWidth, 0);    // 0 / Y ===> 0
     Remainder = APInt(BitWidth, 0);   // 0 % Y ===> 0
-    return;
+    반환;
   }
 
-  if (rhsBits == 1) {
+  만약 (rhsBits == 1) {
     Quotient = LHS;                   // X / 1 ===> X
     Remainder = APInt(BitWidth, 0);   // X % 1 ===> 0
   }
 
-  if (lhsWords < rhsWords || LHS.ult(RHS)) {
+  만약 (lhsWords < rhsWords || LHS.ult(RHS)) {
     Remainder = LHS;                  // X % Y ===> X, iff X < Y
     Quotient = APInt(BitWidth, 0);    // X / Y ===> 0, iff X < Y
-    return;
+    반환;
   }
 
-  if (LHS == RHS) {
+  만약 (LHS == RHS) {
     Quotient  = APInt(BitWidth, 1);   // X / X ===> 1
     Remainder = APInt(BitWidth, 0);   // X % X ===> 0;
-    return;
+    반환;
   }
 
   // Make sure there is enough space to hold the results.
@@ -1845,13 +1845,13 @@ void APInt::udivrem(const APInt &LHS, const APInt &RHS,
   Quotient.reallocate(BitWidth);
   Remainder.reallocate(BitWidth);
 
-  if (lhsWords == 1) { // rhsWords is 1 if lhsWords is 1.
+  만약 (lhsWords == 1) { // rhsWords is 1 if lhsWords is 1.
     // There is only one word to consider so use the native versions.
     uint64_t lhsValue = LHS.U.pVal[0];
     uint64_t rhsValue = RHS.U.pVal[0];
     Quotient = lhsValue / rhsValue;
     Remainder = lhsValue % rhsValue;
-    return;
+    반환;
   }
 
   // Okay, lets do it the long way
@@ -1870,39 +1870,39 @@ void APInt::udivrem(const APInt &LHS, uint64_t RHS, APInt &Quotient,
   unsigned BitWidth = LHS.BitWidth;
 
   // First, deal with the easy case
-  if (LLVM_LIKELY(LHS.isSingleWord())) {
+  만약 (LLVM_LIKELY(LHS.isSingleWord())) {
     uint64_t QuotVal = LHS.U.VAL / RHS;
     Remainder = LHS.U.VAL % RHS;
     Quotient = APInt(BitWidth, QuotVal);
-    return;
+    반환;
   }
 
   // Get some size facts about the dividend and divisor
   unsigned lhsWords = getNumWords(LHS.getActiveBits());
 
   // Check the degenerate cases
-  if (lhsWords == 0) {
+  만약 (lhsWords == 0) {
     Quotient = APInt(BitWidth, 0);    // 0 / Y ===> 0
     Remainder = 0;                    // 0 % Y ===> 0
-    return;
+    반환;
   }
 
-  if (RHS == 1) {
+  만약 (RHS == 1) {
     Quotient = LHS;                   // X / 1 ===> X
     Remainder = 0;                    // X % 1 ===> 0
-    return;
+    반환;
   }
 
-  if (LHS.ult(RHS)) {
+  만약 (LHS.ult(RHS)) {
     Remainder = LHS.getZExtValue();   // X % Y ===> X, iff X < Y
     Quotient = APInt(BitWidth, 0);    // X / Y ===> 0, iff X < Y
-    return;
+    반환;
   }
 
-  if (LHS == RHS) {
+  만약 (LHS == RHS) {
     Quotient  = APInt(BitWidth, 1);   // X / X ===> 1
     Remainder = 0;                    // X % X ===> 0;
-    return;
+    반환;
   }
 
   // Make sure there is enough space to hold the results.
@@ -1910,12 +1910,12 @@ void APInt::udivrem(const APInt &LHS, uint64_t RHS, APInt &Quotient,
   // change the size. This is necessary if Quotient is aliased with LHS.
   Quotient.reallocate(BitWidth);
 
-  if (lhsWords == 1) { // rhsWords is 1 if lhsWords is 1.
+  만약 (lhsWords == 1) { // rhsWords is 1 if lhsWords is 1.
     // There is only one word to consider so use the native versions.
     uint64_t lhsValue = LHS.U.pVal[0];
     Quotient = lhsValue / RHS;
     Remainder = lhsValue % RHS;
-    return;
+    반환;
   }
 
   // Okay, lets do it the long way
@@ -1927,18 +1927,18 @@ void APInt::udivrem(const APInt &LHS, uint64_t RHS, APInt &Quotient,
 
 void APInt::sdivrem(const APInt &LHS, const APInt &RHS,
                     APInt &Quotient, APInt &Remainder) {
-  if (LHS.isNegative()) {
-    if (RHS.isNegative())
+  만약 (LHS.isNegative()) {
+    만약 (RHS.isNegative())
       APInt::udivrem(-LHS, -RHS, Quotient, Remainder);
-    else {
+    아니면 {
       APInt::udivrem(-LHS, RHS, Quotient, Remainder);
       Quotient.negate();
     }
     Remainder.negate();
-  } else if (RHS.isNegative()) {
+  } 아니면 만약 (RHS.isNegative()) {
     APInt::udivrem(LHS, -RHS, Quotient, Remainder);
     Quotient.negate();
-  } else {
+  } 아니면 {
     APInt::udivrem(LHS, RHS, Quotient, Remainder);
   }
 }
@@ -1946,18 +1946,18 @@ void APInt::sdivrem(const APInt &LHS, const APInt &RHS,
 void APInt::sdivrem(const APInt &LHS, int64_t RHS,
                     APInt &Quotient, int64_t &Remainder) {
   uint64_t R = Remainder;
-  if (LHS.isNegative()) {
-    if (RHS < 0)
+  만약 (LHS.isNegative()) {
+    만약 (RHS < 0)
       APInt::udivrem(-LHS, -RHS, Quotient, R);
-    else {
+    아니면 {
       APInt::udivrem(-LHS, RHS, Quotient, R);
       Quotient.negate();
     }
     R = -R;
-  } else if (RHS < 0) {
+  } 아니면 만약 (RHS < 0) {
     APInt::udivrem(LHS, -RHS, Quotient, R);
     Quotient.negate();
-  } else {
+  } 아니면 {
     APInt::udivrem(LHS, RHS, Quotient, R);
   }
   Remainder = R;
@@ -1967,185 +1967,185 @@ APInt APInt::sadd_ov(const APInt &RHS, bool &Overflow) const {
   APInt Res = *this+RHS;
   Overflow = isNonNegative() == RHS.isNonNegative() &&
              Res.isNonNegative() != isNonNegative();
-  return Res;
+  반환 Res;
 }
 
 APInt APInt::uadd_ov(const APInt &RHS, bool &Overflow) const {
   APInt Res = *this+RHS;
   Overflow = Res.ult(RHS);
-  return Res;
+  반환 Res;
 }
 
 APInt APInt::ssub_ov(const APInt &RHS, bool &Overflow) const {
   APInt Res = *this - RHS;
   Overflow = isNonNegative() != RHS.isNonNegative() &&
              Res.isNonNegative() != isNonNegative();
-  return Res;
+  반환 Res;
 }
 
 APInt APInt::usub_ov(const APInt &RHS, bool &Overflow) const {
   APInt Res = *this-RHS;
   Overflow = Res.ugt(*this);
-  return Res;
+  반환 Res;
 }
 
 APInt APInt::sdiv_ov(const APInt &RHS, bool &Overflow) const {
   // MININT/-1  -->  overflow.
   Overflow = isMinSignedValue() && RHS.isAllOnes();
-  return sdiv(RHS);
+  반환 sdiv(RHS);
 }
 
 APInt APInt::smul_ov(const APInt &RHS, bool &Overflow) const {
   APInt Res = *this * RHS;
 
-  if (RHS != 0)
+  만약 (RHS != 0)
     Overflow = Res.sdiv(RHS) != *this ||
                (isMinSignedValue() && RHS.isAllOnes());
-  else
+  아니면
     Overflow = false;
-  return Res;
+  반환 Res;
 }
 
 APInt APInt::umul_ov(const APInt &RHS, bool &Overflow) const {
-  if (countl_zero() + RHS.countl_zero() + 2 <= BitWidth) {
+  만약 (countl_zero() + RHS.countl_zero() + 2 <= BitWidth) {
     Overflow = true;
-    return *this * RHS;
+    반환 *this * RHS;
   }
 
   APInt Res = lshr(1) * RHS;
   Overflow = Res.isNegative();
   Res <<= 1;
-  if ((*this)[0]) {
+  만약 ((*this)[0]) {
     Res += RHS;
-    if (Res.ult(RHS))
+    만약 (Res.ult(RHS))
       Overflow = true;
   }
-  return Res;
+  반환 Res;
 }
 
 APInt APInt::sshl_ov(const APInt &ShAmt, bool &Overflow) const {
-  return sshl_ov(ShAmt.getLimitedValue(getBitWidth()), Overflow);
+  반환 sshl_ov(ShAmt.getLimitedValue(getBitWidth()), Overflow);
 }
 
 APInt APInt::sshl_ov(unsigned ShAmt, bool &Overflow) const {
   Overflow = ShAmt >= getBitWidth();
-  if (Overflow)
-    return APInt(BitWidth, 0);
+  만약 (Overflow)
+    반환 APInt(BitWidth, 0);
 
-  if (isNonNegative()) // Don't allow sign change.
+  만약 (isNonNegative()) // Don't allow sign change.
     Overflow = ShAmt >= countl_zero();
-  else
+  아니면
     Overflow = ShAmt >= countl_one();
 
-  return *this << ShAmt;
+  반환 *this << ShAmt;
 }
 
 APInt APInt::ushl_ov(const APInt &ShAmt, bool &Overflow) const {
-  return ushl_ov(ShAmt.getLimitedValue(getBitWidth()), Overflow);
+  반환 ushl_ov(ShAmt.getLimitedValue(getBitWidth()), Overflow);
 }
 
 APInt APInt::ushl_ov(unsigned ShAmt, bool &Overflow) const {
   Overflow = ShAmt >= getBitWidth();
-  if (Overflow)
-    return APInt(BitWidth, 0);
+  만약 (Overflow)
+    반환 APInt(BitWidth, 0);
 
   Overflow = ShAmt > countl_zero();
 
-  return *this << ShAmt;
+  반환 *this << ShAmt;
 }
 
 APInt APInt::sfloordiv_ov(const APInt &RHS, bool &Overflow) const {
   APInt quotient = sdiv_ov(RHS, Overflow);
-  if ((quotient * RHS != *this) && (isNegative() != RHS.isNegative()))
-    return quotient - 1;
-  return quotient;
+  만약 ((quotient * RHS != *this) && (isNegative() != RHS.isNegative()))
+    반환 quotient - 1;
+  반환 quotient;
 }
 
 APInt APInt::sadd_sat(const APInt &RHS) const {
   bool Overflow;
   APInt Res = sadd_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+  만약 (!Overflow)
+    반환 Res;
 
-  return isNegative() ? APInt::getSignedMinValue(BitWidth)
+  반환 isNegative() ? APInt::getSignedMinValue(BitWidth)
                       : APInt::getSignedMaxValue(BitWidth);
 }
 
 APInt APInt::uadd_sat(const APInt &RHS) const {
   bool Overflow;
   APInt Res = uadd_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+  만약 (!Overflow)
+    반환 Res;
 
-  return APInt::getMaxValue(BitWidth);
+  반환 APInt::getMaxValue(BitWidth);
 }
 
 APInt APInt::ssub_sat(const APInt &RHS) const {
   bool Overflow;
   APInt Res = ssub_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+  만약 (!Overflow)
+    반환 Res;
 
-  return isNegative() ? APInt::getSignedMinValue(BitWidth)
+  반환 isNegative() ? APInt::getSignedMinValue(BitWidth)
                       : APInt::getSignedMaxValue(BitWidth);
 }
 
 APInt APInt::usub_sat(const APInt &RHS) const {
   bool Overflow;
   APInt Res = usub_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+  만약 (!Overflow)
+    반환 Res;
 
-  return APInt(BitWidth, 0);
+  반환 APInt(BitWidth, 0);
 }
 
 APInt APInt::smul_sat(const APInt &RHS) const {
   bool Overflow;
   APInt Res = smul_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+  만약 (!Overflow)
+    반환 Res;
 
   // The result is negative if one and only one of inputs is negative.
   bool ResIsNegative = isNegative() ^ RHS.isNegative();
 
-  return ResIsNegative ? APInt::getSignedMinValue(BitWidth)
+  반환 ResIsNegative ? APInt::getSignedMinValue(BitWidth)
                        : APInt::getSignedMaxValue(BitWidth);
 }
 
 APInt APInt::umul_sat(const APInt &RHS) const {
   bool Overflow;
   APInt Res = umul_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+  만약 (!Overflow)
+    반환 Res;
 
-  return APInt::getMaxValue(BitWidth);
+  반환 APInt::getMaxValue(BitWidth);
 }
 
 APInt APInt::sshl_sat(const APInt &RHS) const {
-  return sshl_sat(RHS.getLimitedValue(getBitWidth()));
+  반환 sshl_sat(RHS.getLimitedValue(getBitWidth()));
 }
 
 APInt APInt::sshl_sat(unsigned RHS) const {
   bool Overflow;
   APInt Res = sshl_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+  만약 (!Overflow)
+    반환 Res;
 
-  return isNegative() ? APInt::getSignedMinValue(BitWidth)
+  반환 isNegative() ? APInt::getSignedMinValue(BitWidth)
                       : APInt::getSignedMaxValue(BitWidth);
 }
 
 APInt APInt::ushl_sat(const APInt &RHS) const {
-  return ushl_sat(RHS.getLimitedValue(getBitWidth()));
+  반환 ushl_sat(RHS.getLimitedValue(getBitWidth()));
 }
 
 APInt APInt::ushl_sat(unsigned RHS) const {
   bool Overflow;
   APInt Res = ushl_ov(RHS, Overflow);
-  if (!Overflow)
-    return Res;
+  만약 (!Overflow)
+    반환 Res;
 
-  return APInt::getMaxValue(BitWidth);
+  반환 APInt::getMaxValue(BitWidth);
 }
 
 void APInt::fromString(unsigned numbits, StringRef str, uint8_t radix) {
@@ -2158,7 +2158,7 @@ void APInt::fromString(unsigned numbits, StringRef str, uint8_t radix) {
   StringRef::iterator p = str.begin();
   size_t slen = str.size();
   bool isNeg = *p == '-';
-  if (*p == '-' || *p == '+') {
+  만약 (*p == '-' || *p == '+') {
     p++;
     slen--;
     assert(slen && "String is only a sign, needs a value.");
@@ -2170,24 +2170,24 @@ void APInt::fromString(unsigned numbits, StringRef str, uint8_t radix) {
          "Insufficient bit width");
 
   // Allocate memory if needed
-  if (LLVM_LIKELY(isSingleWord()))
+  만약 (LLVM_LIKELY(isSingleWord()))
     U.VAL = 0;
-  else
+  아니면
     U.pVal = getClearedMemory(getNumWords());
 
   // Figure out if we can shift instead of multiply
   unsigned shift = (radix == 16 ? 4 : radix == 8 ? 3 : radix == 2 ? 1 : 0);
 
   // Enter digit traversal loop
-  for (StringRef::iterator e = str.end(); p != e; ++p) {
+  위해 (StringRef::iterator e = str.end(); p != e; ++p) {
     unsigned digit = getDigit(*p, radix);
     assert(digit < radix && "Invalid character in digit string");
 
     // Shift or multiply the value by the radix
-    if (slen > 1) {
-      if (shift)
+    만약 (slen > 1) {
+      만약 (shift)
         *this <<= shift;
-      else
+      아니면
         *this *= radix;
     }
 
@@ -2195,7 +2195,7 @@ void APInt::fromString(unsigned numbits, StringRef str, uint8_t radix) {
     *this += digit;
   }
   // If its negative, put it in two's complement form
-  if (isNeg)
+  만약 (isNeg)
     this->negate();
 }
 
@@ -2207,7 +2207,7 @@ void APInt::toString(SmallVectorImpl<char> &Str, unsigned Radix, bool Signed,
          "Radix should be 2, 8, 10, 16, or 36!");
 
   const char *Prefix = "";
-  if (formatAsCLiteral) {
+  만약 (formatAsCLiteral) {
     switch (Radix) {
       case 2:
         // Binary literals are a non-standard extension added in gcc 4.3:
@@ -2231,56 +2231,56 @@ void APInt::toString(SmallVectorImpl<char> &Str, unsigned Radix, bool Signed,
   unsigned Grouping = (Radix == 8 || Radix == 10) ? 3 : 4;
 
   // First, check for a zero value and just short circuit the logic below.
-  if (isZero()) {
-    while (*Prefix) {
+  만약 (isZero()) {
+    동안 (*Prefix) {
       Str.push_back(*Prefix);
       ++Prefix;
     };
     Str.push_back('0');
-    return;
+    반환;
   }
 
   static const char BothDigits[] = "0123456789abcdefghijklmnopqrstuvwxyz"
                                    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const char *Digits = BothDigits + (UpperCase ? 36 : 0);
 
-  if (LLVM_LIKELY(isSingleWord())) {
+  만약 (LLVM_LIKELY(isSingleWord())) {
     char Buffer[65];
     char *BufPtr = std::end(Buffer);
 
     uint64_t N;
-    if (!Signed) {
+    만약 (!Signed) {
       N = getZExtValue();
-    } else {
+    } 아니면 {
       int64_t I = getSExtValue();
-      if (I >= 0) {
+      만약 (I >= 0) {
         N = I;
-      } else {
+      } 아니면 {
         Str.push_back('-');
         N = -(uint64_t)I;
       }
     }
 
-    while (*Prefix) {
+    동안 (*Prefix) {
       Str.push_back(*Prefix);
       ++Prefix;
     };
 
-    int Pos = 0;
-    while (N) {
-      if (InsertSeparators && Pos % Grouping == 0 && Pos > 0)
+    정수 Pos = 0;
+    동안 (N) {
+      만약 (InsertSeparators && Pos % Grouping == 0 && Pos > 0)
         *--BufPtr = '\'';
       *--BufPtr = Digits[N % Radix];
       N /= Radix;
       Pos++;
     }
     Str.append(BufPtr, std::end(Buffer));
-    return;
+    반환;
   }
 
   APInt Tmp(*this);
 
-  if (Signed && isNegative()) {
+  만약 (Signed && isNegative()) {
     // They want to print the signed version and it is a negative value
     // Flip the bits and add one to turn it into the equivalent positive
     // value and put a '-' in the result.
@@ -2288,7 +2288,7 @@ void APInt::toString(SmallVectorImpl<char> &Str, unsigned Radix, bool Signed,
     Str.push_back('-');
   }
 
-  while (*Prefix) {
+  동안 (*Prefix) {
     Str.push_back(*Prefix);
     ++Prefix;
   }
@@ -2299,28 +2299,28 @@ void APInt::toString(SmallVectorImpl<char> &Str, unsigned Radix, bool Signed,
   // For the 2, 8 and 16 bit cases, we can just shift instead of divide
   // because the number of bits per digit (1, 3 and 4 respectively) divides
   // equally.  We just shift until the value is zero.
-  if (Radix == 2 || Radix == 8 || Radix == 16) {
+  만약 (Radix == 2 || Radix == 8 || Radix == 16) {
     // Just shift tmp right for each digit width until it becomes zero
     unsigned ShiftAmt = (Radix == 16 ? 4 : (Radix == 8 ? 3 : 1));
     unsigned MaskAmt = Radix - 1;
 
-    int Pos = 0;
-    while (Tmp.getBoolValue()) {
+    정수 Pos = 0;
+    동안 (Tmp.getBoolValue()) {
       unsigned Digit = unsigned(Tmp.getRawData()[0]) & MaskAmt;
-      if (InsertSeparators && Pos % Grouping == 0 && Pos > 0)
+      만약 (InsertSeparators && Pos % Grouping == 0 && Pos > 0)
         Str.push_back('\'');
 
       Str.push_back(Digits[Digit]);
       Tmp.lshrInPlace(ShiftAmt);
       Pos++;
     }
-  } else {
-    int Pos = 0;
-    while (Tmp.getBoolValue()) {
+  } 아니면 {
+    정수 Pos = 0;
+    동안 (Tmp.getBoolValue()) {
       uint64_t Digit;
       udivrem(Tmp, Radix, Tmp, Digit);
       assert(Digit < Radix && "divide failed");
-      if (InsertSeparators && Pos % Grouping == 0 && Pos > 0)
+      만약 (InsertSeparators && Pos % Grouping == 0 && Pos > 0)
         Str.push_back('\'');
 
       Str.push_back(Digits[Digit]);
@@ -2332,7 +2332,7 @@ void APInt::toString(SmallVectorImpl<char> &Str, unsigned Radix, bool Signed,
   std::reverse(Str.begin()+StartDig, Str.end());
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+#만약 !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 LLVM_DUMP_METHOD void APInt::dump() const {
   SmallString<40> S, U;
   this->toStringUnsigned(U);
@@ -2360,17 +2360,17 @@ static_assert(APInt::APINT_BITS_PER_WORD % 2 == 0,
 // BITS cannot be zero.
 static inline APInt::WordType lowBitMask(unsigned bits) {
   assert(bits != 0 && bits <= APInt::APINT_BITS_PER_WORD);
-  return ~(APInt::WordType) 0 >> (APInt::APINT_BITS_PER_WORD - bits);
+  반환 ~(APInt::WordType) 0 >> (APInt::APINT_BITS_PER_WORD - bits);
 }
 
 /// Returns the value of the lower half of PART.
 static inline APInt::WordType lowHalf(APInt::WordType part) {
-  return part & lowBitMask(APInt::APINT_BITS_PER_WORD / 2);
+  반환 part & lowBitMask(APInt::APINT_BITS_PER_WORD / 2);
 }
 
 /// Returns the value of the upper half of PART.
 static inline APInt::WordType highHalf(APInt::WordType part) {
-  return part >> (APInt::APINT_BITS_PER_WORD / 2);
+  반환 part >> (APInt::APINT_BITS_PER_WORD / 2);
 }
 
 /// Sets the least significant part of a bignum to the input value, and zeroes
@@ -2378,28 +2378,28 @@ static inline APInt::WordType highHalf(APInt::WordType part) {
 void APInt::tcSet(WordType *dst, WordType part, unsigned parts) {
   assert(parts > 0);
   dst[0] = part;
-  for (unsigned i = 1; i < parts; i++)
+  위해 (unsigned i = 1; i < parts; i++)
     dst[i] = 0;
 }
 
 /// Assign one bignum to another.
 void APInt::tcAssign(WordType *dst, const WordType *src, unsigned parts) {
-  for (unsigned i = 0; i < parts; i++)
+  위해 (unsigned i = 0; i < parts; i++)
     dst[i] = src[i];
 }
 
 /// Returns true if a bignum is zero, false otherwise.
 bool APInt::tcIsZero(const WordType *src, unsigned parts) {
-  for (unsigned i = 0; i < parts; i++)
-    if (src[i])
-      return false;
+  위해 (unsigned i = 0; i < parts; i++)
+    만약 (src[i])
+      반환 false;
 
-  return true;
+  반환 true;
 }
 
 /// Extract the given bit of a bignum; returns 0 or 1.
-int APInt::tcExtractBit(const WordType *parts, unsigned bit) {
-  return (parts[whichWord(bit)] & maskBit(bit)) != 0;
+정수 APInt::tcExtractBit(const WordType *parts, unsigned bit) {
+  반환 (parts[whichWord(bit)] & maskBit(bit)) != 0;
 }
 
 /// Set the given bit of a bignum.
@@ -2415,14 +2415,14 @@ void APInt::tcClearBit(WordType *parts, unsigned bit) {
 /// Returns the bit number of the least significant set bit of a number.  If the
 /// input number has no bits set UINT_MAX is returned.
 unsigned APInt::tcLSB(const WordType *parts, unsigned n) {
-  for (unsigned i = 0; i < n; i++) {
-    if (parts[i] != 0) {
+  위해 (unsigned i = 0; i < n; i++) {
+    만약 (parts[i] != 0) {
       unsigned lsb = llvm::countr_zero(parts[i]);
-      return lsb + i * APINT_BITS_PER_WORD;
+      반환 lsb + i * APINT_BITS_PER_WORD;
     }
   }
 
-  return UINT_MAX;
+  반환 UINT_MAX;
 }
 
 /// Returns the bit number of the most significant set bit of a number.
@@ -2431,15 +2431,15 @@ unsigned APInt::tcMSB(const WordType *parts, unsigned n) {
   do {
     --n;
 
-    if (parts[n] != 0) {
+    만약 (parts[n] != 0) {
       static_assert(sizeof(parts[n]) <= sizeof(uint64_t));
       unsigned msb = llvm::Log2_64(parts[n]);
 
-      return msb + n * APINT_BITS_PER_WORD;
+      반환 msb + n * APINT_BITS_PER_WORD;
     }
-  } while (n);
+  } 동안 (n);
 
-  return UINT_MAX;
+  반환 UINT_MAX;
 }
 
 /// Copy the bit vector of width srcBITS from SRC, starting at bit srcLSB, to
@@ -2462,17 +2462,17 @@ APInt::tcExtract(WordType *dst, unsigned dstCount, const WordType *src,
   // in DST.  If this is less that srcBits, append the rest, else
   // clear the high bits.
   unsigned n = dstParts * APINT_BITS_PER_WORD - shift;
-  if (n < srcBits) {
+  만약 (n < srcBits) {
     WordType mask = lowBitMask (srcBits - n);
     dst[dstParts - 1] |= ((src[firstSrcPart + dstParts] & mask)
                           << n % APINT_BITS_PER_WORD);
-  } else if (n > srcBits) {
-    if (srcBits % APINT_BITS_PER_WORD)
+  } 아니면 만약 (n > srcBits) {
+    만약 (srcBits % APINT_BITS_PER_WORD)
       dst[dstParts - 1] &= lowBitMask (srcBits % APINT_BITS_PER_WORD);
   }
 
   // Clear high parts.
-  while (dstParts < dstCount)
+  동안 (dstParts < dstCount)
     dst[dstParts++] = 0;
 }
 
@@ -2481,18 +2481,18 @@ APInt::WordType APInt::tcAdd(WordType *dst, const WordType *rhs,
                              WordType c, unsigned parts) {
   assert(c <= 1);
 
-  for (unsigned i = 0; i < parts; i++) {
+  위해 (unsigned i = 0; i < parts; i++) {
     WordType l = dst[i];
-    if (c) {
+    만약 (c) {
       dst[i] += rhs[i] + 1;
       c = (dst[i] <= l);
-    } else {
+    } 아니면 {
       dst[i] += rhs[i];
       c = (dst[i] < l);
     }
   }
 
-  return c;
+  반환 c;
 }
 
 /// This function adds a single "word" integer, src, to the multiple
@@ -2501,14 +2501,14 @@ APInt::WordType APInt::tcAdd(WordType *dst, const WordType *rhs,
 /// @returns the carry of the addition.
 APInt::WordType APInt::tcAddPart(WordType *dst, WordType src,
                                  unsigned parts) {
-  for (unsigned i = 0; i < parts; ++i) {
+  위해 (unsigned i = 0; i < parts; ++i) {
     dst[i] += src;
-    if (dst[i] >= src)
-      return 0; // No need to carry so exit early.
+    만약 (dst[i] >= src)
+      반환 0; // No need to carry so exit early.
     src = 1; // Carry one to next digit.
   }
 
-  return 1;
+  반환 1;
 }
 
 /// DST -= RHS + C where C is zero or one.  Returns the carry flag.
@@ -2516,18 +2516,18 @@ APInt::WordType APInt::tcSubtract(WordType *dst, const WordType *rhs,
                                   WordType c, unsigned parts) {
   assert(c <= 1);
 
-  for (unsigned i = 0; i < parts; i++) {
+  위해 (unsigned i = 0; i < parts; i++) {
     WordType l = dst[i];
-    if (c) {
+    만약 (c) {
       dst[i] -= rhs[i] + 1;
       c = (dst[i] >= l);
-    } else {
+    } 아니면 {
       dst[i] -= rhs[i];
       c = (dst[i] > l);
     }
   }
 
-  return c;
+  반환 c;
 }
 
 /// This function subtracts a single "word" (64-bit word), src, from
@@ -2539,15 +2539,15 @@ APInt::WordType APInt::tcSubtract(WordType *dst, const WordType *rhs,
 /// @returns the borrow out of the subtraction
 APInt::WordType APInt::tcSubtractPart(WordType *dst, WordType src,
                                       unsigned parts) {
-  for (unsigned i = 0; i < parts; ++i) {
+  위해 (unsigned i = 0; i < parts; ++i) {
     WordType Dst = dst[i];
     dst[i] -= src;
-    if (src <= Dst)
-      return 0; // No need to borrow so exit early.
+    만약 (src <= Dst)
+      반환 0; // No need to borrow so exit early.
     src = 1; // We have to "borrow 1" from next "word"
   }
 
-  return 1;
+  반환 1;
 }
 
 /// Negate a bignum in-place.
@@ -2565,7 +2565,7 @@ void APInt::tcNegate(WordType *dst, unsigned parts) {
 /// DSTPARTS parts of the result, and if all of the omitted higher
 /// parts were zero return zero, otherwise overflow occurred and
 /// return one.
-int APInt::tcMultiplyPart(WordType *dst, const WordType *src,
+정수 APInt::tcMultiplyPart(WordType *dst, const WordType *src,
                           WordType multiplier, WordType carry,
                           unsigned srcParts, unsigned dstParts,
                           bool add) {
@@ -2576,93 +2576,93 @@ int APInt::tcMultiplyPart(WordType *dst, const WordType *src,
   // N loops; minimum of dstParts and srcParts.
   unsigned n = std::min(dstParts, srcParts);
 
-  for (unsigned i = 0; i < n; i++) {
+  위해 (unsigned i = 0; i < n; i++) {
     // [LOW, HIGH] = MULTIPLIER * SRC[i] + DST[i] + CARRY.
     // This cannot overflow, because:
     //   (n - 1) * (n - 1) + 2 (n - 1) = (n - 1) * (n + 1)
     // which is less than n^2.
     WordType srcPart = src[i];
     WordType low, mid, high;
-    if (multiplier == 0 || srcPart == 0) {
+    만약 (multiplier == 0 || srcPart == 0) {
       low = carry;
       high = 0;
-    } else {
+    } 아니면 {
       low = lowHalf(srcPart) * lowHalf(multiplier);
       high = highHalf(srcPart) * highHalf(multiplier);
 
       mid = lowHalf(srcPart) * highHalf(multiplier);
       high += highHalf(mid);
       mid <<= APINT_BITS_PER_WORD / 2;
-      if (low + mid < low)
+      만약 (low + mid < low)
         high++;
       low += mid;
 
       mid = highHalf(srcPart) * lowHalf(multiplier);
       high += highHalf(mid);
       mid <<= APINT_BITS_PER_WORD / 2;
-      if (low + mid < low)
+      만약 (low + mid < low)
         high++;
       low += mid;
 
       // Now add carry.
-      if (low + carry < low)
+      만약 (low + carry < low)
         high++;
       low += carry;
     }
 
-    if (add) {
+    만약 (add) {
       // And now DST[i], and store the new low part there.
-      if (low + dst[i] < low)
+      만약 (low + dst[i] < low)
         high++;
       dst[i] += low;
-    } else {
+    } 아니면 {
       dst[i] = low;
     }
 
     carry = high;
   }
 
-  if (srcParts < dstParts) {
+  만약 (srcParts < dstParts) {
     // Full multiplication, there is no overflow.
     assert(srcParts + 1 == dstParts);
     dst[srcParts] = carry;
-    return 0;
+    반환 0;
   }
 
   // We overflowed if there is carry.
-  if (carry)
-    return 1;
+  만약 (carry)
+    반환 1;
 
   // We would overflow if any significant unwritten parts would be
   // non-zero.  This is true if any remaining src parts are non-zero
   // and the multiplier is non-zero.
-  if (multiplier)
-    for (unsigned i = dstParts; i < srcParts; i++)
-      if (src[i])
-        return 1;
+  만약 (multiplier)
+    위해 (unsigned i = dstParts; i < srcParts; i++)
+      만약 (src[i])
+        반환 1;
 
   // We fitted in the narrow destination.
-  return 0;
+  반환 0;
 }
 
 /// DST = LHS * RHS, where DST has the same width as the operands and
 /// is filled with the least significant parts of the result.  Returns
 /// one if overflow occurred, otherwise zero.  DST must be disjoint
 /// from both operands.
-int APInt::tcMultiply(WordType *dst, const WordType *lhs,
+정수 APInt::tcMultiply(WordType *dst, const WordType *lhs,
                       const WordType *rhs, unsigned parts) {
   assert(dst != lhs && dst != rhs);
 
-  int overflow = 0;
+  정수 overflow = 0;
 
-  for (unsigned i = 0; i < parts; i++) {
+  위해 (unsigned i = 0; i < parts; i++) {
     // Don't accumulate on the first iteration so we don't need to initalize
     // dst to 0.
     overflow |=
         tcMultiplyPart(&dst[i], lhs, rhs[i], 0, parts, parts - i, i != 0);
   }
 
-  return overflow;
+  반환 overflow;
 }
 
 /// DST = LHS * RHS, where DST has width the sum of the widths of the
@@ -2671,12 +2671,12 @@ void APInt::tcFullMultiply(WordType *dst, const WordType *lhs,
                            const WordType *rhs, unsigned lhsParts,
                            unsigned rhsParts) {
   // Put the narrower number on the LHS for less loops below.
-  if (lhsParts > rhsParts)
-    return tcFullMultiply (dst, rhs, lhs, rhsParts, lhsParts);
+  만약 (lhsParts > rhsParts)
+    반환 tcFullMultiply (dst, rhs, lhs, rhsParts, lhsParts);
 
   assert(dst != lhs && dst != rhs);
 
-  for (unsigned i = 0; i < lhsParts; i++) {
+  위해 (unsigned i = 0; i < lhsParts; i++) {
     // Don't accumulate on the first iteration so we don't need to initalize
     // dst to 0.
     tcMultiplyPart(&dst[i], rhs, lhs[i], 0, rhsParts, rhsParts + 1, i != 0);
@@ -2692,14 +2692,14 @@ void APInt::tcFullMultiply(WordType *dst, const WordType *lhs,
 // SCRATCH is a bignum of the same size as the operands and result for
 // use by the routine; its contents need not be initialized and are
 // destroyed.  LHS, REMAINDER and SCRATCH must be distinct.
-int APInt::tcDivide(WordType *lhs, const WordType *rhs,
+정수 APInt::tcDivide(WordType *lhs, const WordType *rhs,
                     WordType *remainder, WordType *srhs,
                     unsigned parts) {
   assert(lhs != remainder && lhs != srhs && remainder != srhs);
 
   unsigned shiftCount = tcMSB(rhs, parts) + 1;
-  if (shiftCount == 0)
-    return true;
+  만약 (shiftCount == 0)
+    반환 true;
 
   shiftCount = parts * APINT_BITS_PER_WORD - shiftCount;
   unsigned n = shiftCount / APINT_BITS_PER_WORD;
@@ -2712,44 +2712,44 @@ int APInt::tcDivide(WordType *lhs, const WordType *rhs,
 
   // Loop, subtracting SRHS if REMAINDER is greater and adding that to the
   // total.
-  for (;;) {
-    int compare = tcCompare(remainder, srhs, parts);
-    if (compare >= 0) {
+  위해 (;;) {
+    정수 compare = tcCompare(remainder, srhs, parts);
+    만약 (compare >= 0) {
       tcSubtract(remainder, srhs, 0, parts);
       lhs[n] |= mask;
     }
 
-    if (shiftCount == 0)
+    만약 (shiftCount == 0)
       break;
     shiftCount--;
     tcShiftRight(srhs, parts, 1);
-    if ((mask >>= 1) == 0) {
+    만약 ((mask >>= 1) == 0) {
       mask = (WordType) 1 << (APINT_BITS_PER_WORD - 1);
       n--;
     }
   }
 
-  return false;
+  반환 false;
 }
 
 /// Shift a bignum left Count bits in-place. Shifted in bits are zero. There are
 /// no restrictions on Count.
 void APInt::tcShiftLeft(WordType *Dst, unsigned Words, unsigned Count) {
   // Don't bother performing a no-op shift.
-  if (!Count)
-    return;
+  만약 (!Count)
+    반환;
 
   // WordShift is the inter-part shift; BitShift is the intra-part shift.
   unsigned WordShift = std::min(Count / APINT_BITS_PER_WORD, Words);
   unsigned BitShift = Count % APINT_BITS_PER_WORD;
 
   // Fastpath for moving by whole words.
-  if (BitShift == 0) {
+  만약 (BitShift == 0) {
     std::memmove(Dst + WordShift, Dst, (Words - WordShift) * APINT_WORD_SIZE);
-  } else {
-    while (Words-- > WordShift) {
+  } 아니면 {
+    동안 (Words-- > WordShift) {
       Dst[Words] = Dst[Words - WordShift] << BitShift;
-      if (Words > WordShift)
+      만약 (Words > WordShift)
         Dst[Words] |=
           Dst[Words - WordShift - 1] >> (APINT_BITS_PER_WORD - BitShift);
     }
@@ -2763,8 +2763,8 @@ void APInt::tcShiftLeft(WordType *Dst, unsigned Words, unsigned Count) {
 /// are no restrictions on Count.
 void APInt::tcShiftRight(WordType *Dst, unsigned Words, unsigned Count) {
   // Don't bother performing a no-op shift.
-  if (!Count)
-    return;
+  만약 (!Count)
+    반환;
 
   // WordShift is the inter-part shift; BitShift is the intra-part shift.
   unsigned WordShift = std::min(Count / APINT_BITS_PER_WORD, Words);
@@ -2772,12 +2772,12 @@ void APInt::tcShiftRight(WordType *Dst, unsigned Words, unsigned Count) {
 
   unsigned WordsToMove = Words - WordShift;
   // Fastpath for moving by whole words.
-  if (BitShift == 0) {
+  만약 (BitShift == 0) {
     std::memmove(Dst, Dst + WordShift, WordsToMove * APINT_WORD_SIZE);
-  } else {
-    for (unsigned i = 0; i != WordsToMove; ++i) {
+  } 아니면 {
+    위해 (unsigned i = 0; i != WordsToMove; ++i) {
       Dst[i] = Dst[i + WordShift] >> BitShift;
-      if (i + 1 != WordsToMove)
+      만약 (i + 1 != WordsToMove)
         Dst[i] |= Dst[i + WordShift + 1] << (APINT_BITS_PER_WORD - BitShift);
     }
   }
@@ -2787,15 +2787,15 @@ void APInt::tcShiftRight(WordType *Dst, unsigned Words, unsigned Count) {
 }
 
 // Comparison (unsigned) of two bignums.
-int APInt::tcCompare(const WordType *lhs, const WordType *rhs,
+정수 APInt::tcCompare(const WordType *lhs, const WordType *rhs,
                      unsigned parts) {
-  while (parts) {
+  동안 (parts) {
     parts--;
-    if (lhs[parts] != rhs[parts])
-      return (lhs[parts] > rhs[parts]) ? 1 : -1;
+    만약 (lhs[parts] != rhs[parts])
+      반환 (lhs[parts] > rhs[parts]) ? 1 : -1;
   }
 
-  return 0;
+  반환 0;
 }
 
 APInt llvm::APIntOps::RoundingUDiv(const APInt &A, const APInt &B,
@@ -2804,13 +2804,13 @@ APInt llvm::APIntOps::RoundingUDiv(const APInt &A, const APInt &B,
   switch (RM) {
   case APInt::Rounding::DOWN:
   case APInt::Rounding::TOWARD_ZERO:
-    return A.udiv(B);
+    반환 A.udiv(B);
   case APInt::Rounding::UP: {
     APInt Quo, Rem;
     APInt::udivrem(A, B, Quo, Rem);
-    if (Rem.isZero())
-      return Quo;
-    return Quo + 1;
+    만약 (Rem.isZero())
+      반환 Quo;
+    반환 Quo + 1;
   }
   }
   llvm_unreachable("Unknown APInt::Rounding enum");
@@ -2823,25 +2823,25 @@ APInt llvm::APIntOps::RoundingSDiv(const APInt &A, const APInt &B,
   case APInt::Rounding::UP: {
     APInt Quo, Rem;
     APInt::sdivrem(A, B, Quo, Rem);
-    if (Rem.isZero())
-      return Quo;
+    만약 (Rem.isZero())
+      반환 Quo;
     // This algorithm deals with arbitrary rounding mode used by sdivrem.
     // We want to check whether the non-integer part of the mathematical value
     // is negative or not. If the non-integer part is negative, we need to round
     // down from Quo; otherwise, if it's positive or 0, we return Quo, as it's
     // already rounded down.
-    if (RM == APInt::Rounding::DOWN) {
-      if (Rem.isNegative() != B.isNegative())
-        return Quo - 1;
-      return Quo;
+    만약 (RM == APInt::Rounding::DOWN) {
+      만약 (Rem.isNegative() != B.isNegative())
+        반환 Quo - 1;
+      반환 Quo;
     }
-    if (Rem.isNegative() != B.isNegative())
-      return Quo;
-    return Quo + 1;
+    만약 (Rem.isNegative() != B.isNegative())
+      반환 Quo;
+    반환 Quo + 1;
   }
   // Currently sdiv rounds towards zero.
   case APInt::Rounding::TOWARD_ZERO:
-    return A.sdiv(B);
+    반환 A.sdiv(B);
   }
   llvm_unreachable("Unknown APInt::Rounding enum");
 }
@@ -2859,9 +2859,9 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
                     << "x + " << C << ", rw:" << RangeWidth << '\n');
 
   // Identify 0 as a (non)solution immediately.
-  if (C.sextOrTrunc(RangeWidth).isZero()) {
+  만약 (C.sextOrTrunc(RangeWidth).isZero()) {
     LLVM_DEBUG(dbgs() << __func__ << ": zero solution\n");
-    return APInt(CoeffWidth, 0);
+    반환 APInt(CoeffWidth, 0);
   }
 
   // The result of APInt arithmetic has the same bit width as the operands,
@@ -2885,7 +2885,7 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
 
   // Make A > 0 for simplicity. Negate cannot overflow at this point because
   // the bit width has increased.
-  if (A.isNegative()) {
+  만약 (A.isNegative()) {
     A.negate();
     B.negate();
     C.negate();
@@ -2921,24 +2921,24 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
   auto RoundUp = [] (const APInt &V, const APInt &A) -> APInt {
     assert(A.isStrictlyPositive());
     APInt T = V.abs().urem(A);
-    if (T.isZero())
-      return V;
-    return V.isNegative() ? V+T : V+(A-T);
+    만약 (T.isZero())
+      반환 V;
+    반환 V.isNegative() ? V+T : V+(A-T);
   };
 
   // The vertex of the parabola is at -B/2A, but since A > 0, it's negative
   // iff B is positive.
-  if (B.isNonNegative()) {
+  만약 (B.isNonNegative()) {
     // If B >= 0, the vertex it at a negative location (or at 0), so in
     // order to have a non-negative solution we need to pick k that makes
     // C-kR negative. To satisfy all the requirements for the solution
     // that we are looking for, it needs to be closest to 0 of all k.
     C = C.srem(R);
-    if (C.isStrictlyPositive())
+    만약 (C.isStrictlyPositive())
       C -= R;
     // Pick the greater solution.
     PickLow = false;
-  } else {
+  } 아니면 {
     // If B < 0, the vertex is at a positive location. For any solution
     // to exist, the discriminant must be non-negative. This means that
     // C-kR <= B^2/4A is a necessary condition for k, i.e. there is a
@@ -2952,13 +2952,13 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
     // q(x) = kR. Out of all such values of k, pick the one that makes
     // C-kR closest to 0, (i.e. pick maximum k such that C-kR > 0).
     // In other words, find maximum k such that LowkR <= kR < C.
-    if (C.sgt(LowkR)) {
+    만약 (C.sgt(LowkR)) {
       // If LowkR < C, then such a k is guaranteed to exist because
       // LowkR itself is a multiple of R.
       C -= -RoundUp(-C, R);      // C = C - RoundDown(C, R)
       // Pick the smaller solution.
       PickLow = true;
-    } else {
+    } 아니면 {
       // If C-kR < 0 for all potential k's, it means that one solution
       // will be negative, while the other will be positive. The positive
       // solution will shift towards 0 if the parabola is moved up.
@@ -2991,9 +2991,9 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
   // To make sure that the calculated root is not greater than the exact
   // one, subtract SQ+1 when calculating the low root (for inexact value
   // of SQ).
-  if (PickLow)
+  만약 (PickLow)
     APInt::sdivrem(-B - (SQ+InexactSQ), TwoA, X, Rem);
-  else
+  아니면
     APInt::sdivrem(-B + SQ, TwoA, X, Rem);
 
   // The updated coefficients should be such that the (exact) solution is
@@ -3001,9 +3001,9 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
   // can be 0, but cannot be negative.
   assert(X.isNonNegative() && "Solution should be non-negative");
 
-  if (!InexactSQ && Rem.isZero()) {
+  만약 (!InexactSQ && Rem.isZero()) {
     LLVM_DEBUG(dbgs() << __func__ << ": solution (root): " << X << '\n');
-    return X;
+    반환 X;
   }
 
   assert((SQ*SQ).sle(D) && "SQ = |_sqrt(D)_|, so SQ*SQ <= D");
@@ -3022,22 +3022,22 @@ llvm::APIntOps::SolveQuadraticEquationWrap(APInt A, APInt B, APInt C,
   // If the sign did not change between X and X+1, X is not a valid solution.
   // This could happen when the actual (exact) roots don't have an integer
   // between them, so they would both be contained between X and X+1.
-  if (!SignChange) {
+  만약 (!SignChange) {
     LLVM_DEBUG(dbgs() << __func__ << ": no valid solution\n");
-    return std::nullopt;
+    반환 std::nullopt;
   }
 
   X += 1;
   LLVM_DEBUG(dbgs() << __func__ << ": solution (wrap): " << X << '\n');
-  return X;
+  반환 X;
 }
 
 std::optional<unsigned>
 llvm::APIntOps::GetMostSignificantDifferentBit(const APInt &A, const APInt &B) {
   assert(A.getBitWidth() == B.getBitWidth() && "Must have the same bitwidth");
-  if (A == B)
-    return std::nullopt;
-  return A.getBitWidth() - ((A ^ B).countl_zero() + 1);
+  만약 (A == B)
+    반환 std::nullopt;
+  반환 A.getBitWidth() - ((A ^ B).countl_zero() + 1);
 }
 
 APInt llvm::APIntOps::ScaleBitMask(const APInt &A, unsigned NewBitWidth,
@@ -3049,35 +3049,35 @@ APInt llvm::APIntOps::ScaleBitMask(const APInt &A, unsigned NewBitWidth,
          "Can't do fractional scaling.");
 
   // Check for matching bitwidths.
-  if (OldBitWidth == NewBitWidth)
-    return A;
+  만약 (OldBitWidth == NewBitWidth)
+    반환 A;
 
   APInt NewA = APInt::getZero(NewBitWidth);
 
   // Check for null input.
-  if (A.isZero())
-    return NewA;
+  만약 (A.isZero())
+    반환 NewA;
 
-  if (NewBitWidth > OldBitWidth) {
+  만약 (NewBitWidth > OldBitWidth) {
     // Repeat bits.
     unsigned Scale = NewBitWidth / OldBitWidth;
-    for (unsigned i = 0; i != OldBitWidth; ++i)
-      if (A[i])
+    위해 (unsigned i = 0; i != OldBitWidth; ++i)
+      만약 (A[i])
         NewA.setBits(i * Scale, (i + 1) * Scale);
-  } else {
+  } 아니면 {
     unsigned Scale = OldBitWidth / NewBitWidth;
-    for (unsigned i = 0; i != NewBitWidth; ++i) {
-      if (MatchAllBits) {
-        if (A.extractBits(Scale, i * Scale).isAllOnes())
+    위해 (unsigned i = 0; i != NewBitWidth; ++i) {
+      만약 (MatchAllBits) {
+        만약 (A.extractBits(Scale, i * Scale).isAllOnes())
           NewA.setBit(i);
-      } else {
-        if (!A.extractBits(Scale, i * Scale).isZero())
+      } 아니면 {
+        만약 (!A.extractBits(Scale, i * Scale).isZero())
           NewA.setBit(i);
       }
     }
   }
 
-  return NewA;
+  반환 NewA;
 }
 
 /// StoreIntToMemory - Fills the StoreBytes bytes of memory starting from Dst
@@ -3087,15 +3087,15 @@ void llvm::StoreIntToMemory(const APInt &IntVal, uint8_t *Dst,
   assert((IntVal.getBitWidth()+7)/8 >= StoreBytes && "Integer too small!");
   const uint8_t *Src = (const uint8_t *)IntVal.getRawData();
 
-  if (sys::IsLittleEndianHost) {
+  만약 (sys::IsLittleEndianHost) {
     // Little-endian host - the source is ordered from LSB to MSB.  Order the
     // destination from LSB to MSB: Do a straight copy.
     memcpy(Dst, Src, StoreBytes);
-  } else {
+  } 아니면 {
     // Big-endian host - the source is an array of 64 bit words ordered from
     // LSW to MSW.  Each word is ordered from MSB to LSB.  Order the destination
     // from MSB to LSB: Reverse the word order, but not the bytes in a word.
-    while (StoreBytes > sizeof(uint64_t)) {
+    동안 (StoreBytes > sizeof(uint64_t)) {
       StoreBytes -= sizeof(uint64_t);
       // May not be aligned so use memcpy.
       memcpy(Dst + StoreBytes, Src, sizeof(uint64_t));
@@ -3114,16 +3114,16 @@ void llvm::LoadIntFromMemory(APInt &IntVal, const uint8_t *Src,
   uint8_t *Dst = reinterpret_cast<uint8_t *>(
                    const_cast<uint64_t *>(IntVal.getRawData()));
 
-  if (sys::IsLittleEndianHost)
+  만약 (sys::IsLittleEndianHost)
     // Little-endian host - the destination must be ordered from LSB to MSB.
     // The source is ordered from LSB to MSB: Do a straight copy.
     memcpy(Dst, Src, LoadBytes);
-  else {
+  아니면 {
     // Big-endian - the destination is an array of 64 bit words ordered from
     // LSW to MSW.  Each word must be ordered from MSB to LSB.  The source is
     // ordered from MSB to LSB: Reverse the word order, but not the bytes in
     // a word.
-    while (LoadBytes > sizeof(uint64_t)) {
+    동안 (LoadBytes > sizeof(uint64_t)) {
       LoadBytes -= sizeof(uint64_t);
       // May not be aligned so use memcpy.
       memcpy(Dst, Src + LoadBytes, sizeof(uint64_t));
@@ -3136,32 +3136,32 @@ void llvm::LoadIntFromMemory(APInt &IntVal, const uint8_t *Src,
 
 APInt APIntOps::avgFloorS(const APInt &C1, const APInt &C2) {
   // Return floor((C1 + C2) / 2)
-  return (C1 & C2) + (C1 ^ C2).ashr(1);
+  반환 (C1 & C2) + (C1 ^ C2).ashr(1);
 }
 
 APInt APIntOps::avgFloorU(const APInt &C1, const APInt &C2) {
   // Return floor((C1 + C2) / 2)
-  return (C1 & C2) + (C1 ^ C2).lshr(1);
+  반환 (C1 & C2) + (C1 ^ C2).lshr(1);
 }
 
 APInt APIntOps::avgCeilS(const APInt &C1, const APInt &C2) {
   // Return ceil((C1 + C2) / 2)
-  return (C1 | C2) - (C1 ^ C2).ashr(1);
+  반환 (C1 | C2) - (C1 ^ C2).ashr(1);
 }
 
 APInt APIntOps::avgCeilU(const APInt &C1, const APInt &C2) {
   // Return ceil((C1 + C2) / 2)
-  return (C1 | C2) - (C1 ^ C2).lshr(1);
+  반환 (C1 | C2) - (C1 ^ C2).lshr(1);
 }
 
 APInt APIntOps::avgSubFloorS(const APInt &C1, const APInt &C2) {
   // Return floor((C1 - C2) / 2), using C1 - C2 == (C1 ^ C2) - 2 * (~C1 & C2).
-  return (C1 ^ C2).ashr(1) - (~C1 & C2);
+  반환 (C1 ^ C2).ashr(1) - (~C1 & C2);
 }
 
 APInt APIntOps::avgSubFloorU(const APInt &C1, const APInt &C2) {
   // Return floor((C1 - C2) / 2), using C1 - C2 == (C1 ^ C2) - 2 * (~C1 & C2).
-  return (C1 ^ C2).lshr(1) - (~C1 & C2);
+  반환 (C1 ^ C2).lshr(1) - (~C1 & C2);
 }
 
 APInt APIntOps::mulhs(const APInt &C1, const APInt &C2) {
@@ -3169,7 +3169,7 @@ APInt APIntOps::mulhs(const APInt &C1, const APInt &C2) {
   unsigned FullWidth = C1.getBitWidth() * 2;
   APInt C1Ext = C1.sext(FullWidth);
   APInt C2Ext = C2.sext(FullWidth);
-  return (C1Ext * C2Ext).extractBits(C1.getBitWidth(), C1.getBitWidth());
+  반환 (C1Ext * C2Ext).extractBits(C1.getBitWidth(), C1.getBitWidth());
 }
 
 APInt APIntOps::mulhu(const APInt &C1, const APInt &C2) {
@@ -3177,7 +3177,7 @@ APInt APIntOps::mulhu(const APInt &C1, const APInt &C2) {
   unsigned FullWidth = C1.getBitWidth() * 2;
   APInt C1Ext = C1.zext(FullWidth);
   APInt C2Ext = C2.zext(FullWidth);
-  return (C1Ext * C2Ext).extractBits(C1.getBitWidth(), C1.getBitWidth());
+  반환 (C1Ext * C2Ext).extractBits(C1.getBitWidth(), C1.getBitWidth());
 }
 
 APInt APIntOps::mulsExtended(const APInt &C1, const APInt &C2) {
@@ -3185,7 +3185,7 @@ APInt APIntOps::mulsExtended(const APInt &C1, const APInt &C2) {
   unsigned FullWidth = C1.getBitWidth() * 2;
   APInt C1Ext = C1.sext(FullWidth);
   APInt C2Ext = C2.sext(FullWidth);
-  return C1Ext * C2Ext;
+  반환 C1Ext * C2Ext;
 }
 
 APInt APIntOps::muluExtended(const APInt &C1, const APInt &C2) {
@@ -3193,81 +3193,81 @@ APInt APIntOps::muluExtended(const APInt &C1, const APInt &C2) {
   unsigned FullWidth = C1.getBitWidth() * 2;
   APInt C1Ext = C1.zext(FullWidth);
   APInt C2Ext = C2.zext(FullWidth);
-  return C1Ext * C2Ext;
+  반환 C1Ext * C2Ext;
 }
 
 APInt APIntOps::pow(const APInt &X, int64_t N) {
   assert(N >= 0 && "negative exponents not supported.");
   APInt Acc = APInt(X.getBitWidth(), 1);
-  if (N == 0)
-    return Acc;
+  만약 (N == 0)
+    반환 Acc;
   APInt Base = X;
   int64_t RemainingExponent = N;
-  while (RemainingExponent > 0) {
-    while (RemainingExponent % 2 == 0) {
+  동안 (RemainingExponent > 0) {
+    동안 (RemainingExponent % 2 == 0) {
       Base *= Base;
       RemainingExponent /= 2;
     }
     --RemainingExponent;
     Acc *= Base;
   }
-  return Acc;
+  반환 Acc;
 }
 
 APInt llvm::APIntOps::fshl(const APInt &Hi, const APInt &Lo,
                            const APInt &Shift) {
   assert(Hi.getBitWidth() == Lo.getBitWidth());
   unsigned ShiftAmt = rotateModulo(Hi.getBitWidth(), Shift);
-  if (ShiftAmt == 0)
-    return Hi;
-  return Hi.shl(ShiftAmt) | Lo.lshr(Hi.getBitWidth() - ShiftAmt);
+  만약 (ShiftAmt == 0)
+    반환 Hi;
+  반환 Hi.shl(ShiftAmt) | Lo.lshr(Hi.getBitWidth() - ShiftAmt);
 }
 
 APInt llvm::APIntOps::fshr(const APInt &Hi, const APInt &Lo,
                            const APInt &Shift) {
   assert(Hi.getBitWidth() == Lo.getBitWidth());
   unsigned ShiftAmt = rotateModulo(Hi.getBitWidth(), Shift);
-  if (ShiftAmt == 0)
-    return Lo;
-  return Hi.shl(Hi.getBitWidth() - ShiftAmt) | Lo.lshr(ShiftAmt);
+  만약 (ShiftAmt == 0)
+    반환 Lo;
+  반환 Hi.shl(Hi.getBitWidth() - ShiftAmt) | Lo.lshr(ShiftAmt);
 }
 
 APInt llvm::APIntOps::clmul(const APInt &LHS, const APInt &RHS) {
   unsigned BW = LHS.getBitWidth();
   assert(BW == RHS.getBitWidth() && "Operand mismatch");
   APInt Result(BW, 0);
-  for (unsigned I : seq(std::min(RHS.getActiveBits(), BW - LHS.countr_zero())))
-    if (RHS[I])
+  위해 (unsigned I : seq(std::min(RHS.getActiveBits(), BW - LHS.countr_zero())))
+    만약 (RHS[I])
       Result ^= LHS << I;
-  return Result;
+  반환 Result;
 }
 
 APInt llvm::APIntOps::clmulr(const APInt &LHS, const APInt &RHS) {
   assert(LHS.getBitWidth() == RHS.getBitWidth());
-  return clmul(LHS.reverseBits(), RHS.reverseBits()).reverseBits();
+  반환 clmul(LHS.reverseBits(), RHS.reverseBits()).reverseBits();
 }
 
 APInt llvm::APIntOps::clmulh(const APInt &LHS, const APInt &RHS) {
   assert(LHS.getBitWidth() == RHS.getBitWidth());
-  return clmulr(LHS, RHS).lshr(1);
+  반환 clmulr(LHS, RHS).lshr(1);
 }
 
 APInt llvm::APIntOps::pext(const APInt &Val, const APInt &Mask) {
   unsigned BW = Val.getBitWidth();
   assert(BW == Mask.getBitWidth() && "Operand mismatch");
   APInt Result = APInt::getZero(BW);
-  for (unsigned I = 0, P = 0; I != BW; ++I)
-    if (Mask[I])
+  위해 (unsigned I = 0, P = 0; I != BW; ++I)
+    만약 (Mask[I])
       Result.setBitVal(P++, Val[I]);
-  return Result;
+  반환 Result;
 }
 
 APInt llvm::APIntOps::pdep(const APInt &Val, const APInt &Mask) {
   unsigned BW = Val.getBitWidth();
   assert(BW == Mask.getBitWidth() && "Operand mismatch");
   APInt Result = APInt::getZero(BW);
-  for (unsigned I = 0, P = 0; I != BW; ++I)
-    if (Mask[I])
+  위해 (unsigned I = 0, P = 0; I != BW; ++I)
+    만약 (Mask[I])
       Result.setBitVal(I, Val[P++]);
-  return Result;
+  반환 Result;
 }

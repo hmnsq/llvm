@@ -32,7 +32,7 @@ using namespace sys;
 
 std::optional<std::string>
 Process::FindInEnvPath(StringRef EnvName, StringRef FileName, char Separator) {
-  return FindInEnvPath(EnvName, FileName, {}, Separator);
+  반환 FindInEnvPath(EnvName, FileName, {}, Separator);
 }
 
 std::optional<std::string>
@@ -41,29 +41,29 @@ Process::FindInEnvPath(StringRef EnvName, StringRef FileName,
   assert(!path::is_absolute(FileName));
   std::optional<std::string> FoundPath;
   std::optional<std::string> OptPath = Process::GetEnv(EnvName);
-  if (!OptPath)
-    return FoundPath;
+  만약 (!OptPath)
+    반환 FoundPath;
 
   const char EnvPathSeparatorStr[] = {Separator, '\0'};
   SmallVector<StringRef, 8> Dirs;
   SplitString(*OptPath, Dirs, EnvPathSeparatorStr);
 
-  for (StringRef Dir : Dirs) {
-    if (Dir.empty())
+  위해 (StringRef Dir : Dirs) {
+    만약 (Dir.empty())
       continue;
 
-    if (any_of(IgnoreList, [&](StringRef S) { return fs::equivalent(S, Dir); }))
+    만약 (any_of(IgnoreList, [&](StringRef S) { 반환 fs::equivalent(S, Dir); }))
       continue;
 
     SmallString<128> FilePath(Dir);
     path::append(FilePath, FileName);
-    if (fs::exists(Twine(FilePath))) {
+    만약 (fs::exists(Twine(FilePath))) {
       FoundPath = std::string(FilePath);
       break;
     }
   }
 
-  return FoundPath;
+  반환 FoundPath;
 }
 
 // clang-format off
@@ -105,15 +105,15 @@ static const char colorcodes[2][2][16][11] = {
 // may disable core dumps by calling Process::PreventCoreFiles().
 static bool coreFilesPrevented = !LLVM_ENABLE_CRASH_DUMPS;
 
-bool Process::AreCoreFilesPrevented() { return coreFilesPrevented; }
+bool Process::AreCoreFilesPrevented() { 반환 coreFilesPrevented; }
 
-[[noreturn]] void Process::Exit(int RetCode, bool NoCleanup) {
-  if (CrashRecoveryContext *CRC = CrashRecoveryContext::GetCurrent())
+[[noreturn]] void Process::Exit(정수 RetCode, bool NoCleanup) {
+  만약 (CrashRecoveryContext *CRC = CrashRecoveryContext::GetCurrent())
     CRC->HandleExit(RetCode);
 
-  if (NoCleanup)
+  만약 (NoCleanup)
     ExitNoCleanup(RetCode);
-  else
+  아니면
     ::exit(RetCode);
 }
 

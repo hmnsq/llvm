@@ -31,7 +31,7 @@ raw_ostream &llvm::operator<<(raw_ostream &OS, ModRefInfo MR) {
     OS << "ModRef";
     break;
   }
-  return OS;
+  반환 OS;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, MemoryEffects ME) {
@@ -58,26 +58,26 @@ raw_ostream &llvm::operator<<(raw_ostream &OS, MemoryEffects ME) {
     }
     OS << ME.getModRef(Loc);
   });
-  return OS;
+  반환 OS;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureComponents CC) {
-  if (capturesNothing(CC)) {
+  만약 (capturesNothing(CC)) {
     OS << "none";
-    return OS;
+    반환 OS;
   }
 
   ListSeparator LS;
-  if (capturesAddressIsNullOnly(CC))
+  만약 (capturesAddressIsNullOnly(CC))
     OS << LS << "address_is_null";
-  else if (capturesAddress(CC))
+  아니면 만약 (capturesAddress(CC))
     OS << LS << "address";
-  if (capturesReadProvenanceOnly(CC))
+  만약 (capturesReadProvenanceOnly(CC))
     OS << LS << "read_provenance";
-  if (capturesFullProvenance(CC))
+  만약 (capturesFullProvenance(CC))
     OS << LS << "provenance";
 
-  return OS;
+  반환 OS;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureInfo CI) {
@@ -86,10 +86,10 @@ raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureInfo CI) {
   CaptureComponents Ret = CI.getRetComponents();
 
   OS << "captures(";
-  if (!capturesNothing(Other) || Other == Ret)
+  만약 (!capturesNothing(Other) || Other == Ret)
     OS << LS << Other;
-  if (Other != Ret)
+  만약 (Other != Ret)
     OS << LS << "ret: " << Ret;
   OS << ")";
-  return OS;
+  반환 OS;
 }

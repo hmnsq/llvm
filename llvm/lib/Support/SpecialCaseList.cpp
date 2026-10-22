@@ -82,11 +82,11 @@ private:
 
   mutable RadixTree<iterator_range<StringRef::const_iterator>,
                     RadixTree<iterator_range<StringRef::const_reverse_iterator>,
-                              SmallVector<int, 1>>>
+                              SmallVector<정수, 1>>>
       PrefixSuffixToGlob;
 
   mutable RadixTree<iterator_range<StringRef::const_iterator>,
-                    SmallVector<int, 1>>
+                    SmallVector<정수, 1>>
       SubstrToGlob;
 
   mutable bool Initialized = false;
@@ -107,7 +107,7 @@ public:
   Error insert(StringRef Pattern, unsigned LineNumber);
   unsigned match(StringRef Query) const;
 
-  bool matchAny(StringRef Query) const { return match(Query); }
+  bool matchAny(StringRef Query) const { 반환 match(Query); }
 
 private:
   unsigned matchInternal(StringRef Query) const;
@@ -120,13 +120,13 @@ private:
 
 Error RegexMatcher::insert(StringRef Pattern, unsigned LineNumber,
                            bool SlashAgnostic) {
-  if (Pattern.empty())
-    return createStringError(errc::invalid_argument,
+  만약 (Pattern.empty())
+    반환 createStringError(errc::invalid_argument,
                              "Supplied regex was blank");
 
   // Replace * with .*
   auto Regexp = Pattern.str();
-  for (size_t pos = 0; (pos = Regexp.find('*', pos)) != std::string::npos;
+  위해 (size_t pos = 0; (pos = Regexp.find('*', pos)) != std::string::npos;
        pos += strlen(".*")) {
     Regexp.replace(pos, strlen("*"), ".*");
   }
@@ -136,54 +136,54 @@ Error RegexMatcher::insert(StringRef Pattern, unsigned LineNumber,
   // Check that the regexp is valid.
   Regex CheckRE(Regexp);
   std::string REError;
-  if (!CheckRE.isValid(REError))
-    return createStringError(errc::invalid_argument, REError);
+  만약 (!CheckRE.isValid(REError))
+    반환 createStringError(errc::invalid_argument, REError);
 
   RegExes.emplace_back(Pattern, LineNumber, std::move(CheckRE));
-  return Error::success();
+  반환 Error::success();
 }
 
 unsigned RegexMatcher::match(StringRef Query) const {
-  for (const auto &R : reverse(RegExes))
-    if (R.Rg.match(Query))
-      return R.LineNo;
-  return 0;
+  위해 (const auto &R : reverse(RegExes))
+    만약 (R.Rg.match(Query))
+      반환 R.LineNo;
+  반환 0;
 }
 
 StringRef RegexMatcher::findRule(unsigned LineNo) const {
-  for (const auto &R : RegExes)
-    if (R.LineNo == LineNo)
-      return R.Name;
+  위해 (const auto &R : RegExes)
+    만약 (R.LineNo == LineNo)
+      반환 R.Name;
   llvm_unreachable("`findRule` should be called only with correct `LineNo`");
-  return {};
+  반환 {};
 }
 
 Error GlobMatcher::insert(StringRef Pattern, unsigned LineNumber,
                           bool SlashAgnostic) {
-  if (Pattern.empty())
-    return createStringError(errc::invalid_argument, "Supplied glob was blank");
+  만약 (Pattern.empty())
+    반환 createStringError(errc::invalid_argument, "Supplied glob was blank");
 
   auto Res =
       GlobPattern::create(Pattern, /*MaxSubPatterns=*/1024, SlashAgnostic);
-  if (auto Err = Res.takeError())
-    return Err;
+  만약 (auto Err = Res.takeError())
+    반환 Err;
   Globs.emplace_back(Pattern, LineNumber, std::move(Res.get()));
-  return Error::success();
+  반환 Error::success();
 }
 
 void GlobMatcher::LazyInit() const {
-  if (LLVM_LIKELY(Initialized))
-    return;
+  만약 (LLVM_LIKELY(Initialized))
+    반환;
   Initialized = true;
-  for (const auto &[Idx, G] : enumerate(Globs)) {
+  위해 (const auto &[Idx, G] : enumerate(Globs)) {
     StringRef Prefix = G.Pattern.prefix();
     StringRef Suffix = G.Pattern.suffix();
 
-    if (Suffix.empty() && Prefix.empty()) {
+    만약 (Suffix.empty() && Prefix.empty()) {
       // If both prefix and suffix are empty put into special tree to search by
       // substring in a middle.
       StringRef Substr = G.Pattern.longest_substr();
-      if (!Substr.empty()) {
+      만약 (!Substr.empty()) {
         // But only if substring is not empty. Searching this tree is more
         // expensive.
         auto &V = SubstrToGlob.emplace(Substr).first->second;
@@ -201,15 +201,15 @@ void GlobMatcher::LazyInit() const {
 unsigned GlobMatcher::match(StringRef Query) const {
   LazyInit();
 
-  int Best = -1;
-  if (!PrefixSuffixToGlob.empty()) {
-    for (const auto &[_, SToGlob] : PrefixSuffixToGlob.find_prefixes(Query)) {
-      for (const auto &[_, V] : SToGlob.find_prefixes(reverse(Query))) {
-        for (int Idx : reverse(V)) {
-          if (Best > Idx)
+  정수 Best = -1;
+  만약 (!PrefixSuffixToGlob.empty()) {
+    위해 (const auto &[_, SToGlob] : PrefixSuffixToGlob.find_prefixes(Query)) {
+      위해 (const auto &[_, V] : SToGlob.find_prefixes(reverse(Query))) {
+        위해 (정수 Idx : reverse(V)) {
+          만약 (Best > Idx)
             break;
           const GlobMatcher::Glob &G = Globs[Idx];
-          if (G.Pattern.match(Query)) {
+          만약 (G.Pattern.match(Query)) {
             Best = Idx;
             // As soon as we find a match in the vector, we can break for this
             // vector, since the globs are already sorted by priority within the
@@ -222,16 +222,16 @@ unsigned GlobMatcher::match(StringRef Query) const {
     }
   }
 
-  if (!SubstrToGlob.empty()) {
+  만약 (!SubstrToGlob.empty()) {
     // As we don't know when substring exactly starts, we will try all
     // possibilities. In most cases search will fail on first characters.
-    for (StringRef Q = Query; !Q.empty(); Q = Q.drop_front()) {
-      for (const auto &[_, V] : SubstrToGlob.find_prefixes(Q)) {
-        for (int Idx : reverse(V)) {
-          if (Best > Idx)
+    위해 (StringRef Q = Query; !Q.empty(); Q = Q.drop_front()) {
+      위해 (const auto &[_, V] : SubstrToGlob.find_prefixes(Q)) {
+        위해 (정수 Idx : reverse(V)) {
+          만약 (Best > Idx)
             break;
           const GlobMatcher::Glob &G = Globs[Idx];
-          if (G.Pattern.match(Query)) {
+          만약 (G.Pattern.match(Query)) {
             Best = Idx;
             // As soon as we find a match in the vector, we can break for this
             // vector, since the globs are already sorted by priority within the
@@ -243,28 +243,28 @@ unsigned GlobMatcher::match(StringRef Query) const {
       }
     }
   }
-  return Best < 0 ? 0 : Globs[Best].LineNo;
+  반환 Best < 0 ? 0 : Globs[Best].LineNo;
 }
 
 StringRef GlobMatcher::findRule(unsigned LineNo) const {
-  for (const auto &G : Globs)
-    if (G.LineNo == LineNo)
-      return G.Name;
+  위해 (const auto &G : Globs)
+    만약 (G.LineNo == LineNo)
+      반환 G.Name;
   llvm_unreachable("`findRule` should be called only with correct `LineNo`");
-  return {};
+  반환 {};
 }
 
 Matcher::Matcher(QueryOptions QOpts) : Options(QOpts) {
-  if (Options.UseGlobs)
+  만약 (Options.UseGlobs)
     M.emplace<GlobMatcher>();
-  else
+  아니면
     M.emplace<RegexMatcher>();
 }
 
 Error Matcher::insert(StringRef Pattern, unsigned LineNumber) {
-  return std::visit(
+  반환 std::visit(
       [&](auto &V) {
-        return V.insert(Pattern, LineNumber, Options.SlashAgnostic);
+        반환 V.insert(Pattern, LineNumber, Options.SlashAgnostic);
       },
       M);
 }
@@ -282,19 +282,19 @@ Error Matcher::insert(StringRef Pattern, unsigned LineNumber) {
 //   If a match only works with the old behavior (non-canonicalized), a warning
 //   is emitted.
 unsigned Matcher::match(StringRef Query) const {
-  if (!Options.RemoveDotSlash)
-    return matchInternal(Query);
+  만약 (!Options.RemoveDotSlash)
+    반환 matchInternal(Query);
 
-  if (!Options.WarnDotSlashMatch)
-    return matchInternal(llvm::sys::path::remove_leading_dotslash(Query));
+  만약 (!Options.WarnDotSlashMatch)
+    반환 matchInternal(llvm::sys::path::remove_leading_dotslash(Query));
 
   StringRef FixedQuery = llvm::sys::path::remove_leading_dotslash(Query);
   unsigned FixedMatched = matchInternal(FixedQuery);
-  if (FixedQuery == Query)
-    return FixedMatched;
+  만약 (FixedQuery == Query)
+    반환 FixedMatched;
 
   unsigned OriginalMatch = matchInternal(Query);
-  if (OriginalMatch > FixedMatched) {
+  만약 (OriginalMatch > FixedMatched) {
     std::call_once(Warned, [&]() {
       WithColor::warning() << "Deprecated behaviour: pattern '"
                            << findRule(OriginalMatch) << "' matches '" << Query
@@ -302,15 +302,15 @@ unsigned Matcher::match(StringRef Query) const {
                            << "' instead (further warnings suppressed).\n";
     });
   }
-  return std::max(OriginalMatch, FixedMatched);
+  반환 std::max(OriginalMatch, FixedMatched);
 }
 
 unsigned Matcher::matchInternal(StringRef Query) const {
-  return std::visit([&](auto &V) -> unsigned { return V.match(Query); }, M);
+  반환 std::visit([&](auto &V) -> unsigned { 반환 V.match(Query); }, M);
 }
 
 StringRef Matcher::findRule(unsigned LineNo) const {
-  return std::visit([&](auto &V) -> StringRef { return V.findRule(LineNo); },
+  반환 std::visit([&](auto &V) -> StringRef { 반환 V.findRule(LineNo); },
                     M);
 }
 } // namespace
@@ -332,52 +332,52 @@ std::unique_ptr<SpecialCaseList>
 SpecialCaseList::create(const std::vector<std::string> &Paths,
                         llvm::vfs::FileSystem &FS, std::string &Error) {
   std::unique_ptr<SpecialCaseList> SCL(new SpecialCaseList());
-  if (SCL->createInternal(Paths, FS, Error))
-    return SCL;
-  return nullptr;
+  만약 (SCL->createInternal(Paths, FS, Error))
+    반환 SCL;
+  반환 nullptr;
 }
 
 std::unique_ptr<SpecialCaseList> SpecialCaseList::create(const MemoryBuffer *MB,
                                                          std::string &Error) {
   std::unique_ptr<SpecialCaseList> SCL(new SpecialCaseList());
-  if (SCL->createInternal(MB, Error))
-    return SCL;
-  return nullptr;
+  만약 (SCL->createInternal(MB, Error))
+    반환 SCL;
+  반환 nullptr;
 }
 
 std::unique_ptr<SpecialCaseList>
 SpecialCaseList::createOrDie(const std::vector<std::string> &Paths,
                              llvm::vfs::FileSystem &FS) {
   std::string Error;
-  if (auto SCL = create(Paths, FS, Error))
-    return SCL;
+  만약 (auto SCL = create(Paths, FS, Error))
+    반환 SCL;
   report_fatal_error(Twine(Error));
 }
 
 bool SpecialCaseList::createInternal(const std::vector<std::string> &Paths,
                                      vfs::FileSystem &VFS, std::string &Error) {
-  for (size_t i = 0; i < Paths.size(); ++i) {
+  위해 (size_t i = 0; i < Paths.size(); ++i) {
     const auto &Path = Paths[i];
     ErrorOr<std::unique_ptr<MemoryBuffer>> FileOrErr =
         VFS.getBufferForFile(Path);
-    if (std::error_code EC = FileOrErr.getError()) {
+    만약 (std::error_code EC = FileOrErr.getError()) {
       Error = (Twine("can't open file '") + Path + "': " + EC.message()).str();
-      return false;
+      반환 false;
     }
     std::string ParseError;
-    if (!parse(i, FileOrErr.get().get(), ParseError)) {
+    만약 (!parse(i, FileOrErr.get().get(), ParseError)) {
       Error = (Twine("error parsing file '") + Path + "': " + ParseError).str();
-      return false;
+      반환 false;
     }
   }
-  return true;
+  반환 true;
 }
 
 bool SpecialCaseList::createInternal(const MemoryBuffer *MB,
                                      std::string &Error) {
-  if (!parse(0, MB, Error))
-    return false;
-  return true;
+  만약 (!parse(0, MB, Error))
+    반환 false;
+  반환 true;
 }
 
 Expected<SpecialCaseList::Section *>
@@ -387,14 +387,14 @@ SpecialCaseList::addSection(StringRef SectionStr, unsigned FileNo,
   Sections.emplace_back(SectionStr, FileNo, UseGlobs);
   auto &Section = Sections.back();
 
-  if (auto Err = Section.Impl->SectionMatcher.insert(SectionStr, LineNo)) {
-    return createStringError(errc::invalid_argument,
+  만약 (auto Err = Section.Impl->SectionMatcher.insert(SectionStr, LineNo)) {
+    반환 createStringError(errc::invalid_argument,
                              "malformed section at line " + Twine(LineNo) +
                                  ": '" + SectionStr +
                                  "': " + toString(std::move(Err)));
   }
 
-  return &Section;
+  반환 &Section;
 }
 
 bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
@@ -402,10 +402,10 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
   unsigned long long Version = 2;
 
   StringRef Header = MB->getBuffer();
-  if (Header.consume_front("#!special-case-list-v"))
+  만약 (Header.consume_front("#!special-case-list-v"))
     consumeUnsignedInteger(Header, 10, Version);
 
-  auto MinVersion = [&](unsigned V) { return Version >= V; };
+  auto MinVersion = [&](unsigned V) { 반환 Version >= V; };
 
   // In https://reviews.llvm.org/D154014 we added glob support and planned
   // to remove regex support in patterns. We temporarily support the
@@ -426,9 +426,9 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
                                             llvm::sys::path::Style::native);
 
   auto ErrOrSection = addSection("*", FileIdx, 1, true);
-  if (auto Err = ErrOrSection.takeError()) {
+  만약 (auto Err = ErrOrSection.takeError()) {
     Error = toString(std::move(Err));
-    return false;
+    반환 false;
   }
   Section::SectionImpl *CurrentImpl = ErrOrSection.get()->Impl.get();
 
@@ -436,27 +436,27 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
   // path. We may need parametrization in constructor in future.
   constexpr StringRef PathPrefixes[] = {"src", "!src", "mainfile", "source"};
 
-  for (line_iterator LineIt(*MB, /*SkipBlanks=*/true, /*CommentMarker=*/'#');
+  위해 (line_iterator LineIt(*MB, /*SkipBlanks=*/true, /*CommentMarker=*/'#');
        !LineIt.is_at_eof(); LineIt++) {
     unsigned LineNo = LineIt.line_number();
     StringRef Line = LineIt->trim();
-    if (Line.empty())
+    만약 (Line.empty())
       continue;
 
     // Save section names
-    if (Line.starts_with("[")) {
-      if (!Line.ends_with("]")) {
+    만약 (Line.starts_with("[")) {
+      만약 (!Line.ends_with("]")) {
         Error =
             ("malformed section header on line " + Twine(LineNo) + ": " + Line)
                 .str();
-        return false;
+        반환 false;
       }
 
       auto ErrOrSection =
           addSection(Line.drop_front().drop_back(), FileIdx, LineNo, UseGlobs);
-      if (auto Err = ErrOrSection.takeError()) {
+      만약 (auto Err = ErrOrSection.takeError()) {
         Error = toString(std::move(Err));
-        return false;
+        반환 false;
       }
       CurrentImpl = ErrOrSection.get()->Impl.get();
       continue;
@@ -464,15 +464,15 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
 
     // Get our prefix and unparsed glob.
     auto [Prefix, Postfix] = Line.split(":");
-    if (Postfix.empty()) {
+    만약 (Postfix.empty()) {
       // Missing ':' in the line.
       Error = ("malformed line " + Twine(LineNo) + ": '" + Line + "'").str();
-      return false;
+      반환 false;
     }
 
     QueryOptions QOpts;
     QOpts.UseGlobs = UseGlobs;
-    if (llvm::is_contained(PathPrefixes, Prefix)) {
+    만약 (llvm::is_contained(PathPrefixes, Prefix)) {
       QOpts.RemoveDotSlash = RemoveDotSlash;
       QOpts.WarnDotSlashMatch = WarnDotSlash;
       QOpts.SlashAgnostic = SlashAgnostic;
@@ -481,16 +481,16 @@ bool SpecialCaseList::parse(unsigned FileIdx, const MemoryBuffer *MB,
     auto [Pattern, Category] = Postfix.split("=");
     auto [It, _] = CurrentImpl->Entries[Prefix].try_emplace(Category, QOpts);
     Pattern = Pattern.copy(StrAlloc);
-    if (auto Err = It->second.insert(Pattern, LineNo)) {
+    만약 (auto Err = It->second.insert(Pattern, LineNo)) {
       Error =
           (Twine("malformed ") + (UseGlobs ? "glob" : "regex") + " in line " +
            Twine(LineNo) + ": '" + Pattern + "': " + toString(std::move(Err)))
               .str();
-      return false;
+      반환 false;
     }
   }
 
-  return true;
+  반환 true;
 }
 
 SpecialCaseList::~SpecialCaseList() = default;
@@ -498,20 +498,20 @@ SpecialCaseList::~SpecialCaseList() = default;
 bool SpecialCaseList::inSection(StringRef Section, StringRef Prefix,
                                 StringRef Query, StringRef Category) const {
   auto [FileIdx, LineNo] = inSectionBlame(Section, Prefix, Query, Category);
-  return LineNo;
+  반환 LineNo;
 }
 
 std::pair<unsigned, unsigned>
 SpecialCaseList::inSectionBlame(StringRef Section, StringRef Prefix,
                                 StringRef Query, StringRef Category) const {
-  for (const auto &S : reverse(Sections)) {
-    if (S.Impl->SectionMatcher.matchAny(Section)) {
+  위해 (const auto &S : reverse(Sections)) {
+    만약 (S.Impl->SectionMatcher.matchAny(Section)) {
       unsigned Blame = S.getLastMatch(Prefix, Query, Category);
-      if (Blame)
-        return {S.FileIdx, Blame};
+      만약 (Blame)
+        반환 {S.FileIdx, Blame};
     }
   }
-  return NotFound;
+  반환 NotFound;
 }
 
 SpecialCaseList::Section::Section(StringRef Str, unsigned FileIdx,
@@ -525,32 +525,32 @@ SpecialCaseList::Section::Section(Section &&) = default;
 SpecialCaseList::Section::~Section() = default;
 
 bool SpecialCaseList::Section::matchName(StringRef Name) const {
-  return Impl->SectionMatcher.matchAny(Name);
+  반환 Impl->SectionMatcher.matchAny(Name);
 }
 
 const Matcher *
 SpecialCaseList::Section::SectionImpl::findMatcher(StringRef Prefix,
                                                    StringRef Category) const {
   SectionEntries::const_iterator I = Entries.find(Prefix);
-  if (I == Entries.end())
-    return nullptr;
+  만약 (I == Entries.end())
+    반환 nullptr;
   StringMap<Matcher>::const_iterator II = I->second.find(Category);
-  if (II == I->second.end())
-    return nullptr;
+  만약 (II == I->second.end())
+    반환 nullptr;
 
-  return &II->second;
+  반환 &II->second;
 }
 
 unsigned SpecialCaseList::Section::getLastMatch(StringRef Prefix,
                                                 StringRef Query,
                                                 StringRef Category) const {
-  if (const Matcher *M = Impl->findMatcher(Prefix, Category))
-    return M->match(Query);
-  return 0;
+  만약 (const Matcher *M = Impl->findMatcher(Prefix, Category))
+    반환 M->match(Query);
+  반환 0;
 }
 
 bool SpecialCaseList::Section::hasPrefix(StringRef Prefix) const {
-  return Impl->Entries.contains(Prefix);
+  반환 Impl->Entries.contains(Prefix);
 }
 
 } // namespace llvm

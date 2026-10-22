@@ -13,9 +13,9 @@
 using namespace llvm;
 
 hash_code llvm::hash_value(const DynamicAPInt &X) {
-  if (X.isSmall())
-    return llvm::hash_value(X.getSmall());
-  return detail::hash_value(X.getLarge());
+  만약 (X.isSmall())
+    반환 llvm::hash_value(X.getSmall());
+  반환 detail::hash_value(X.getLarge());
 }
 
 void DynamicAPInt::static_assert_layout() {
@@ -27,11 +27,11 @@ void DynamicAPInt::static_assert_layout() {
 }
 
 raw_ostream &DynamicAPInt::print(raw_ostream &OS) const {
-  if (isSmall())
-    return OS << ValSmall;
-  return OS << ValLarge;
+  만약 (isSmall())
+    반환 OS << ValSmall;
+  반환 OS << ValLarge;
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+#만약 !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 LLVM_DUMP_METHOD void DynamicAPInt::dump() const { print(dbgs()); }
 #endif

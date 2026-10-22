@@ -172,14 +172,14 @@ const uint8_t *MD5::body(ArrayRef<uint8_t> Data) {
     d += saved_d;
 
     ptr += 64;
-  } while (Size -= 64);
+  } 동안 (Size -= 64);
 
   InternalState.a = a;
   InternalState.b = b;
   InternalState.c = c;
   InternalState.d = d;
 
-  return ptr;
+  반환 ptr;
 }
 
 MD5::MD5() = default;
@@ -192,18 +192,18 @@ void MD5::update(ArrayRef<uint8_t> Data) {
   unsigned long Size = Data.size();
 
   saved_lo = InternalState.lo;
-  if ((InternalState.lo = (saved_lo + Size) & 0x1fffffff) < saved_lo)
+  만약 ((InternalState.lo = (saved_lo + Size) & 0x1fffffff) < saved_lo)
     InternalState.hi++;
   InternalState.hi += Size >> 29;
 
   used = saved_lo & 0x3f;
 
-  if (used) {
+  만약 (used) {
     free = 64 - used;
 
-    if (Size < free) {
+    만약 (Size < free) {
       memcpy(&InternalState.buffer[used], Ptr, Size);
-      return;
+      반환;
     }
 
     memcpy(&InternalState.buffer[used], Ptr, free);
@@ -212,7 +212,7 @@ void MD5::update(ArrayRef<uint8_t> Data) {
     body(ArrayRef(InternalState.buffer, 64));
   }
 
-  if (Size >= 64) {
+  만약 (Size >= 64) {
     Ptr = body(ArrayRef(Ptr, Size & ~(unsigned long)0x3f));
     Size &= 0x3f;
   }
@@ -239,7 +239,7 @@ void MD5::final(MD5Result &Result) {
 
   free = 64 - used;
 
-  if (free < 8) {
+  만약 (free < 8) {
     memset(&InternalState.buffer[used], 0, free);
     body(ArrayRef(InternalState.buffer, 64));
     used = 0;
@@ -263,7 +263,7 @@ void MD5::final(MD5Result &Result) {
 MD5::MD5Result MD5::final() {
   MD5Result Result;
   final(Result);
-  return Result;
+  반환 Result;
 }
 
 MD5::MD5Result MD5::result() {
@@ -274,13 +274,13 @@ MD5::MD5Result MD5::result() {
   // Restore the state
   InternalState = StateToRestore;
 
-  return Hash;
+  반환 Hash;
 }
 
 SmallString<32> MD5::MD5Result::digest() const {
   SmallString<32> Str;
   toHex(*this, /*LowerCase*/ true, Str);
-  return Str;
+  반환 Str;
 }
 
 void MD5::stringifyResult(MD5Result &Result, SmallVectorImpl<char> &Str) {
@@ -293,7 +293,7 @@ MD5::MD5Result MD5::hash(ArrayRef<uint8_t> Data) {
   MD5::MD5Result Res;
   Hash.final(Res);
 
-  return Res;
+  반환 Res;
 }
 
 #undef F

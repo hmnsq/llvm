@@ -18,9 +18,9 @@
 #include "llvm/Support/Windows/WindowsSupport.h"
 #endif
 
-#if defined(HAVE_UNISTD_H)
+#만약 defined(HAVE_UNISTD_H)
 #include <unistd.h>
-#else
+#아니면
 #ifndef STDIN_FILENO
 #define STDIN_FILENO 0
 #endif
@@ -35,13 +35,13 @@
 static void RaiseLimits() {
 #ifdef _AIX
   // AIX has restrictive memory soft-limits out-of-box, so raise them if needed.
-  auto RaiseLimit = [](int resource) {
+  auto RaiseLimit = [](정수 resource) {
     struct rlimit r;
     getrlimit(resource, &r);
 
     // Increase the soft limit to the hard limit, if necessary and
     // possible.
-    if (r.rlim_cur != RLIM_INFINITY && r.rlim_cur != r.rlim_max) {
+    만약 (r.rlim_cur != RLIM_INFINITY && r.rlim_cur != r.rlim_max) {
       r.rlim_cur = r.rlim_max;
       setrlimit(resource, &r);
     }
@@ -72,7 +72,7 @@ void CleanupStdHandles(void *Cookie) {
 using namespace llvm;
 using namespace llvm::sys;
 
-InitLLVM::InitLLVM(int &Argc, const char **&Argv,
+InitLLVM::InitLLVM(정수 &Argc, const char **&Argv,
                    bool InstallPipeSignalExitHandler,
                    bool NeedsPOSIXUtilitySignalHandling) {
 #ifndef NDEBUG
@@ -84,12 +84,12 @@ InitLLVM::InitLLVM(int &Argc, const char **&Argv,
   // Bring stdin/stdout/stderr into a known state.
 #ifdef _WIN32
   sys::AddSignalHandler(CleanupStdHandles, nullptr);
-#else
+#아니면
   sys::AddSignalHandler(CleanupStdHandles, nullptr,
                         NeedsPOSIXUtilitySignalHandling);
 #endif
 
-  if (InstallPipeSignalExitHandler)
+  만약 (InstallPipeSignalExitHandler)
     // The pipe signal handler must be installed before any other handlers are
     // registered. This is because the Unix \ref RegisterHandlers function does
     // not perform a sigaction() for SIGPIPE unless a one-shot handler is

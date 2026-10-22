@@ -28,7 +28,7 @@
 #include <limits>
 #include <optional>
 
-#if HAVE_UNISTD_H
+#만약 HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -65,10 +65,10 @@ static bool isTimerGlobalsConstructed();
 
 std::unique_ptr<raw_ostream> llvm::CreateInfoOutputFile() {
   const std::string &OutputFilename = libSupportInfoOutputFilename();
-  if (OutputFilename.empty())
-    return std::make_unique<raw_fd_ostream>(2, false); // stderr.
-  if (OutputFilename == "-")
-    return std::make_unique<raw_fd_ostream>(1, false); // stdout.
+  만약 (OutputFilename.empty())
+    반환 std::make_unique<raw_fd_ostream>(2, false); // stderr.
+  만약 (OutputFilename == "-")
+    반환 std::make_unique<raw_fd_ostream>(1, false); // stdout.
 
   // Append mode is used because the info output file is opened and closed
   // each time -stats or -time-passes wants to print output to it. To
@@ -77,12 +77,12 @@ std::unique_ptr<raw_ostream> llvm::CreateInfoOutputFile() {
   std::error_code EC;
   auto Result = std::make_unique<raw_fd_ostream>(
       OutputFilename, EC, sys::fs::OF_Append | sys::fs::OF_TextWithCRLF);
-  if (!EC)
-    return Result;
+  만약 (!EC)
+    반환 Result;
 
   errs() << "Error opening info-output-file '"
     << OutputFilename << " for appending!\n";
-  return std::make_unique<raw_fd_ostream>(2, false); // stderr.
+  반환 std::make_unique<raw_fd_ostream>(2, false); // stderr.
 }
 
 //===----------------------------------------------------------------------===//
@@ -104,25 +104,25 @@ void Timer::init(StringRef TimerName, StringRef TimerDescription,
 }
 
 Timer::~Timer() {
-  if (!TG) return;  // Never initialized, or already cleared.
+  만약 (!TG) 반환;  // Never initialized, or already cleared.
   TG->removeTimer(*this);
 }
 
 static inline size_t getMemUsage() {
-  if (!trackSpace())
-    return 0;
-  return sys::Process::GetMallocUsage();
+  만약 (!trackSpace())
+    반환 0;
+  반환 sys::Process::GetMallocUsage();
 }
 
 static uint64_t getCurInstructionsExecuted() {
-#if defined(HAVE_UNISTD_H) && defined(HAVE_PROC_PID_RUSAGE) &&                 \
+#만약 defined(HAVE_UNISTD_H) && defined(HAVE_PROC_PID_RUSAGE) &&                 \
     defined(RUSAGE_INFO_V4)
   struct rusage_info_v4 ru;
-  if (proc_pid_rusage(getpid(), RUSAGE_INFO_V4, (rusage_info_t *)&ru) == 0) {
-    return ru.ri_instructions;
+  만약 (proc_pid_rusage(getpid(), RUSAGE_INFO_V4, (rusage_info_t *)&ru) == 0) {
+    반환 ru.ri_instructions;
   }
 #endif
-  return 0;
+  반환 0;
 }
 
 TimeRecord TimeRecord::getCurrentTime(bool Start) {
@@ -131,11 +131,11 @@ TimeRecord TimeRecord::getCurrentTime(bool Start) {
   sys::TimePoint<> now;
   std::chrono::nanoseconds user, sys;
 
-  if (Start) {
+  만약 (Start) {
     Result.MemUsed = getMemUsage();
     Result.InstructionsExecuted = getCurInstructionsExecuted();
     sys::Process::GetTimeUsage(now, user, sys);
-  } else {
+  } 아니면 {
     sys::Process::GetTimeUsage(now, user, sys);
     Result.InstructionsExecuted = getCurInstructionsExecuted();
     Result.MemUsed = getMemUsage();
@@ -144,13 +144,13 @@ TimeRecord TimeRecord::getCurrentTime(bool Start) {
   Result.WallTime = Seconds(now.time_since_epoch()).count();
   Result.UserTime = Seconds(user).count();
   Result.SystemTime = Seconds(sys).count();
-  return Result;
+  반환 Result;
 }
 
 void Timer::startTimer() {
   assert(!Running && "Cannot start a running timer");
   Running = Triggered = true;
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
+#만약 LLVM_SUPPORT_XCODE_SIGNPOSTS
   signposts().startInterval(this, getName());
 #endif
   StartTime = TimeRecord::getCurrentTime(true);
@@ -161,7 +161,7 @@ void Timer::stopTimer() {
   Running = false;
   Time += TimeRecord::getCurrentTime(false);
   Time -= StartTime;
-#if LLVM_SUPPORT_XCODE_SIGNPOSTS
+#만약 LLVM_SUPPORT_XCODE_SIGNPOSTS
   signposts().endInterval(this, getName());
 #endif
 }
@@ -177,26 +177,26 @@ void Timer::yieldTo(Timer &O) {
 }
 
 static void printVal(double Val, double Total, raw_ostream &OS) {
-  if (Total < 1e-7)   // Avoid dividing by zero.
+  만약 (Total < 1e-7)   // Avoid dividing by zero.
     OS << "        -----     ";
-  else
+  아니면
     OS << format("  %7.4f (%5.1f%%)", Val, Val*100/Total);
 }
 
 void TimeRecord::print(const TimeRecord &Total, raw_ostream &OS) const {
-  if (Total.getUserTime())
+  만약 (Total.getUserTime())
     printVal(getUserTime(), Total.getUserTime(), OS);
-  if (Total.getSystemTime())
+  만약 (Total.getSystemTime())
     printVal(getSystemTime(), Total.getSystemTime(), OS);
-  if (Total.getProcessTime())
+  만약 (Total.getProcessTime())
     printVal(getProcessTime(), Total.getProcessTime(), OS);
   printVal(getWallTime(), Total.getWallTime(), OS);
 
   OS << "  ";
 
-  if (Total.getMemUsed())
+  만약 (Total.getMemUsed())
     OS << format("%9" PRId64 "  ", (int64_t)getMemUsed());
-  if (Total.getInstructionsExecuted())
+  만약 (Total.getInstructionsExecuted())
     OS << format("%9" PRId64 "  ", (int64_t)getInstructionsExecuted());
 }
 
@@ -213,7 +213,7 @@ class Name2PairMap {
   StringMap<std::pair<TimerGroup*, Name2TimerMap> > Map;
 public:
   ~Name2PairMap() {
-    for (StringMap<std::pair<TimerGroup*, Name2TimerMap> >::iterator
+    위해 (StringMap<std::pair<TimerGroup*, Name2TimerMap> >::iterator
          I = Map.begin(), E = Map.end(); I != E; ++I)
       delete I->second.first;
   }
@@ -225,25 +225,25 @@ public:
     std::pair<TimerGroup *, Name2TimerMap> &GroupEntry =
         getGroupEntry(GroupName, GroupDescription);
     Timer &T = GroupEntry.second[Name];
-    if (!T.isInitialized())
+    만약 (!T.isInitialized())
       T.init(Name, Description, *GroupEntry.first);
-    return T;
+    반환 T;
   }
 
   TimerGroup &getTimerGroup(StringRef GroupName, StringRef GroupDescription) {
     sys::SmartScopedLock<true> L(timerLock());
-    return *getGroupEntry(GroupName, GroupDescription).first;
+    반환 *getGroupEntry(GroupName, GroupDescription).first;
   }
 
 private:
   std::pair<TimerGroup *, Name2TimerMap> &
   getGroupEntry(StringRef GroupName, StringRef GroupDescription) {
     std::pair<TimerGroup *, Name2TimerMap> &GroupEntry = Map[GroupName];
-    if (!GroupEntry.first)
+    만약 (!GroupEntry.first)
       GroupEntry.first =
           new TimerGroup(GroupName, GroupDescription, /*PrintOnExit=*/true);
 
-    return GroupEntry;
+    반환 GroupEntry;
   }
 };
 
@@ -259,7 +259,7 @@ NamedRegionTimer::NamedRegionTimer(StringRef Name, StringRef Description,
 
 TimerGroup &NamedRegionTimer::getNamedTimerGroup(StringRef GroupName,
                                                  StringRef GroupDescription) {
-  return namedGroupedTimers().getTimerGroup(GroupName, GroupDescription);
+  반환 namedGroupedTimers().getTimerGroup(GroupName, GroupDescription);
 }
 
 //===----------------------------------------------------------------------===//
@@ -277,7 +277,7 @@ TimerGroup::TimerGroup(StringRef Name, StringRef Description,
       PrintOnExit(PrintOnExit) {
   // Add the group to TimerGroupList.
   sys::SmartScopedLock<true> L(lock);
-  if (TimerGroupList)
+  만약 (TimerGroupList)
     TimerGroupList->Prev = &Next;
   Next = TimerGroupList;
   Prev = &TimerGroupList;
@@ -291,7 +291,7 @@ TimerGroup::TimerGroup(StringRef Name, StringRef Description,
                        const StringMap<TimeRecord> &Records, bool PrintOnExit)
     : TimerGroup(Name, Description, PrintOnExit) {
   TimersToPrint.reserve(Records.size());
-  for (const auto &P : Records)
+  위해 (const auto &P : Records)
     TimersToPrint.emplace_back(P.getValue(), std::string(P.getKey()),
                                std::string(P.getKey()));
   assert(TimersToPrint.size() == Records.size() && "Size mismatch");
@@ -300,17 +300,17 @@ TimerGroup::TimerGroup(StringRef Name, StringRef Description,
 TimerGroup::~TimerGroup() {
   // If the timer group is destroyed before the timers it owns, accumulate and
   // print the timing data.
-  while (FirstTimer)
+  동안 (FirstTimer)
     removeTimer(*FirstTimer);
 
-  if (!TimersToPrint.empty() && PrintOnExit) {
+  만약 (!TimersToPrint.empty() && PrintOnExit) {
     std::unique_ptr<raw_ostream> OutStream = CreateInfoOutputFile();
     PrintQueuedTimers(*OutStream);
   }
 
   auto unlink = [&]() {
     *Prev = Next;
-    if (Next)
+    만약 (Next)
       Next->Prev = Prev;
   };
 
@@ -318,9 +318,9 @@ TimerGroup::~TimerGroup() {
   // when a TimeGroup is created. On CRT shutdown, the TimerGlobals instance
   // might have been destroyed already. Avoid re-creating it if calling
   // timerLock().
-  if (!isTimerGlobalsConstructed()) {
+  만약 (!isTimerGlobalsConstructed()) {
     unlink();
-    return;
+    반환;
   }
 
   // Remove the group from the TimerGroupList.
@@ -332,14 +332,14 @@ void TimerGroup::removeTimer(Timer &T) {
   sys::SmartScopedLock<true> L(timerLock());
 
   // If the timer was started, move its data to TimersToPrint.
-  if (T.hasTriggered())
+  만약 (T.hasTriggered())
     TimersToPrint.emplace_back(T.Time, T.Name, T.Description);
 
   T.TG = nullptr;
 
   // Unlink the timer from our list.
   *T.Prev = T.Next;
-  if (T.Next)
+  만약 (T.Next)
     T.Next->Prev = T.Prev;
 }
 
@@ -347,7 +347,7 @@ void TimerGroup::addTimer(Timer &T) {
   sys::SmartScopedLock<true> L(timerLock());
 
   // Add the timer to our list.
-  if (FirstTimer)
+  만약 (FirstTimer)
     FirstTimer->Prev = &T.Next;
   T.Next = FirstTimer;
   T.Prev = &FirstTimer;
@@ -356,44 +356,44 @@ void TimerGroup::addTimer(Timer &T) {
 
 void TimerGroup::PrintQueuedTimers(raw_ostream &OS) {
   // Perhaps sort the timers in descending order by amount of time taken.
-  if (sortTimers())
+  만약 (sortTimers())
     llvm::sort(TimersToPrint);
 
   TimeRecord Total;
-  for (const PrintRecord &Record : TimersToPrint)
+  위해 (const PrintRecord &Record : TimersToPrint)
     Total += Record.Time;
 
   // Print out timing header.
   OS << "===" << std::string(73, '-') << "===\n";
   // Figure out how many spaces to indent TimerGroup name.
   unsigned Padding = (80-Description.length())/2;
-  if (Padding > 80) Padding = 0;         // Don't allow "negative" numbers
+  만약 (Padding > 80) Padding = 0;         // Don't allow "negative" numbers
   OS.indent(Padding) << Description << '\n';
   OS << "===" << std::string(73, '-') << "===\n";
 
   // If this is not an collection of ungrouped times, print the total time.
   // Ungrouped timers don't really make sense to add up.  We still print the
   // TOTAL line to make the percentages make sense.
-  if (this != &defaultTimerGroup())
+  만약 (this != &defaultTimerGroup())
     OS << format("  Total Execution Time: %5.4f seconds (%5.4f wall clock)\n",
                  Total.getProcessTime(), Total.getWallTime());
   OS << '\n';
 
-  if (Total.getUserTime())
+  만약 (Total.getUserTime())
     OS << "   ---User Time---";
-  if (Total.getSystemTime())
+  만약 (Total.getSystemTime())
     OS << "   --System Time--";
-  if (Total.getProcessTime())
+  만약 (Total.getProcessTime())
     OS << "   --User+System--";
   OS << "   ---Wall Time---";
-  if (Total.getMemUsed())
+  만약 (Total.getMemUsed())
     OS << "  ---Mem---";
-  if (Total.getInstructionsExecuted())
+  만약 (Total.getInstructionsExecuted())
     OS << "  ---Instr---";
   OS << "  --- Name ---\n";
 
   // Loop through all of the timing data, printing it out.
-  for (const PrintRecord &Record : llvm::reverse(TimersToPrint)) {
+  위해 (const PrintRecord &Record : llvm::reverse(TimersToPrint)) {
     Record.Time.print(Total, OS);
     OS << Record.Description << '\n';
   }
@@ -407,18 +407,18 @@ void TimerGroup::PrintQueuedTimers(raw_ostream &OS) {
 
 void TimerGroup::prepareToPrintList(bool ResetTime) {
   // See if any of our timers were started, if so add them to TimersToPrint.
-  for (Timer *T = FirstTimer; T; T = T->Next) {
-    if (!T->hasTriggered()) continue;
+  위해 (Timer *T = FirstTimer; T; T = T->Next) {
+    만약 (!T->hasTriggered()) continue;
     bool WasRunning = T->isRunning();
-    if (WasRunning)
+    만약 (WasRunning)
       T->stopTimer();
 
     TimersToPrint.emplace_back(T->Time, T->Name, T->Description);
 
-    if (ResetTime)
+    만약 (ResetTime)
       T->clear();
 
-    if (WasRunning)
+    만약 (WasRunning)
       T->startTimer();
   }
 }
@@ -431,26 +431,26 @@ void TimerGroup::print(raw_ostream &OS, bool ResetAfterPrint) {
   }
 
   // If any timers were started, print the group.
-  if (!TimersToPrint.empty())
+  만약 (!TimersToPrint.empty())
     PrintQueuedTimers(OS);
 }
 
 void TimerGroup::clear() {
   sys::SmartScopedLock<true> L(timerLock());
-  for (Timer *T = FirstTimer; T; T = T->Next)
+  위해 (Timer *T = FirstTimer; T; T = T->Next)
     T->clear();
 }
 
 void TimerGroup::printAll(raw_ostream &OS) {
   sys::SmartScopedLock<true> L(timerLock());
 
-  for (TimerGroup *TG = TimerGroupList; TG; TG = TG->Next)
+  위해 (TimerGroup *TG = TimerGroupList; TG; TG = TG->Next)
     TG->print(OS);
 }
 
 void TimerGroup::clearAll() {
   sys::SmartScopedLock<true> L(timerLock());
-  for (TimerGroup *TG = TimerGroupList; TG; TG = TG->Next)
+  위해 (TimerGroup *TG = TimerGroupList; TG; TG = TG->Next)
     TG->clear();
 }
 
@@ -465,7 +465,7 @@ const char *TimerGroup::printJSONValues(raw_ostream &OS, const char *delim) {
   sys::SmartScopedLock<true> L(timerLock());
 
   prepareToPrintList(false);
-  for (const PrintRecord &R : TimersToPrint) {
+  위해 (const PrintRecord &R : TimersToPrint) {
     OS << delim;
     delim = ",\n";
 
@@ -475,24 +475,24 @@ const char *TimerGroup::printJSONValues(raw_ostream &OS, const char *delim) {
     printJSONValue(OS, R, ".user", T.getUserTime());
     OS << delim;
     printJSONValue(OS, R, ".sys", T.getSystemTime());
-    if (T.getMemUsed()) {
+    만약 (T.getMemUsed()) {
       OS << delim;
       printJSONValue(OS, R, ".mem", T.getMemUsed());
     }
-    if (T.getInstructionsExecuted()) {
+    만약 (T.getInstructionsExecuted()) {
       OS << delim;
       printJSONValue(OS, R, ".instr", T.getInstructionsExecuted());
     }
   }
   TimersToPrint.clear();
-  return delim;
+  반환 delim;
 }
 
 const char *TimerGroup::printAllJSONValues(raw_ostream &OS, const char *delim) {
   sys::SmartScopedLock<true> L(timerLock());
-  for (TimerGroup *TG = TimerGroupList; TG; TG = TG->Next)
+  위해 (TimerGroup *TG = TimerGroupList; TG; TG = TG->Next)
     delim = TG->printJSONValues(OS, delim);
-  return delim;
+  반환 delim;
 }
 
 //===----------------------------------------------------------------------===//
@@ -544,26 +544,26 @@ public:
   TimerGlobals &initDeferred() {
     std::call_once(InitDeferredFlag,
                    [this]() { NamedGroupedTimersPtr.emplace(); });
-    return *this;
+    반환 *this;
   }
 };
 
 static ManagedStatic<TimerGlobals> ManagedTimerGlobals;
 
 static std::string &libSupportInfoOutputFilename() {
-  return ManagedTimerGlobals->LibSupportInfoOutputFilename;
+  반환 ManagedTimerGlobals->LibSupportInfoOutputFilename;
 }
-static bool trackSpace() { return ManagedTimerGlobals->TrackSpace; }
-static bool sortTimers() { return ManagedTimerGlobals->SortTimers; }
-static SignpostEmitter &signposts() { return ManagedTimerGlobals->Signposts; }
+static bool trackSpace() { 반환 ManagedTimerGlobals->TrackSpace; }
+static bool sortTimers() { 반환 ManagedTimerGlobals->SortTimers; }
+static SignpostEmitter &signposts() { 반환 ManagedTimerGlobals->Signposts; }
 static sys::SmartMutex<true> &timerLock() {
-  return ManagedTimerGlobals->TimerLock;
+  반환 ManagedTimerGlobals->TimerLock;
 }
 static TimerGroup &defaultTimerGroup() {
-  return ManagedTimerGlobals->DefaultTimerGroup;
+  반환 ManagedTimerGlobals->DefaultTimerGroup;
 }
 static Name2PairMap &namedGroupedTimers() {
-  return *ManagedTimerGlobals->initDeferred().NamedGroupedTimersPtr;
+  반환 *ManagedTimerGlobals->initDeferred().NamedGroupedTimersPtr;
 }
 
 void llvm::initTimerOptions() { *ManagedTimerGlobals; }
@@ -571,8 +571,8 @@ void TimerGroup::constructForStatistics() {
   ManagedTimerGlobals->initDeferred();
 }
 
-void *TimerGroup::acquireTimerGlobals() { return ManagedTimerGlobals.claim(); }
+void *TimerGroup::acquireTimerGlobals() { 반환 ManagedTimerGlobals.claim(); }
 
 static bool isTimerGlobalsConstructed() {
-  return ManagedTimerGlobals.isConstructed();
+  반환 ManagedTimerGlobals.isConstructed();
 }

@@ -39,7 +39,7 @@ IO::IO(void *Context) : Ctxt(Context) {}
 IO::~IO() = default;
 
 void *IO::getContext() const {
-  return Ctxt;
+  반환 Ctxt;
 }
 
 void IO::setContext(void *Context) {
@@ -57,7 +57,7 @@ void IO::setAllowUnknownKeys(bool Allow) {
 Input::Input(StringRef InputContent, void *Ctxt,
              SourceMgr::DiagHandlerTy DiagHandler, void *DiagHandlerCtxt)
     : IO(Ctxt), Strm(new Stream(InputContent, SrcMgr, false, &EC)) {
-  if (DiagHandler)
+  만약 (DiagHandler)
     SrcMgr.setDiagHandler(DiagHandler, DiagHandlerCtxt);
   DocIterator = Strm->begin();
 }
@@ -65,69 +65,69 @@ Input::Input(StringRef InputContent, void *Ctxt,
 Input::Input(MemoryBufferRef Input, void *Ctxt,
              SourceMgr::DiagHandlerTy DiagHandler, void *DiagHandlerCtxt)
     : IO(Ctxt), Strm(new Stream(Input, SrcMgr, false, &EC)) {
-  if (DiagHandler)
+  만약 (DiagHandler)
     SrcMgr.setDiagHandler(DiagHandler, DiagHandlerCtxt);
   DocIterator = Strm->begin();
 }
 
 Input::~Input() = default;
 
-std::error_code Input::error() { return EC; }
+std::error_code Input::error() { 반환 EC; }
 
 bool Input::outputting() const {
-  return false;
+  반환 false;
 }
 
 bool Input::setCurrentDocument() {
-  if (DocIterator != Strm->end()) {
+  만약 (DocIterator != Strm->end()) {
     Node *N = DocIterator->getRoot();
-    if (!N) {
+    만약 (!N) {
       EC = make_error_code(errc::invalid_argument);
-      return false;
+      반환 false;
     }
 
-    if (isa<NullNode>(N)) {
+    만약 (isa<NullNode>(N)) {
       // Empty files are allowed and ignored
       ++DocIterator;
-      return setCurrentDocument();
+      반환 setCurrentDocument();
     }
     releaseHNodeBuffers();
     TopNode = createHNodes(N);
     CurrentNode = TopNode;
-    return true;
+    반환 true;
   }
-  return false;
+  반환 false;
 }
 
 bool Input::nextDocument() {
-  return ++DocIterator != Strm->end();
+  반환 ++DocIterator != Strm->end();
 }
 
 const Node *Input::getCurrentNode() const {
-  return CurrentNode ? CurrentNode->_node : nullptr;
+  반환 CurrentNode ? CurrentNode->_node : nullptr;
 }
 
 bool Input::mapTag(StringRef Tag, bool Default) {
   // CurrentNode can be null if setCurrentDocument() was unable to
   // parse the document because it was invalid or empty.
-  if (!CurrentNode)
-    return false;
+  만약 (!CurrentNode)
+    반환 false;
 
   std::string foundTag = CurrentNode->_node->getVerbatimTag();
-  if (foundTag.empty()) {
+  만약 (foundTag.empty()) {
     // If no tag found and 'Tag' is the default, say it was found.
-    return Default;
+    반환 Default;
   }
   // Return true iff found tag matches supplied tag.
-  return Tag == foundTag;
+  반환 Tag == foundTag;
 }
 
 void Input::beginMapping() {
-  if (EC)
-    return;
+  만약 (EC)
+    반환;
   // CurrentNode can be null if the document is empty.
   MapHNode *MN = dyn_cast_or_null<MapHNode>(CurrentNode);
-  if (MN) {
+  만약 (MN) {
     MN->ValidKeys.clear();
   }
 }
@@ -135,51 +135,51 @@ void Input::beginMapping() {
 std::vector<StringRef> Input::keys() {
   MapHNode *MN = dyn_cast<MapHNode>(CurrentNode);
   std::vector<StringRef> Ret;
-  if (!MN) {
+  만약 (!MN) {
     setError(CurrentNode, "not a mapping");
-    return Ret;
+    반환 Ret;
   }
-  for (auto &P : MN->Mapping)
+  위해 (auto &P : MN->Mapping)
     Ret.push_back(P.first());
-  return Ret;
+  반환 Ret;
 }
 
 bool Input::preflightKey(StringRef Key, bool Required, bool, bool &UseDefault,
                          void *&SaveInfo) {
   UseDefault = false;
-  if (EC)
-    return false;
+  만약 (EC)
+    반환 false;
 
   // CurrentNode is null for empty documents, which is an error in case required
   // nodes are present.
-  if (!CurrentNode) {
-    if (Required)
+  만약 (!CurrentNode) {
+    만약 (Required)
       EC = make_error_code(errc::invalid_argument);
-    else
+    아니면
       UseDefault = true;
-    return false;
+    반환 false;
   }
 
   MapHNode *MN = dyn_cast<MapHNode>(CurrentNode);
-  if (!MN) {
-    if (Required || !isa<EmptyHNode>(CurrentNode))
+  만약 (!MN) {
+    만약 (Required || !isa<EmptyHNode>(CurrentNode))
       setError(CurrentNode, "not a mapping");
-    else
+    아니면
       UseDefault = true;
-    return false;
+    반환 false;
   }
   MN->ValidKeys.push_back(Key.str());
   HNode *Value = MN->Mapping[Key].first;
-  if (!Value) {
-    if (Required)
+  만약 (!Value) {
+    만약 (Required)
       setError(CurrentNode, Twine("missing required key '") + Key + "'");
-    else
+    아니면
       UseDefault = true;
-    return false;
+    반환 false;
   }
   SaveInfo = CurrentNode;
   CurrentNode = Value;
-  return true;
+  반환 true;
 }
 
 void Input::postflightKey(void *saveInfo) {
@@ -187,19 +187,19 @@ void Input::postflightKey(void *saveInfo) {
 }
 
 void Input::endMapping() {
-  if (EC)
-    return;
+  만약 (EC)
+    반환;
   // CurrentNode can be null if the document is empty.
   MapHNode *MN = dyn_cast_or_null<MapHNode>(CurrentNode);
-  if (!MN)
-    return;
-  for (const auto &NN : MN->Mapping) {
-    if (!is_contained(MN->ValidKeys, NN.first())) {
+  만약 (!MN)
+    반환;
+  위해 (const auto &NN : MN->Mapping) {
+    만약 (!is_contained(MN->ValidKeys, NN.first())) {
       const SMRange &ReportLoc = NN.second.second;
-      if (!AllowUnknownKeys) {
+      만약 (!AllowUnknownKeys) {
         setError(ReportLoc, Twine("unknown key '") + NN.first() + "'");
         break;
-      } else
+      } 아니면
         reportWarning(ReportLoc, Twine("unknown key '") + NN.first() + "'");
     }
   }
@@ -210,49 +210,49 @@ void Input::beginFlowMapping() { beginMapping(); }
 void Input::endFlowMapping() { endMapping(); }
 
 unsigned Input::beginSequence() {
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode))
-    return SQ->Entries.size();
-  if (isa<EmptyHNode>(CurrentNode))
-    return 0;
+  만약 (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode))
+    반환 SQ->Entries.size();
+  만약 (isa<EmptyHNode>(CurrentNode))
+    반환 0;
   // Treat case where there's a scalar "null" value as an empty sequence.
-  if (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
-    if (isNull(SN->value()))
-      return 0;
+  만약 (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
+    만약 (isNull(SN->value()))
+      반환 0;
   }
   // Any other type of HNode is an error.
   setError(CurrentNode, "not a sequence");
-  return 0;
+  반환 0;
 }
 
 void Input::endSequence() {
 }
 
 bool Input::preflightElement(unsigned Index, void *&SaveInfo) {
-  if (EC)
-    return false;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
+  만약 (EC)
+    반환 false;
+  만약 (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
     SaveInfo = CurrentNode;
     CurrentNode = SQ->Entries[Index];
-    return true;
+    반환 true;
   }
-  return false;
+  반환 false;
 }
 
 void Input::postflightElement(void *SaveInfo) {
   CurrentNode = reinterpret_cast<HNode *>(SaveInfo);
 }
 
-unsigned Input::beginFlowSequence() { return beginSequence(); }
+unsigned Input::beginFlowSequence() { 반환 beginSequence(); }
 
 bool Input::preflightFlowElement(unsigned index, void *&SaveInfo) {
-  if (EC)
-    return false;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
+  만약 (EC)
+    반환 false;
+  만약 (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
     SaveInfo = CurrentNode;
     CurrentNode = SQ->Entries[index];
-    return true;
+    반환 true;
   }
-  return false;
+  반환 false;
 }
 
 void Input::postflightFlowElement(void *SaveInfo) {
@@ -267,81 +267,81 @@ void Input::beginEnumScalar() {
 }
 
 bool Input::matchEnumScalar(StringRef Str, bool) {
-  if (ScalarMatchFound)
-    return false;
-  if (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
-    if (SN->value() == Str) {
+  만약 (ScalarMatchFound)
+    반환 false;
+  만약 (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
+    만약 (SN->value() == Str) {
       ScalarMatchFound = true;
-      return true;
+      반환 true;
     }
   }
-  return false;
+  반환 false;
 }
 
 bool Input::matchEnumFallback() {
-  if (ScalarMatchFound)
-    return false;
+  만약 (ScalarMatchFound)
+    반환 false;
   ScalarMatchFound = true;
-  return true;
+  반환 true;
 }
 
 void Input::endEnumScalar() {
-  if (!ScalarMatchFound) {
+  만약 (!ScalarMatchFound) {
     setError(CurrentNode, "unknown enumerated scalar");
   }
 }
 
 bool Input::beginBitSetScalar(bool &DoClear) {
   BitValuesUsed.clear();
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
+  만약 (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
     BitValuesUsed.resize(SQ->Entries.size());
-  } else {
+  } 아니면 {
     setError(CurrentNode, "expected sequence of bit values");
   }
   DoClear = true;
-  return true;
+  반환 true;
 }
 
 bool Input::bitSetMatch(StringRef Str, bool) {
-  if (EC)
-    return false;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
+  만약 (EC)
+    반환 false;
+  만약 (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
     unsigned Index = 0;
-    for (auto &N : SQ->Entries) {
-      if (ScalarHNode *SN = dyn_cast<ScalarHNode>(N)) {
-        if (SN->value() == Str) {
+    위해 (auto &N : SQ->Entries) {
+      만약 (ScalarHNode *SN = dyn_cast<ScalarHNode>(N)) {
+        만약 (SN->value() == Str) {
           BitValuesUsed[Index] = true;
-          return true;
+          반환 true;
         }
-      } else {
+      } 아니면 {
         setError(CurrentNode, "unexpected scalar in sequence of bit values");
       }
       ++Index;
     }
-  } else {
+  } 아니면 {
     setError(CurrentNode, "expected sequence of bit values");
   }
-  return false;
+  반환 false;
 }
 
 void Input::endBitSetScalar() {
-  if (EC)
-    return;
-  if (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
+  만약 (EC)
+    반환;
+  만약 (SequenceHNode *SQ = dyn_cast<SequenceHNode>(CurrentNode)) {
     assert(BitValuesUsed.size() == SQ->Entries.size());
-    for (unsigned i = 0; i < SQ->Entries.size(); ++i) {
-      if (!BitValuesUsed[i]) {
+    위해 (unsigned i = 0; i < SQ->Entries.size(); ++i) {
+      만약 (!BitValuesUsed[i]) {
         setError(SQ->Entries[i], "unknown bit value");
-        return;
+        반환;
       }
     }
   }
 }
 
 void Input::scalarString(StringRef &S, QuotingType) {
-  if (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
+  만약 (ScalarHNode *SN = dyn_cast<ScalarHNode>(CurrentNode)) {
     S = SN->value();
-  } else {
+  } 아니면 {
     setError(CurrentNode, "unexpected scalar");
   }
 }
@@ -358,12 +358,12 @@ void Input::setError(HNode *hnode, const Twine &message) {
 }
 
 NodeKind Input::getNodeKind() {
-  if (isa<ScalarHNode>(CurrentNode))
-    return NodeKind::Scalar;
-  else if (isa<MapHNode>(CurrentNode))
-    return NodeKind::Map;
-  else if (isa<SequenceHNode>(CurrentNode))
-    return NodeKind::Sequence;
+  만약 (isa<ScalarHNode>(CurrentNode))
+    반환 NodeKind::Scalar;
+  아니면 만약 (isa<MapHNode>(CurrentNode))
+    반환 NodeKind::Map;
+  아니면 만약 (isa<SequenceHNode>(CurrentNode))
+    반환 NodeKind::Sequence;
   llvm_unreachable("Unsupported node kind");
 }
 
@@ -399,7 +399,7 @@ void Input::releaseHNodeBuffers() {
 
 void Input::saveAliasHNode(Node *N, HNode *HN) {
   StringRef Anchor = N->getAnchor();
-  if (!Anchor.empty())
+  만약 (!Anchor.empty())
     // YAML 1.2.2 - 3.2.2.2. Anchors and Aliases:
     //
     // An alias event refers to the most recent event in the serialization
@@ -415,13 +415,13 @@ Input::HNode *Input::createHNodes(Node *N) {
   case Node::NK_Scalar: {
     ScalarNode *SN = dyn_cast<ScalarNode>(N);
     StringRef KeyStr = SN->getValue(StringStorage);
-    if (!StringStorage.empty()) {
+    만약 (!StringStorage.empty()) {
       // Copy string to permanent storage
       KeyStr = StringStorage.str().copy(StringAllocator);
     }
     auto *SHNode = new (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, KeyStr);
     saveAliasHNode(SN, SHNode);
-    return SHNode;
+    반환 SHNode;
   }
   case Node::NK_BlockScalar: {
     BlockScalarNode *BSN = dyn_cast<BlockScalarNode>(N);
@@ -429,71 +429,71 @@ Input::HNode *Input::createHNodes(Node *N) {
     auto *BSHNode =
         new (ScalarHNodeAllocator.Allocate()) ScalarHNode(N, ValueCopy);
     saveAliasHNode(BSN, BSHNode);
-    return BSHNode;
+    반환 BSHNode;
   }
   case Node::NK_Sequence: {
     SequenceNode *SQ = dyn_cast<SequenceNode>(N);
     auto SQHNode = new (SequenceHNodeAllocator.Allocate()) SequenceHNode(N);
-    for (Node &SN : *SQ) {
+    위해 (Node &SN : *SQ) {
       auto Entry = createHNodes(&SN);
-      if (EC)
+      만약 (EC)
         break;
       SQHNode->Entries.push_back(Entry);
     }
     saveAliasHNode(SQ, SQHNode);
-    return SQHNode;
+    반환 SQHNode;
   }
   case Node::NK_Mapping: {
     MappingNode *Map = dyn_cast<MappingNode>(N);
     auto mapHNode = new (MapHNodeAllocator.Allocate()) MapHNode(N);
-    for (KeyValueNode &KVN : *Map) {
+    위해 (KeyValueNode &KVN : *Map) {
       Node *KeyNode = KVN.getKey();
       ScalarNode *Key = dyn_cast_if_present<ScalarNode>(KeyNode);
       Node *Value = KVN.getValue();
-      if (!Key || !Value) {
-        if (!Key)
+      만약 (!Key || !Value) {
+        만약 (!Key)
           setError(KeyNode, "Map key must be a scalar");
-        if (!Value)
+        만약 (!Value)
           setError(KeyNode, "Map value must not be empty");
         break;
       }
       StringStorage.clear();
       StringRef KeyStr = Key->getValue(StringStorage);
-      if (!StringStorage.empty()) {
+      만약 (!StringStorage.empty()) {
         // Copy string to permanent storage
         KeyStr = StringStorage.str().copy(StringAllocator);
       }
-      if (mapHNode->Mapping.count(KeyStr))
+      만약 (mapHNode->Mapping.count(KeyStr))
         // From YAML spec: "The content of a mapping node is an unordered set of
         // key/value node pairs, with the restriction that each of the keys is
         // unique."
         setError(KeyNode, Twine("duplicated mapping key '") + KeyStr + "'");
       auto ValueHNode = createHNodes(Value);
-      if (EC)
+      만약 (EC)
         break;
       mapHNode->Mapping[KeyStr] =
           std::make_pair(std::move(ValueHNode), KeyNode->getSourceRange());
     }
     saveAliasHNode(Map, mapHNode);
-    return std::move(mapHNode);
+    반환 std::move(mapHNode);
   }
   case Node::NK_Null:
     // TODO: Anchor is not set for NullNode in the parser. Update the parser to
     // faithfully preserve anchors.
-    return new (EmptyHNodeAllocator.Allocate()) EmptyHNode(N);
+    반환 new (EmptyHNodeAllocator.Allocate()) EmptyHNode(N);
   case Node::NK_Alias: {
     AliasNode *AN = dyn_cast<AliasNode>(N);
     auto AliasName = AN->getName();
     auto AHN = AliasMap.find(AliasName);
-    if (AHN == AliasMap.end()) {
+    만약 (AHN == AliasMap.end()) {
       setError(AN, Twine("undefined alias '" + AliasName + "'"));
-      return nullptr;
+      반환 nullptr;
     }
-    return AHN->second;
+    반환 AHN->second;
   }
   default:
     setError(N, "unknown node kind");
-    return nullptr;
+    반환 nullptr;
   }
 }
 
@@ -504,20 +504,20 @@ void Input::setError(const Twine &Message) {
 void Input::setAllowUnknownKeys(bool Allow) { AllowUnknownKeys = Allow; }
 
 bool Input::canElideEmptySequence() {
-  return false;
+  반환 false;
 }
 
 //===----------------------------------------------------------------------===//
 //  Output
 //===----------------------------------------------------------------------===//
 
-Output::Output(raw_ostream &yout, void *context, int WrapColumn)
+Output::Output(raw_ostream &yout, void *context, 정수 WrapColumn)
     : IO(context), Out(yout), WrapColumn(WrapColumn) {}
 
 Output::~Output() = default;
 
 bool Output::outputting() const {
-  return true;
+  반환 true;
 }
 
 void Output::beginMapping() {
@@ -527,25 +527,25 @@ void Output::beginMapping() {
 }
 
 bool Output::mapTag(StringRef Tag, bool Use) {
-  if (Use) {
+  만약 (Use) {
     // If this tag is being written inside a sequence we should write the start
     // of the sequence before writing the tag, otherwise the tag won't be
     // attached to the element in the sequence, but rather the sequence itself.
     bool SequenceElement = false;
-    if (StateStack.size() > 1) {
+    만약 (StateStack.size() > 1) {
       auto &E = StateStack[StateStack.size() - 2];
       SequenceElement = inSeqAnyElement(E) || inFlowSeqAnyElement(E);
     }
-    if (SequenceElement && StateStack.back() == inMapFirstKey) {
+    만약 (SequenceElement && StateStack.back() == inMapFirstKey) {
       newLineCheck();
-    } else {
+    } 아니면 {
       output(" ");
     }
     output(Tag);
-    if (SequenceElement) {
+    만약 (SequenceElement) {
       // If we're writing the tag during the first element of a map, the tag
       // takes the place of the first element in the sequence.
-      if (StateStack.back() == inMapFirstKey) {
+      만약 (StateStack.back() == inMapFirstKey) {
         StateStack.pop_back();
         StateStack.push_back(inMapOtherKey);
       }
@@ -554,12 +554,12 @@ bool Output::mapTag(StringRef Tag, bool Use) {
       Padding = "\n";
     }
   }
-  return Use;
+  반환 Use;
 }
 
 void Output::endMapping() {
   // If we did not map anything, we should explicitly emit an empty map
-  if (StateStack.back() == inMapFirstKey) {
+  만약 (StateStack.back() == inMapFirstKey) {
     Padding = PaddingBeforeContainer;
     newLineCheck();
     output("{}");
@@ -576,24 +576,24 @@ bool Output::preflightKey(StringRef Key, bool Required, bool SameAsDefault,
                           bool &UseDefault, void *&SaveInfo) {
   UseDefault = false;
   SaveInfo = nullptr;
-  if (Required || !SameAsDefault || WriteDefaultValues) {
+  만약 (Required || !SameAsDefault || WriteDefaultValues) {
     auto State = StateStack.back();
-    if (State == inFlowMapFirstKey || State == inFlowMapOtherKey) {
+    만약 (State == inFlowMapFirstKey || State == inFlowMapOtherKey) {
       flowKey(Key);
-    } else {
+    } 아니면 {
       newLineCheck();
       paddedKey(Key);
     }
-    return true;
+    반환 true;
   }
-  return false;
+  반환 false;
 }
 
 void Output::postflightKey(void *) {
-  if (StateStack.back() == inMapFirstKey) {
+  만약 (StateStack.back() == inMapFirstKey) {
     StateStack.pop_back();
     StateStack.push_back(inMapOtherKey);
-  } else if (StateStack.back() == inFlowMapFirstKey) {
+  } 아니면 만약 (StateStack.back() == inFlowMapFirstKey) {
     StateStack.pop_back();
     StateStack.push_back(inFlowMapOtherKey);
   }
@@ -616,9 +616,9 @@ void Output::beginDocuments() {
 }
 
 bool Output::preflightDocument(unsigned index) {
-  if (index > 0)
+  만약 (index > 0)
     outputUpToEndOfLine("\n---");
-  return true;
+  반환 true;
 }
 
 void Output::postflightDocument() {
@@ -632,12 +632,12 @@ unsigned Output::beginSequence() {
   StateStack.push_back(inSeqFirstElement);
   PaddingBeforeContainer = Padding;
   Padding = "\n";
-  return 0;
+  반환 0;
 }
 
 void Output::endSequence() {
   // If we did not emit anything, we should explicitly emit an empty sequence
-  if (StateStack.back() == inSeqFirstElement) {
+  만약 (StateStack.back() == inSeqFirstElement) {
     Padding = PaddingBeforeContainer;
     newLineCheck(/*EmptySequence=*/true);
     output("[]");
@@ -648,14 +648,14 @@ void Output::endSequence() {
 
 bool Output::preflightElement(unsigned, void *&SaveInfo) {
   SaveInfo = nullptr;
-  return true;
+  반환 true;
 }
 
 void Output::postflightElement(void *) {
-  if (StateStack.back() == inSeqFirstElement) {
+  만약 (StateStack.back() == inSeqFirstElement) {
     StateStack.pop_back();
     StateStack.push_back(inSeqOtherElement);
-  } else if (StateStack.back() == inFlowSeqFirstElement) {
+  } 아니면 만약 (StateStack.back() == inFlowSeqFirstElement) {
     StateStack.pop_back();
     StateStack.push_back(inFlowSeqOtherElement);
   }
@@ -667,7 +667,7 @@ unsigned Output::beginFlowSequence() {
   ColumnAtFlowStart = Column;
   output("[ ");
   NeedFlowSequenceComma = false;
-  return 0;
+  반환 0;
 }
 
 void Output::endFlowSequence() {
@@ -676,17 +676,17 @@ void Output::endFlowSequence() {
 }
 
 bool Output::preflightFlowElement(unsigned, void *&SaveInfo) {
-  if (NeedFlowSequenceComma)
+  만약 (NeedFlowSequenceComma)
     output(", ");
-  if (WrapColumn && Column > WrapColumn) {
+  만약 (WrapColumn && Column > WrapColumn) {
     output("\n");
-    for (int i = 0; i < ColumnAtFlowStart; ++i)
+    위해 (정수 i = 0; i < ColumnAtFlowStart; ++i)
       output(" ");
     Column = ColumnAtFlowStart;
     output("  ");
   }
   SaveInfo = nullptr;
-  return true;
+  반환 true;
 }
 
 void Output::postflightFlowElement(void *) {
@@ -698,23 +698,23 @@ void Output::beginEnumScalar() {
 }
 
 bool Output::matchEnumScalar(StringRef Str, bool Match) {
-  if (Match && !EnumerationMatchFound) {
+  만약 (Match && !EnumerationMatchFound) {
     newLineCheck();
     outputUpToEndOfLine(Str);
     EnumerationMatchFound = true;
   }
-  return false;
+  반환 false;
 }
 
 bool Output::matchEnumFallback() {
-  if (EnumerationMatchFound)
-    return false;
+  만약 (EnumerationMatchFound)
+    반환 false;
   EnumerationMatchFound = true;
-  return true;
+  반환 true;
 }
 
 void Output::endEnumScalar() {
-  if (!EnumerationMatchFound)
+  만약 (!EnumerationMatchFound)
     llvm_unreachable("bad runtime enum value");
 }
 
@@ -723,17 +723,17 @@ bool Output::beginBitSetScalar(bool &DoClear) {
   output("[ ");
   NeedBitValueComma = false;
   DoClear = false;
-  return true;
+  반환 true;
 }
 
 bool Output::bitSetMatch(StringRef Str, bool Matches) {
-  if (Matches) {
-    if (NeedBitValueComma)
+  만약 (Matches) {
+    만약 (NeedBitValueComma)
       output(", ");
     output(Str);
     NeedBitValueComma = true;
   }
-  return false;
+  반환 false;
 }
 
 void Output::endBitSetScalar() {
@@ -742,27 +742,27 @@ void Output::endBitSetScalar() {
 
 void Output::scalarString(StringRef &S, QuotingType MustQuote) {
   newLineCheck();
-  if (S.empty()) {
+  만약 (S.empty()) {
     // Print '' for the empty string because leaving the field empty is not
     // allowed.
     outputUpToEndOfLine("''");
-    return;
+    반환;
   }
   output(S, MustQuote);
   outputUpToEndOfLine("");
 }
 
 void Output::blockScalarString(StringRef &S) {
-  if (!StateStack.empty())
+  만약 (!StateStack.empty())
     newLineCheck();
   output(" |");
 
   unsigned Indent = StateStack.empty() ? 1 : StateStack.size();
 
   auto Buffer = MemoryBuffer::getMemBuffer(S, "", false);
-  for (line_iterator Lines(*Buffer, false); !Lines.is_at_end(); ++Lines) {
+  위해 (line_iterator Lines(*Buffer, false); !Lines.is_at_end(); ++Lines) {
     outputNewLine();
-    for (unsigned I = 0; I < Indent; ++I) {
+    위해 (unsigned I = 0; I < Indent; ++I) {
       output("  ");
     }
     output(*Lines);
@@ -771,8 +771,8 @@ void Output::blockScalarString(StringRef &S) {
 }
 
 void Output::scalarTag(std::string &Tag) {
-  if (Tag.empty())
-    return;
+  만약 (Tag.empty())
+    반환;
   newLineCheck();
   output(Tag);
   output(" ");
@@ -781,7 +781,7 @@ void Output::scalarTag(std::string &Tag) {
 void Output::setError(const Twine &message) {
 }
 
-std::error_code Output::error() { return {}; }
+std::error_code Output::error() { 반환 {}; }
 
 bool Output::canElideEmptySequence() {
   // Normally, with an optional key/value where the value is an empty sequence,
@@ -789,11 +789,11 @@ bool Output::canElideEmptySequence() {
   // if the key/value is the only thing in the map and the map is used in
   // a sequence.  This detects if the this sequence is the first key/value
   // in map that itself is embedded in a sequence.
-  if (StateStack.size() < 2)
-    return true;
-  if (StateStack.back() != inMapFirstKey)
-    return true;
-  return !inSeqAnyElement(StateStack[StateStack.size() - 2]);
+  만약 (StateStack.size() < 2)
+    반환 true;
+  만약 (StateStack.back() != inMapFirstKey)
+    반환 true;
+  반환 !inSeqAnyElement(StateStack[StateStack.size() - 2]);
 }
 
 void Output::output(StringRef s) {
@@ -802,10 +802,10 @@ void Output::output(StringRef s) {
 }
 
 void Output::output(StringRef S, QuotingType MustQuote) {
-  if (MustQuote == QuotingType::None) {
+  만약 (MustQuote == QuotingType::None) {
     // Only quote if we must.
     output(S);
-    return;
+    반환;
   }
 
   StringLiteral Quote = MustQuote == QuotingType::Single ? StringLiteral("'")
@@ -816,10 +816,10 @@ void Output::output(StringRef S, QuotingType MustQuote) {
   // characters may be present, and will be escaped using a variety of
   // unicode-scalar and special short-form escapes. This is handled in
   // yaml::escape.
-  if (MustQuote == QuotingType::Double) {
+  만약 (MustQuote == QuotingType::Double) {
     output(yaml::escape(S, /* EscapePrintable= */ false));
     output(Quote);
-    return;
+    반환;
   }
 
   unsigned i = 0;
@@ -829,8 +829,8 @@ void Output::output(StringRef S, QuotingType MustQuote) {
 
   // When using single-quoted strings, any single quote ' must be doubled to be
   // escaped.
-  while (j < End) {
-    if (S[j] == '\'') {                   // Escape quotes.
+  동안 (j < End) {
+    만약 (S[j] == '\'') {                   // Escape quotes.
       output(StringRef(&Base[i], j - i)); // "flush".
       output(StringLiteral("''"));        // Print it as ''
       i = j + 1;
@@ -843,7 +843,7 @@ void Output::output(StringRef S, QuotingType MustQuote) {
 
 void Output::outputUpToEndOfLine(StringRef s) {
   output(s);
-  if (StateStack.empty() || (!inFlowSeqAnyElement(StateStack.back()) &&
+  만약 (StateStack.empty() || (!inFlowSeqAnyElement(StateStack.back()) &&
                              !inFlowMapAnyKey(StateStack.back())))
     Padding = "\n";
 }
@@ -858,51 +858,51 @@ void Output::outputNewLine() {
 //
 
 void Output::newLineCheck(bool EmptySequence) {
-  if (Padding != "\n") {
+  만약 (Padding != "\n") {
     output(Padding);
     Padding = {};
-    return;
+    반환;
   }
   outputNewLine();
   Padding = {};
 
-  if (StateStack.size() == 0 || EmptySequence)
-    return;
+  만약 (StateStack.size() == 0 || EmptySequence)
+    반환;
 
   unsigned Indent = StateStack.size() - 1;
   bool PossiblyNestedSeq = false;
   auto I = StateStack.rbegin(), E = StateStack.rend();
 
-  if (inSeqAnyElement(*I)) {
+  만약 (inSeqAnyElement(*I)) {
     PossiblyNestedSeq = true; // Not possibly but always.
     ++Indent;
-  } else if (*I == inMapFirstKey || *I == inFlowMapFirstKey ||
+  } 아니면 만약 (*I == inMapFirstKey || *I == inFlowMapFirstKey ||
              inFlowSeqAnyElement(*I)) {
     PossiblyNestedSeq = true;
     ++I; // Skip back().
   }
 
   unsigned OutputDashCount = 0;
-  if (PossiblyNestedSeq) {
+  만약 (PossiblyNestedSeq) {
     // Count up consecutive inSeqFirstElement from the end, unless
     // inSeqFirstElement is the top of nested sequence.
-    while (I != E) {
+    동안 (I != E) {
       // Don't count the top of nested sequence.
-      if (!inSeqAnyElement(*I))
+      만약 (!inSeqAnyElement(*I))
         break;
 
       ++OutputDashCount;
 
       // Stop counting if consecutive inSeqFirstElement ends.
-      if (*I++ != inSeqFirstElement)
+      만약 (*I++ != inSeqFirstElement)
         break;
     }
   }
 
-  for (unsigned I = OutputDashCount; I < Indent; ++I)
+  위해 (unsigned I = OutputDashCount; I < Indent; ++I)
     output("  ");
 
-  for (unsigned I = 0; I < OutputDashCount; ++I)
+  위해 (unsigned I = 0; I < OutputDashCount; ++I)
     output("- ");
 }
 
@@ -910,18 +910,18 @@ void Output::paddedKey(StringRef key) {
   output(key, needsQuotes(key, false));
   output(":");
   const char *spaces = "                ";
-  if (key.size() < strlen(spaces))
+  만약 (key.size() < strlen(spaces))
     Padding = &spaces[key.size()];
-  else
+  아니면
     Padding = " ";
 }
 
 void Output::flowKey(StringRef Key) {
-  if (StateStack.back() == inFlowMapOtherKey)
+  만약 (StateStack.back() == inFlowMapOtherKey)
     output(", ");
-  if (WrapColumn && Column > WrapColumn) {
+  만약 (WrapColumn && Column > WrapColumn) {
     output("\n");
-    for (int I = 0; I < ColumnAtMapFlowStart; ++I)
+    위해 (정수 I = 0; I < ColumnAtMapFlowStart; ++I)
       output(" ");
     Column = ColumnAtMapFlowStart;
     output("  ");
@@ -933,19 +933,19 @@ void Output::flowKey(StringRef Key) {
 NodeKind Output::getNodeKind() { report_fatal_error("invalid call"); }
 
 bool Output::inSeqAnyElement(InState State) {
-  return State == inSeqFirstElement || State == inSeqOtherElement;
+  반환 State == inSeqFirstElement || State == inSeqOtherElement;
 }
 
 bool Output::inFlowSeqAnyElement(InState State) {
-  return State == inFlowSeqFirstElement || State == inFlowSeqOtherElement;
+  반환 State == inFlowSeqFirstElement || State == inFlowSeqOtherElement;
 }
 
 bool Output::inMapAnyKey(InState State) {
-  return State == inMapFirstKey || State == inMapOtherKey;
+  반환 State == inMapFirstKey || State == inMapOtherKey;
 }
 
 bool Output::inFlowMapAnyKey(InState State) {
-  return State == inFlowMapFirstKey || State == inFlowMapOtherKey;
+  반환 State == inFlowMapFirstKey || State == inFlowMapOtherKey;
 }
 
 //===----------------------------------------------------------------------===//
@@ -957,11 +957,11 @@ void ScalarTraits<bool>::output(const bool &Val, void *, raw_ostream &Out) {
 }
 
 StringRef ScalarTraits<bool>::input(StringRef Scalar, void *, bool &Val) {
-  if (std::optional<bool> Parsed = parseBool(Scalar)) {
+  만약 (std::optional<bool> Parsed = parseBool(Scalar)) {
     Val = *Parsed;
-    return StringRef();
+    반환 StringRef();
   }
-  return "invalid boolean";
+  반환 "invalid boolean";
 }
 
 void ScalarTraits<StringRef>::output(const StringRef &Val, void *,
@@ -972,7 +972,7 @@ void ScalarTraits<StringRef>::output(const StringRef &Val, void *,
 StringRef ScalarTraits<StringRef>::input(StringRef Scalar, void *,
                                          StringRef &Val) {
   Val = Scalar;
-  return StringRef();
+  반환 StringRef();
 }
 
 void ScalarTraits<std::string>::output(const std::string &Val, void *,
@@ -983,7 +983,7 @@ void ScalarTraits<std::string>::output(const std::string &Val, void *,
 StringRef ScalarTraits<std::string>::input(StringRef Scalar, void *,
                                            std::string &Val) {
   Val = Scalar.str();
-  return StringRef();
+  반환 StringRef();
 }
 
 void ScalarTraits<uint8_t>::output(const uint8_t &Val, void *,
@@ -995,12 +995,12 @@ void ScalarTraits<uint8_t>::output(const uint8_t &Val, void *,
 
 StringRef ScalarTraits<uint8_t>::input(StringRef Scalar, void *, uint8_t &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid number";
-  if (n > 0xFF)
-    return "out of range number";
+  만약 (getAsUnsignedInteger(Scalar, 0, n))
+    반환 "invalid number";
+  만약 (n > 0xFF)
+    반환 "out of range number";
   Val = n;
-  return StringRef();
+  반환 StringRef();
 }
 
 void ScalarTraits<uint16_t>::output(const uint16_t &Val, void *,
@@ -1011,12 +1011,12 @@ void ScalarTraits<uint16_t>::output(const uint16_t &Val, void *,
 StringRef ScalarTraits<uint16_t>::input(StringRef Scalar, void *,
                                         uint16_t &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid number";
-  if (n > 0xFFFF)
-    return "out of range number";
+  만약 (getAsUnsignedInteger(Scalar, 0, n))
+    반환 "invalid number";
+  만약 (n > 0xFFFF)
+    반환 "out of range number";
   Val = n;
-  return StringRef();
+  반환 StringRef();
 }
 
 void ScalarTraits<uint32_t>::output(const uint32_t &Val, void *,
@@ -1027,12 +1027,12 @@ void ScalarTraits<uint32_t>::output(const uint32_t &Val, void *,
 StringRef ScalarTraits<uint32_t>::input(StringRef Scalar, void *,
                                         uint32_t &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid number";
-  if (n > 0xFFFFFFFFUL)
-    return "out of range number";
+  만약 (getAsUnsignedInteger(Scalar, 0, n))
+    반환 "invalid number";
+  만약 (n > 0xFFFFFFFFUL)
+    반환 "out of range number";
   Val = n;
-  return StringRef();
+  반환 StringRef();
 }
 
 void ScalarTraits<uint64_t>::output(const uint64_t &Val, void *,
@@ -1043,10 +1043,10 @@ void ScalarTraits<uint64_t>::output(const uint64_t &Val, void *,
 StringRef ScalarTraits<uint64_t>::input(StringRef Scalar, void *,
                                         uint64_t &Val) {
   unsigned long long N;
-  if (getAsUnsignedInteger(Scalar, 0, N))
-    return "invalid number";
+  만약 (getAsUnsignedInteger(Scalar, 0, N))
+    반환 "invalid number";
   Val = N;
-  return StringRef();
+  반환 StringRef();
 }
 
 void ScalarTraits<int8_t>::output(const int8_t &Val, void *, raw_ostream &Out) {
@@ -1057,12 +1057,12 @@ void ScalarTraits<int8_t>::output(const int8_t &Val, void *, raw_ostream &Out) {
 
 StringRef ScalarTraits<int8_t>::input(StringRef Scalar, void *, int8_t &Val) {
   long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
-  if ((N > 127) || (N < -128))
-    return "out of range number";
+  만약 (getAsSignedInteger(Scalar, 0, N))
+    반환 "invalid number";
+  만약 ((N > 127) || (N < -128))
+    반환 "out of range number";
   Val = N;
-  return StringRef();
+  반환 StringRef();
 }
 
 void ScalarTraits<int16_t>::output(const int16_t &Val, void *,
@@ -1072,12 +1072,12 @@ void ScalarTraits<int16_t>::output(const int16_t &Val, void *,
 
 StringRef ScalarTraits<int16_t>::input(StringRef Scalar, void *, int16_t &Val) {
   long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
-  if ((N > INT16_MAX) || (N < INT16_MIN))
-    return "out of range number";
+  만약 (getAsSignedInteger(Scalar, 0, N))
+    반환 "invalid number";
+  만약 ((N > INT16_MAX) || (N < INT16_MIN))
+    반환 "out of range number";
   Val = N;
-  return StringRef();
+  반환 StringRef();
 }
 
 void ScalarTraits<int32_t>::output(const int32_t &Val, void *,
@@ -1087,12 +1087,12 @@ void ScalarTraits<int32_t>::output(const int32_t &Val, void *,
 
 StringRef ScalarTraits<int32_t>::input(StringRef Scalar, void *, int32_t &Val) {
   long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
-  if ((N > INT32_MAX) || (N < INT32_MIN))
-    return "out of range number";
+  만약 (getAsSignedInteger(Scalar, 0, N))
+    반환 "invalid number";
+  만약 ((N > INT32_MAX) || (N < INT32_MIN))
+    반환 "out of range number";
   Val = N;
-  return StringRef();
+  반환 StringRef();
 }
 
 void ScalarTraits<int64_t>::output(const int64_t &Val, void *,
@@ -1102,10 +1102,10 @@ void ScalarTraits<int64_t>::output(const int64_t &Val, void *,
 
 StringRef ScalarTraits<int64_t>::input(StringRef Scalar, void *, int64_t &Val) {
   long long N;
-  if (getAsSignedInteger(Scalar, 0, N))
-    return "invalid number";
+  만약 (getAsSignedInteger(Scalar, 0, N))
+    반환 "invalid number";
   Val = N;
-  return StringRef();
+  반환 StringRef();
 }
 
 void ScalarTraits<double>::output(const double &Val, void *, raw_ostream &Out) {
@@ -1113,9 +1113,9 @@ void ScalarTraits<double>::output(const double &Val, void *, raw_ostream &Out) {
 }
 
 StringRef ScalarTraits<double>::input(StringRef Scalar, void *, double &Val) {
-  if (to_float(Scalar, Val))
-    return StringRef();
-  return "invalid floating point number";
+  만약 (to_float(Scalar, Val))
+    반환 StringRef();
+  반환 "invalid floating point number";
 }
 
 void ScalarTraits<float>::output(const float &Val, void *, raw_ostream &Out) {
@@ -1123,9 +1123,9 @@ void ScalarTraits<float>::output(const float &Val, void *, raw_ostream &Out) {
 }
 
 StringRef ScalarTraits<float>::input(StringRef Scalar, void *, float &Val) {
-  if (to_float(Scalar, Val))
-    return StringRef();
-  return "invalid floating point number";
+  만약 (to_float(Scalar, Val))
+    반환 StringRef();
+  반환 "invalid floating point number";
 }
 
 void ScalarTraits<Hex8>::output(const Hex8 &Val, void *, raw_ostream &Out) {
@@ -1134,12 +1134,12 @@ void ScalarTraits<Hex8>::output(const Hex8 &Val, void *, raw_ostream &Out) {
 
 StringRef ScalarTraits<Hex8>::input(StringRef Scalar, void *, Hex8 &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid hex8 number";
-  if (n > 0xFF)
-    return "out of range hex8 number";
+  만약 (getAsUnsignedInteger(Scalar, 0, n))
+    반환 "invalid hex8 number";
+  만약 (n > 0xFF)
+    반환 "out of range hex8 number";
   Val = n;
-  return StringRef();
+  반환 StringRef();
 }
 
 void ScalarTraits<Hex16>::output(const Hex16 &Val, void *, raw_ostream &Out) {
@@ -1148,12 +1148,12 @@ void ScalarTraits<Hex16>::output(const Hex16 &Val, void *, raw_ostream &Out) {
 
 StringRef ScalarTraits<Hex16>::input(StringRef Scalar, void *, Hex16 &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid hex16 number";
-  if (n > 0xFFFF)
-    return "out of range hex16 number";
+  만약 (getAsUnsignedInteger(Scalar, 0, n))
+    반환 "invalid hex16 number";
+  만약 (n > 0xFFFF)
+    반환 "out of range hex16 number";
   Val = n;
-  return StringRef();
+  반환 StringRef();
 }
 
 void ScalarTraits<Hex32>::output(const Hex32 &Val, void *, raw_ostream &Out) {
@@ -1162,12 +1162,12 @@ void ScalarTraits<Hex32>::output(const Hex32 &Val, void *, raw_ostream &Out) {
 
 StringRef ScalarTraits<Hex32>::input(StringRef Scalar, void *, Hex32 &Val) {
   unsigned long long n;
-  if (getAsUnsignedInteger(Scalar, 0, n))
-    return "invalid hex32 number";
-  if (n > 0xFFFFFFFFUL)
-    return "out of range hex32 number";
+  만약 (getAsUnsignedInteger(Scalar, 0, n))
+    반환 "invalid hex32 number";
+  만약 (n > 0xFFFFFFFFUL)
+    반환 "out of range hex32 number";
   Val = n;
-  return StringRef();
+  반환 StringRef();
 }
 
 void ScalarTraits<Hex64>::output(const Hex64 &Val, void *, raw_ostream &Out) {
@@ -1176,10 +1176,10 @@ void ScalarTraits<Hex64>::output(const Hex64 &Val, void *, raw_ostream &Out) {
 
 StringRef ScalarTraits<Hex64>::input(StringRef Scalar, void *, Hex64 &Val) {
   unsigned long long Num;
-  if (getAsUnsignedInteger(Scalar, 0, Num))
-    return "invalid hex64 number";
+  만약 (getAsUnsignedInteger(Scalar, 0, Num))
+    반환 "invalid hex64 number";
   Val = Num;
-  return StringRef();
+  반환 StringRef();
 }
 
 void ScalarTraits<VersionTuple>::output(const VersionTuple &Val, void *,
@@ -1189,7 +1189,7 @@ void ScalarTraits<VersionTuple>::output(const VersionTuple &Val, void *,
 
 StringRef ScalarTraits<VersionTuple>::input(StringRef Scalar, void *,
                                             VersionTuple &Val) {
-  if (Val.tryParse(Scalar))
-    return "invalid version format";
-  return StringRef();
+  만약 (Val.tryParse(Scalar))
+    반환 "invalid version format";
+  반환 StringRef();
 }

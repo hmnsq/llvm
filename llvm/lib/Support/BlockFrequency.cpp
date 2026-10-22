@@ -20,48 +20,48 @@ using namespace llvm;
 
 BlockFrequency &BlockFrequency::operator*=(BranchProbability Prob) {
   Frequency = Prob.scale(Frequency);
-  return *this;
+  반환 *this;
 }
 
 BlockFrequency BlockFrequency::operator*(BranchProbability Prob) const {
   BlockFrequency Freq(Frequency);
   Freq *= Prob;
-  return Freq;
+  반환 Freq;
 }
 
 BlockFrequency &BlockFrequency::operator/=(BranchProbability Prob) {
   Frequency = Prob.scaleByInverse(Frequency);
-  return *this;
+  반환 *this;
 }
 
 BlockFrequency BlockFrequency::operator/(BranchProbability Prob) const {
   BlockFrequency Freq(Frequency);
   Freq /= Prob;
-  return Freq;
+  반환 Freq;
 }
 
 std::optional<BlockFrequency> BlockFrequency::mul(uint64_t Factor) const {
   bool Overflow;
   uint64_t ResultFrequency = SaturatingMultiply(Frequency, Factor, &Overflow);
-  if (Overflow)
-    return {};
-  return BlockFrequency(ResultFrequency);
+  만약 (Overflow)
+    반환 {};
+  반환 BlockFrequency(ResultFrequency);
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, BlockFrequency Freq) {
   OS << Freq.getFrequency();
-  return OS;
+  반환 OS;
 }
 
 void llvm::printRelativeBlockFreq(raw_ostream &OS, BlockFrequency EntryFreq,
                                   BlockFrequency Freq) {
-  if (Freq == BlockFrequency(0)) {
+  만약 (Freq == BlockFrequency(0)) {
     OS << "0";
-    return;
+    반환;
   }
-  if (EntryFreq == BlockFrequency(0)) {
+  만약 (EntryFreq == BlockFrequency(0)) {
     OS << "<invalid BFI>";
-    return;
+    반환;
   }
   ScaledNumber<uint64_t> Block(Freq.getFrequency(), 0);
   ScaledNumber<uint64_t> Entry(EntryFreq.getFrequency(), 0);
