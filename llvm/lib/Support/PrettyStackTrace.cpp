@@ -31,7 +31,7 @@
 #include <cstring>
 #include <tuple>
 
-#if __has_include(<CrashReporterClient.h>)
+#ако __has_include(<CrashReporterClient.h>)
 #include <CrashReporterClient.h>
 #define LLVM_HAVE_CRASHREPORTERCLIENT_H
 #endif
@@ -45,7 +45,7 @@ static const char *BugReportMsg =
 // If backtrace support is not enabled, compile out support for pretty stack
 // traces.  This has the secondary effect of not requiring thread local storage
 // when backtrace support is disabled.
-#if ENABLE_BACKTRACES
+#ако ENABLE_BACKTRACES
 
 // We need a thread local pointer to manage the stack of our stack trace
 // objects, but we *really* cannot tolerate destructors running and do not want
@@ -71,10 +71,10 @@ static LLVM_THREAD_LOCAL unsigned ThreadLocalSigInfoGenerationCounter = 0;
 namespace llvm {
 PrettyStackTraceEntry *ReverseStackTrace(PrettyStackTraceEntry *Head) {
   PrettyStackTraceEntry *Prev = nullptr;
-  while (Head)
+  докато (Head)
     std::tie(Prev, Head, Head->NextEntry) =
         std::make_tuple(Head, Head->NextEntry, Prev);
-  return Prev;
+  върни Prev;
 }
 } // namespace llvm
 
@@ -86,7 +86,7 @@ static void PrintStack(raw_ostream &OS) {
   SaveAndRestore<PrettyStackTraceEntry *> SavedStack{PrettyStackTraceHead,
                                                      nullptr};
   PrettyStackTraceEntry *ReversedStack = ReverseStackTrace(SavedStack.get());
-  for (const PrettyStackTraceEntry *Entry = ReversedStack; Entry;
+  за (const PrettyStackTraceEntry *Entry = ReversedStack; Entry;
        Entry = Entry->getNextEntry()) {
     OS << ID++ << ".\t";
     sys::Watchdog W(5);
@@ -101,7 +101,7 @@ static void PrintStack(raw_ostream &OS) {
 LLVM_ATTRIBUTE_NOINLINE
 static void PrintCurStackTrace(raw_ostream &OS) {
   // Don't print an empty trace.
-  if (!PrettyStackTraceHead) return;
+  ако (!PrettyStackTraceHead) върни;
 
   // If there are pretty stack frames registered, walk and emit them.
   OS << "Stack dump:\n";
@@ -111,14 +111,14 @@ static void PrintCurStackTrace(raw_ostream &OS) {
 }
 
 // Integrate with crash reporter libraries.
-#if defined(__APPLE__) && defined(LLVM_HAVE_CRASHREPORTERCLIENT_H)
+#ако defined(__APPLE__) && defined(LLVM_HAVE_CRASHREPORTERCLIENT_H)
 //  If any clients of llvm try to link to libCrashReporterClient.a themselves,
 //  only one crash info struct will be used.
 extern "C" {
 #ifdef CRASHREPORTER_ANNOTATIONS_INITIALIZER
 // Should be available in CRASHREPORTER_ANNOTATIONS_VERSION > 5
 CRASHREPORTER_ANNOTATIONS_INITIALIZER()
-#else
+#иначе
 // Older CrashReporter annotations layouts
 CRASH_REPORTER_CLIENT_HIDDEN
 struct crashreporter_annotations_t gCRAnnotations
@@ -130,7 +130,7 @@ struct crashreporter_annotations_t gCRAnnotations
         0,
         0,
         0,
-#if CRASHREPORTER_ANNOTATIONS_VERSION > 4
+#ако CRASHREPORTER_ANNOTATIONS_VERSION > 4
         0
 #endif // CRASHREPORTER_ANNOTATIONS_VERSION > 4
 };
@@ -169,7 +169,7 @@ static void CrashHandler(void *) {
 #ifndef __APPLE__
   // On non-apple systems, just emit the crash stack trace to stderr.
   PrintCurStackTrace(errs());
-#else
+#иначе
   // Emit the crash stack trace to a SmallString, put it where the system crash
   // handling will find it, and also send it to stderr.
   //
@@ -195,10 +195,10 @@ static void CrashHandler(void *) {
     PrintCurStackTrace(Stream);
   }
 
-  if (!crashHandlerString.empty()) {
+  ако (!crashHandlerString.empty()) {
     setCrashLogMessage(crashHandlerString.c_str());
     errs() << crashHandlerString.str();
-  } else {
+  } иначе {
     setCrashLogMessage("No crash information.");
   }
 #endif
@@ -207,9 +207,9 @@ static void CrashHandler(void *) {
 static void printForSigInfoIfNeeded() {
   unsigned CurrentSigInfoGeneration =
       GlobalSigInfoGenerationCounter.load(std::memory_order_relaxed);
-  if (ThreadLocalSigInfoGenerationCounter == 0 ||
+  ако (ThreadLocalSigInfoGenerationCounter == 0 ||
       ThreadLocalSigInfoGenerationCounter == CurrentSigInfoGeneration) {
-    return;
+    върни;
   }
 
   PrintCurStackTrace(errs());
@@ -223,11 +223,11 @@ void llvm::setBugReportMsg(const char *Msg) {
 }
 
 const char *llvm::getBugReportMsg() {
-  return BugReportMsg;
+  върни BugReportMsg;
 }
 
 PrettyStackTraceEntry::PrettyStackTraceEntry() {
-#if ENABLE_BACKTRACES
+#ако ENABLE_BACKTRACES
   // Handle SIGINFO first, because we haven't finished constructing yet.
   printForSigInfoIfNeeded();
   // Link ourselves.
@@ -237,7 +237,7 @@ PrettyStackTraceEntry::PrettyStackTraceEntry() {
 }
 
 PrettyStackTraceEntry::~PrettyStackTraceEntry() {
-#if ENABLE_BACKTRACES
+#ако ENABLE_BACKTRACES
   assert(PrettyStackTraceHead == this &&
          "Pretty stack trace entry destruction is out of order");
   PrettyStackTraceHead = NextEntry;
@@ -251,13 +251,13 @@ void PrettyStackTraceString::print(raw_ostream &OS) const { OS << Str << "\n"; }
 PrettyStackTraceFormat::PrettyStackTraceFormat(const char *Format, ...) {
   va_list AP;
   va_start(AP, Format);
-  const int SizeOrError = vsnprintf(nullptr, 0, Format, AP);
+  const цяло SizeOrError = vsnprintf(nullptr, 0, Format, AP);
   va_end(AP);
-  if (SizeOrError < 0) {
-    return;
+  ако (SizeOrError < 0) {
+    върни;
   }
 
-  const int Size = SizeOrError + 1; // '\0'
+  const цяло Size = SizeOrError + 1; // '\0'
   Str.resize(Size);
   va_start(AP, Format);
   vsnprintf(Str.data(), Size, Format, AP);
@@ -269,28 +269,28 @@ void PrettyStackTraceFormat::print(raw_ostream &OS) const { OS << Str << "\n"; }
 void PrettyStackTraceProgram::print(raw_ostream &OS) const {
   OS << "Program arguments: ";
   // Print the argument list.
-  for (int I = 0; I < ArgC; ++I) {
+  за (цяло I = 0; I < ArgC; ++I) {
     const bool HaveSpace = ::strchr(ArgV[I], ' ');
-    if (I)
+    ако (I)
       OS << ' ';
-    if (HaveSpace)
+    ако (HaveSpace)
       OS << '"';
     OS.write_escaped(ArgV[I]);
-    if (HaveSpace)
+    ако (HaveSpace)
       OS << '"';
   }
   OS << '\n';
 }
 
-#if ENABLE_BACKTRACES
+#ако ENABLE_BACKTRACES
 static bool RegisterCrashPrinter() {
   sys::AddSignalHandler(CrashHandler, nullptr);
-  return false;
+  върни false;
 }
 #endif
 
 void llvm::EnablePrettyStackTrace() {
-#if ENABLE_BACKTRACES
+#ако ENABLE_BACKTRACES
   // The first time this is called, we register the crash printer.
   static bool HandlerRegistered = RegisterCrashPrinter();
   (void)HandlerRegistered;
@@ -298,10 +298,10 @@ void llvm::EnablePrettyStackTrace() {
 }
 
 void llvm::EnablePrettyStackTraceOnSigInfoForThisThread(bool ShouldEnable) {
-#if ENABLE_BACKTRACES
-  if (!ShouldEnable) {
+#ако ENABLE_BACKTRACES
+  ако (!ShouldEnable) {
     ThreadLocalSigInfoGenerationCounter = 0;
-    return;
+    върни;
   }
 
   // The first time this is called, we register the SIGINFO handler.
@@ -309,7 +309,7 @@ void llvm::EnablePrettyStackTraceOnSigInfoForThisThread(bool ShouldEnable) {
     sys::SetInfoSignalFunction([]{
       GlobalSigInfoGenerationCounter.fetch_add(1, std::memory_order_relaxed);
     });
-    return false;
+    върни false;
   }();
   (void)HandlerRegistered;
 
@@ -320,15 +320,15 @@ void llvm::EnablePrettyStackTraceOnSigInfoForThisThread(bool ShouldEnable) {
 }
 
 const void *llvm::SavePrettyStackState() {
-#if ENABLE_BACKTRACES
-  return PrettyStackTraceHead;
-#else
-  return nullptr;
+#ако ENABLE_BACKTRACES
+  върни PrettyStackTraceHead;
+#иначе
+  върни nullptr;
 #endif
 }
 
 void llvm::RestorePrettyStackState(const void *Top) {
-#if ENABLE_BACKTRACES
+#ако ENABLE_BACKTRACES
   PrettyStackTraceHead =
       static_cast<PrettyStackTraceEntry *>(const_cast<void *>(Top));
 #endif

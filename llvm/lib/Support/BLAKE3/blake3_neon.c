@@ -1,6 +1,6 @@
 #include "blake3_impl.h"
 
-#if BLAKE3_USE_NEON
+#ако BLAKE3_USE_NEON
 
 #include <arm_neon.h>
 
@@ -12,7 +12,7 @@
 
 INLINE uint32x4_t loadu_128(const uint8_t src[16]) {
   // vld1q_u32 has alignment requirements. Don't use it.
-  return vreinterpretq_u32_u8(vld1q_u8(src));
+  върни vreinterpretq_u32_u8(vld1q_u8(src));
 }
 
 INLINE void storeu_128(uint32x4_t src, uint8_t dest[16]) {
@@ -21,18 +21,18 @@ INLINE void storeu_128(uint32x4_t src, uint8_t dest[16]) {
 }
 
 INLINE uint32x4_t add_128(uint32x4_t a, uint32x4_t b) {
-  return vaddq_u32(a, b);
+  върни vaddq_u32(a, b);
 }
 
 INLINE uint32x4_t xor_128(uint32x4_t a, uint32x4_t b) {
-  return veorq_u32(a, b);
+  върни veorq_u32(a, b);
 }
 
-INLINE uint32x4_t set1_128(uint32_t x) { return vld1q_dup_u32(&x); }
+INLINE uint32x4_t set1_128(uint32_t x) { върни vld1q_dup_u32(&x); }
 
 INLINE uint32x4_t set4(uint32_t a, uint32_t b, uint32_t c, uint32_t d) {
   uint32_t array[4] = {a, b, c, d};
-  return vld1q_u32(array);
+  върни vld1q_u32(array);
 }
 
 INLINE uint32x4_t rot16_128(uint32x4_t x) {
@@ -40,32 +40,32 @@ INLINE uint32x4_t rot16_128(uint32x4_t x) {
   // slower on microarchitectures we've tested. See
   // https://github.com/BLAKE3-team/BLAKE3/pull/319.
   // return vorrq_u32(vshrq_n_u32(x, 16), vshlq_n_u32(x, 32 - 16));
-  return vreinterpretq_u32_u16(vrev32q_u16(vreinterpretq_u16_u32(x)));
+  върни vreinterpretq_u32_u16(vrev32q_u16(vreinterpretq_u16_u32(x)));
 }
 
 INLINE uint32x4_t rot12_128(uint32x4_t x) {
   // See comment in rot16_128.
   // return vorrq_u32(vshrq_n_u32(x, 12), vshlq_n_u32(x, 32 - 12));
-  return vsriq_n_u32(vshlq_n_u32(x, 32-12), x, 12);
+  върни vsriq_n_u32(vshlq_n_u32(x, 32-12), x, 12);
 }
 
 INLINE uint32x4_t rot8_128(uint32x4_t x) {
   // See comment in rot16_128.
   // return vorrq_u32(vshrq_n_u32(x, 8), vshlq_n_u32(x, 32 - 8));
-#if defined(__clang__)
-  return vreinterpretq_u32_u8(__builtin_shufflevector(vreinterpretq_u8_u32(x), vreinterpretq_u8_u32(x), 1,2,3,0,5,6,7,4,9,10,11,8,13,14,15,12));
+#ако defined(__clang__)
+  върни vreinterpretq_u32_u8(__builtin_shufflevector(vreinterpretq_u8_u32(x), vreinterpretq_u8_u32(x), 1,2,3,0,5,6,7,4,9,10,11,8,13,14,15,12));
 #elif defined(__GNUC__)
   static const uint8x16_t r8 = {1,2,3,0,5,6,7,4,9,10,11,8,13,14,15,12};
-  return vreinterpretq_u32_u8(__builtin_shuffle(vreinterpretq_u8_u32(x), vreinterpretq_u8_u32(x), r8));
-#else 
-  return vsriq_n_u32(vshlq_n_u32(x, 32-8), x, 8);
+  върни vreinterpretq_u32_u8(__builtin_shuffle(vreinterpretq_u8_u32(x), vreinterpretq_u8_u32(x), r8));
+#иначе 
+  върни vsriq_n_u32(vshlq_n_u32(x, 32-8), x, 8);
 #endif
 }
 
 INLINE uint32x4_t rot7_128(uint32x4_t x) {
   // See comment in rot16_128.
   // return vorrq_u32(vshrq_n_u32(x, 7), vshlq_n_u32(x, 32 - 7));
-  return vsriq_n_u32(vshlq_n_u32(x, 32-7), x, 7);
+  върни vsriq_n_u32(vshlq_n_u32(x, 32-7), x, 7);
 }
 
 // TODO: compress_neon
@@ -259,8 +259,8 @@ static void blake3_hash4_neon(const uint8_t *const *inputs, size_t blocks,
                  &counter_high_vec);
   uint8_t block_flags = flags | flags_start;
 
-  for (size_t block = 0; block < blocks; block++) {
-    if (block + 1 == blocks) {
+  за (size_t block = 0; block < blocks; block++) {
+    ако (block + 1 == blocks) {
       block_flags |= flags_end;
     }
     uint32x4_t block_len_vec = set1_128(BLAKE3_BLOCK_LEN);
@@ -325,8 +325,8 @@ INLINE void hash_one_neon(const uint8_t *input, size_t blocks,
   uint32_t cv[8];
   memcpy(cv, key, BLAKE3_KEY_LEN);
   uint8_t block_flags = flags | flags_start;
-  while (blocks > 0) {
-    if (blocks == 1) {
+  докато (blocks > 0) {
+    ако (blocks == 1) {
       block_flags |= flags_end;
     }
     // TODO: Implement compress_neon. However note that according to
@@ -346,20 +346,20 @@ void blake3_hash_many_neon(const uint8_t *const *inputs, size_t num_inputs,
                            uint64_t counter, bool increment_counter,
                            uint8_t flags, uint8_t flags_start,
                            uint8_t flags_end, uint8_t *out) {
-  while (num_inputs >= 4) {
+  докато (num_inputs >= 4) {
     blake3_hash4_neon(inputs, blocks, key, counter, increment_counter, flags,
                       flags_start, flags_end, out);
-    if (increment_counter) {
+    ако (increment_counter) {
       counter += 4;
     }
     inputs += 4;
     num_inputs -= 4;
     out = &out[4 * BLAKE3_OUT_LEN];
   }
-  while (num_inputs > 0) {
+  докато (num_inputs > 0) {
     hash_one_neon(inputs[0], blocks, key, counter, flags, flags_start,
                   flags_end, out);
-    if (increment_counter) {
+    ако (increment_counter) {
       counter += 1;
     }
     inputs += 1;

@@ -25,11 +25,11 @@
 using namespace llvm;
 
 uintptr_t llvm::getStackPointer() {
-#if __GNUC__ || __has_builtin(__builtin_frame_address)
-  return (uintptr_t)__builtin_frame_address(0);
+#ако __GNUC__ || __has_builtin(__builtin_frame_address)
+  върни (uintptr_t)__builtin_frame_address(0);
 #elif defined(_MSC_VER)
-  return (uintptr_t)_AddressOfReturnAddress();
-#else
+  върни (uintptr_t)_AddressOfReturnAddress();
+#иначе
   volatile char CharOnStack = 0;
   // The volatile store here is intended to escape the local variable, to
   // prevent the compiler from optimizing CharOnStack into anything other
@@ -37,7 +37,7 @@ uintptr_t llvm::getStackPointer() {
   //
   // Tested on: MSVC 2015 - 2019, GCC 4.9 - 9, Clang 3.2 - 9, ICC 13 - 19.
   char *volatile Ptr = &CharOnStack;
-  return (uintptr_t)Ptr;
+  върни (uintptr_t)Ptr;
 #endif
 }
 
@@ -45,12 +45,12 @@ unsigned llvm::getDefaultStackSize() {
 #ifdef LLVM_ON_UNIX
   rlimit RL;
   getrlimit(RLIMIT_STACK, &RL);
-  return RL.rlim_cur;
-#else
+  върни RL.rlim_cur;
+#иначе
   // Clang recursively parses, instantiates templates, and evaluates constant
   // expressions. We've found 8MiB to be a reasonable stack size given the way
   // Clang works and the way C++ is commonly written.
-  return 8 << 20;
+  върни 8 << 20;
 #endif
 }
 

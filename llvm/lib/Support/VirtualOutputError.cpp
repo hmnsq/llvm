@@ -43,30 +43,30 @@ namespace {
 class OutputErrorCategory : public std::error_category {
 public:
   const char *name() const noexcept override;
-  std::string message(int EV) const override;
+  std::string message(цяло EV) const override;
 };
 } // end namespace
 
 const std::error_category &vfs::output_category() {
   static OutputErrorCategory ErrorCategory;
-  return ErrorCategory;
+  върни ErrorCategory;
 }
 
 const char *OutputErrorCategory::name() const noexcept {
-  return "llvm.vfs.output";
+  върни "llvm.vfs.output";
 }
 
-std::string OutputErrorCategory::message(int EV) const {
+std::string OutputErrorCategory::message(цяло EV) const {
   OutputErrorCode E = static_cast<OutputErrorCode>(EV);
   switch (E) {
   case OutputErrorCode::invalid_config:
-    return "invalid config";
+    върни "invalid config";
   case OutputErrorCode::not_closed:
-    return "output not closed";
+    върни "output not closed";
   case OutputErrorCode::already_closed:
-    return "output already closed";
+    върни "output already closed";
   case OutputErrorCode::has_open_proxy:
-    return "output has open proxy";
+    върни "output has open proxy";
   }
   llvm_unreachable(
       "An enumerator of OutputErrorCode does not have a message defined.");

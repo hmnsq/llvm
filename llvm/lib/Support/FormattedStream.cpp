@@ -28,13 +28,13 @@ void formatted_raw_ostream::UpdatePosition(const char *Ptr, size_t Size) {
   unsigned &Line = Position.second;
 
   auto ProcessUTF8CodePoint = [&Line, &Column](StringRef CP) {
-    int Width = sys::unicode::columnWidthUTF8(CP);
-    if (Width != sys::unicode::ErrorNonPrintableCharacter)
+    цяло Width = sys::unicode::columnWidthUTF8(CP);
+    ако (Width != sys::unicode::ErrorNonPrintableCharacter)
       Column += Width;
 
     // The only special whitespace characters we care about are single-byte.
-    if (CP.size() > 1)
-      return;
+    ако (CP.size() > 1)
+      върни;
 
     switch (CP[0]) {
     case '\n':
@@ -52,15 +52,15 @@ void formatted_raw_ostream::UpdatePosition(const char *Ptr, size_t Size) {
 
   // If we have a partial UTF-8 sequence from the previous buffer, check that
   // first.
-  if (PartialUTF8Char.size()) {
+  ако (PartialUTF8Char.size()) {
     size_t BytesFromBuffer =
         getNumBytesForUTF8(PartialUTF8Char[0]) - PartialUTF8Char.size();
-    if (Size < BytesFromBuffer) {
+    ако (Size < BytesFromBuffer) {
       // If we still don't have enough bytes for a complete code point, just
       // append what we have.
       PartialUTF8Char.append(StringRef(Ptr, Size));
-      return;
-    } else {
+      върни;
+    } иначе {
       // The first few bytes from the buffer will complete the code point.
       // Concatenate them and process their effect on the line and column
       // numbers.
@@ -74,9 +74,9 @@ void formatted_raw_ostream::UpdatePosition(const char *Ptr, size_t Size) {
 
   // Now scan the rest of the buffer.
   unsigned NumBytes;
-  for (const char *End = Ptr + Size; Ptr < End; Ptr += NumBytes) {
+  за (const char *End = Ptr + Size; Ptr < End; Ptr += NumBytes) {
     // Fast path for printable ASCII characters without special handling.
-    if (*Ptr >= 0x20 && *Ptr <= 0x7e) {
+    ако (*Ptr >= 0x20 && *Ptr <= 0x7e) {
       NumBytes = 1;
       ++Column;
       continue;
@@ -89,9 +89,9 @@ void formatted_raw_ostream::UpdatePosition(const char *Ptr, size_t Size) {
     // the display width until we see the rest of the code point. Stash the
     // bytes we do have, so that we can reconstruct the whole code point later,
     // even if the buffer is being flushed.
-    if ((unsigned)(End - Ptr) < NumBytes) {
+    ако ((unsigned)(End - Ptr) < NumBytes) {
       PartialUTF8Char = StringRef(Ptr, End - Ptr);
-      return;
+      върни;
     }
 
     ProcessUTF8CodePoint(StringRef(Ptr, NumBytes));
@@ -101,17 +101,17 @@ void formatted_raw_ostream::UpdatePosition(const char *Ptr, size_t Size) {
 /// ComputePosition - Examine the current output and update line and column
 /// counts.
 void formatted_raw_ostream::ComputePosition(const char *Ptr, size_t Size) {
-  if (DisableScan)
-    return;
+  ако (DisableScan)
+    върни;
 
   // If our previous scan pointer is inside the buffer, assume we already
   // scanned those bytes. This depends on raw_ostream to not change our buffer
   // in unexpected ways.
-  if (Ptr <= Scanned && Scanned <= Ptr + Size)
+  ако (Ptr <= Scanned && Scanned <= Ptr + Size)
     // Scan all characters added since our last scan to determine the new
     // column.
     UpdatePosition(Scanned, Size - (Scanned - Ptr));
-  else
+  иначе
     UpdatePosition(Ptr, Size);
 
   // Update the scanning pointer.
@@ -127,8 +127,8 @@ formatted_raw_ostream &formatted_raw_ostream::PadToColumn(unsigned NewCol) {
   ComputePosition(getBufferStart(), GetNumBytesInBuffer());
 
   // Output spaces until we reach the desired column.
-  indent(std::max(int(NewCol - getColumn()), 1));
-  return *this;
+  indent(std::max(цяло(NewCol - getColumn()), 1));
+  върни *this;
 }
 
 void formatted_raw_ostream::write_impl(const char *Ptr, size_t Size) {
@@ -147,19 +147,19 @@ void formatted_raw_ostream::write_impl(const char *Ptr, size_t Size) {
 /// standard output.  Use it like: fouts() << "foo" << "bar";
 formatted_raw_ostream &llvm::fouts() {
   static formatted_raw_ostream S(outs());
-  return S;
+  върни S;
 }
 
 /// ferrs() - This returns a reference to a formatted_raw_ostream for
 /// standard error.  Use it like: ferrs() << "foo" << "bar";
 formatted_raw_ostream &llvm::ferrs() {
   static formatted_raw_ostream S(errs());
-  return S;
+  върни S;
 }
 
 /// fdbgs() - This returns a reference to a formatted_raw_ostream for
 /// the debug stream.  Use it like: fdbgs() << "foo" << "bar";
 formatted_raw_ostream &llvm::fdbgs() {
   static formatted_raw_ostream S(dbgs());
-  return S;
+  върни S;
 }

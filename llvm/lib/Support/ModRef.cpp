@@ -31,7 +31,7 @@ raw_ostream &llvm::operator<<(raw_ostream &OS, ModRefInfo MR) {
     OS << "ModRef";
     break;
   }
-  return OS;
+  върни OS;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, MemoryEffects ME) {
@@ -58,26 +58,26 @@ raw_ostream &llvm::operator<<(raw_ostream &OS, MemoryEffects ME) {
     }
     OS << ME.getModRef(Loc);
   });
-  return OS;
+  върни OS;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureComponents CC) {
-  if (capturesNothing(CC)) {
+  ако (capturesNothing(CC)) {
     OS << "none";
-    return OS;
+    върни OS;
   }
 
   ListSeparator LS;
-  if (capturesAddressIsNullOnly(CC))
+  ако (capturesAddressIsNullOnly(CC))
     OS << LS << "address_is_null";
-  else if (capturesAddress(CC))
+  иначе ако (capturesAddress(CC))
     OS << LS << "address";
-  if (capturesReadProvenanceOnly(CC))
+  ако (capturesReadProvenanceOnly(CC))
     OS << LS << "read_provenance";
-  if (capturesFullProvenance(CC))
+  ако (capturesFullProvenance(CC))
     OS << LS << "provenance";
 
-  return OS;
+  върни OS;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureInfo CI) {
@@ -86,10 +86,10 @@ raw_ostream &llvm::operator<<(raw_ostream &OS, CaptureInfo CI) {
   CaptureComponents Ret = CI.getRetComponents();
 
   OS << "captures(";
-  if (!capturesNothing(Other) || Other == Ret)
+  ако (!capturesNothing(Other) || Other == Ret)
     OS << LS << Other;
-  if (Other != Ret)
+  ако (Other != Ret)
     OS << LS << "ret: " << Ret;
   OS << ")";
-  return OS;
+  върни OS;
 }
