@@ -20,24 +20,24 @@ unsigned getULEB128Size(uint64_t Value) {
   unsigned Size = 0;
   do {
     Value >>= 7;
-    Size += sizeof(int8_t);
-  } while (Value);
-  return Size;
+    Size += parimaa_na(int8_t);
+  } අතරතුර (Value);
+  ආපසු Size;
 }
 
 /// Utility function to get the size of the SLEB128-encoded value.
 unsigned getSLEB128Size(int64_t Value) {
   unsigned Size = 0;
-  int Sign = Value >> (8 * sizeof(Value) - 1);
+  පූර්ණ_සංඛ්‍යා Sign = Value >> (8 * parimaa_na(Value) - 1);
   bool IsMore;
 
   do {
     unsigned Byte = Value & 0x7f;
     Value >>= 7;
     IsMore = Value != Sign || ((Byte ^ Sign) & 0x40) != 0;
-    Size += sizeof(int8_t);
-  } while (IsMore);
-  return Size;
+    Size += parimaa_na(int8_t);
+  } අතරතුර (IsMore);
+  ආපසු Size;
 }
 
 }  // namespace llvm

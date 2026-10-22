@@ -47,12 +47,12 @@
 
 #define APFLOAT_DISPATCH_ON_SEMANTICS(METHOD_CALL)                             \
   do {                                                                         \
-    if (usesLayout<IEEEFloat>(getSemantics()))                                 \
-      return U.IEEE.METHOD_CALL;                                               \
-    if (usesLayout<DoubleAPFloat>(getSemantics()))                             \
-      return U.Double.METHOD_CALL;                                             \
+    නම් (usesLayout<IEEEFloat>(getSemantics()))                                 \
+      ආපසු U.IEEE.METHOD_CALL;                                               \
+    නම් (usesLayout<DoubleAPFloat>(getSemantics()))                             \
+      ආපසු U.Double.METHOD_CALL;                                             \
     llvm_unreachable("Unexpected semantics");                                  \
-  } while (false)
+  } අතරතුර (false)
 
 using namespace llvm;
 
@@ -135,117 +135,117 @@ constexpr fltSemantics APFloatBase::semBogus = {0, 0, 0, 0};
 
 const llvm::fltSemantics &APFloatBase::EnumToSemantics(Semantics S) {
   switch (S) {
-  case S_IEEEhalf:
-    return IEEEhalf();
-  case S_BFloat:
-    return BFloat();
-  case S_IEEEsingle:
-    return IEEEsingle();
-  case S_IEEEdouble:
-    return IEEEdouble();
-  case S_IEEEquad:
-    return IEEEquad();
-  case S_x87DoubleExtended:
-    return x87DoubleExtended();
-  case S_PPCDoubleDouble:
-    return PPCDoubleDouble();
-  case S_PPCDoubleDoubleLegacy:
-    return PPCDoubleDoubleLegacy();
-  case S_Float8E5M2:
-    return Float8E5M2();
-  case S_Float8E5M2FNUZ:
-    return Float8E5M2FNUZ();
-  case S_Float8E4M3:
-    return Float8E4M3();
-  case S_Float8E4M3FN:
-    return Float8E4M3FN();
-  case S_Float8E4M3FNUZ:
-    return Float8E4M3FNUZ();
-  case S_Float8E4M3B11FNUZ:
-    return Float8E4M3B11FNUZ();
-  case S_Float8E3M4:
-    return Float8E3M4();
-  case S_FloatTF32:
-    return FloatTF32();
-  case S_Float8E8M0FNU:
-    return Float8E8M0FNU();
-  case S_Float8E5M3FNU:
-    return Float8E5M3FNU();
-  case S_Float6E3M2FN:
-    return Float6E3M2FN();
-  case S_Float6E2M3FN:
-    return Float6E2M3FN();
-  case S_Float4E2M1FN:
-    return Float4E2M1FN();
+  pak_sa S_IEEEhalf:
+    ආපසු IEEEhalf();
+  pak_sa S_BFloat:
+    ආපසු BFloat();
+  pak_sa S_IEEEsingle:
+    ආපසු IEEEsingle();
+  pak_sa S_IEEEdouble:
+    ආපසු IEEEdouble();
+  pak_sa S_IEEEquad:
+    ආපසු IEEEquad();
+  pak_sa S_x87DoubleExtended:
+    ආපසු x87DoubleExtended();
+  pak_sa S_PPCDoubleDouble:
+    ආපසු PPCDoubleDouble();
+  pak_sa S_PPCDoubleDoubleLegacy:
+    ආපසු PPCDoubleDoubleLegacy();
+  pak_sa S_Float8E5M2:
+    ආපසු Float8E5M2();
+  pak_sa S_Float8E5M2FNUZ:
+    ආපසු Float8E5M2FNUZ();
+  pak_sa S_Float8E4M3:
+    ආපසු Float8E4M3();
+  pak_sa S_Float8E4M3FN:
+    ආපසු Float8E4M3FN();
+  pak_sa S_Float8E4M3FNUZ:
+    ආපසු Float8E4M3FNUZ();
+  pak_sa S_Float8E4M3B11FNUZ:
+    ආපසු Float8E4M3B11FNUZ();
+  pak_sa S_Float8E3M4:
+    ආපසු Float8E3M4();
+  pak_sa S_FloatTF32:
+    ආපසු FloatTF32();
+  pak_sa S_Float8E8M0FNU:
+    ආපසු Float8E8M0FNU();
+  pak_sa S_Float8E5M3FNU:
+    ආපසු Float8E5M3FNU();
+  pak_sa S_Float6E3M2FN:
+    ආපසු Float6E3M2FN();
+  pak_sa S_Float6E2M3FN:
+    ආපසු Float6E2M3FN();
+  pak_sa S_Float4E2M1FN:
+    ආපසු Float4E2M1FN();
   }
   llvm_unreachable("Unrecognised floating semantics");
 }
 
 APFloatBase::Semantics
 APFloatBase::SemanticsToEnum(const llvm::fltSemantics &Sem) {
-  if (&Sem == &llvm::APFloat::IEEEhalf())
-    return S_IEEEhalf;
-  else if (&Sem == &llvm::APFloat::BFloat())
-    return S_BFloat;
-  else if (&Sem == &llvm::APFloat::IEEEsingle())
-    return S_IEEEsingle;
-  else if (&Sem == &llvm::APFloat::IEEEdouble())
-    return S_IEEEdouble;
-  else if (&Sem == &llvm::APFloat::IEEEquad())
-    return S_IEEEquad;
-  else if (&Sem == &llvm::APFloat::x87DoubleExtended())
-    return S_x87DoubleExtended;
-  else if (&Sem == &llvm::APFloat::PPCDoubleDouble())
-    return S_PPCDoubleDouble;
-  else if (&Sem == &llvm::APFloat::PPCDoubleDoubleLegacy())
-    return S_PPCDoubleDoubleLegacy;
-  else if (&Sem == &llvm::APFloat::Float8E5M2())
-    return S_Float8E5M2;
-  else if (&Sem == &llvm::APFloat::Float8E5M2FNUZ())
-    return S_Float8E5M2FNUZ;
-  else if (&Sem == &llvm::APFloat::Float8E4M3())
-    return S_Float8E4M3;
-  else if (&Sem == &llvm::APFloat::Float8E4M3FN())
-    return S_Float8E4M3FN;
-  else if (&Sem == &llvm::APFloat::Float8E4M3FNUZ())
-    return S_Float8E4M3FNUZ;
-  else if (&Sem == &llvm::APFloat::Float8E4M3B11FNUZ())
-    return S_Float8E4M3B11FNUZ;
-  else if (&Sem == &llvm::APFloat::Float8E3M4())
-    return S_Float8E3M4;
-  else if (&Sem == &llvm::APFloat::FloatTF32())
-    return S_FloatTF32;
-  else if (&Sem == &llvm::APFloat::Float8E8M0FNU())
-    return S_Float8E8M0FNU;
-  else if (&Sem == &llvm::APFloat::Float8E5M3FNU())
-    return S_Float8E5M3FNU;
-  else if (&Sem == &llvm::APFloat::Float6E3M2FN())
-    return S_Float6E3M2FN;
-  else if (&Sem == &llvm::APFloat::Float6E2M3FN())
-    return S_Float6E2M3FN;
-  else if (&Sem == &llvm::APFloat::Float4E2M1FN())
-    return S_Float4E2M1FN;
-  else
+  නම් (&Sem == &llvm::APFloat::IEEEhalf())
+    ආපසු S_IEEEhalf;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::BFloat())
+    ආපසු S_BFloat;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::IEEEsingle())
+    ආපසු S_IEEEsingle;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::IEEEdouble())
+    ආපසු S_IEEEdouble;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::IEEEquad())
+    ආපසු S_IEEEquad;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::x87DoubleExtended())
+    ආපසු S_x87DoubleExtended;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::PPCDoubleDouble())
+    ආපසු S_PPCDoubleDouble;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::PPCDoubleDoubleLegacy())
+    ආපසු S_PPCDoubleDoubleLegacy;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::Float8E5M2())
+    ආපසු S_Float8E5M2;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::Float8E5M2FNUZ())
+    ආපසු S_Float8E5M2FNUZ;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::Float8E4M3())
+    ආපසු S_Float8E4M3;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::Float8E4M3FN())
+    ආපසු S_Float8E4M3FN;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::Float8E4M3FNUZ())
+    ආපසු S_Float8E4M3FNUZ;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::Float8E4M3B11FNUZ())
+    ආපසු S_Float8E4M3B11FNUZ;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::Float8E3M4())
+    ආපසු S_Float8E3M4;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::FloatTF32())
+    ආපසු S_FloatTF32;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::Float8E8M0FNU())
+    ආපසු S_Float8E8M0FNU;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::Float8E5M3FNU())
+    ආපසු S_Float8E5M3FNU;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::Float6E3M2FN())
+    ආපසු S_Float6E3M2FN;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::Float6E2M3FN())
+    ආපසු S_Float6E2M3FN;
+  නැතහොත් නම් (&Sem == &llvm::APFloat::Float4E2M1FN())
+    ආපසු S_Float4E2M1FN;
+  නැතහොත්
     llvm_unreachable("Unknown floating semantics");
 }
 
 bool APFloatBase::isRepresentableBy(const fltSemantics &A,
                                     const fltSemantics &B) {
-  return A.maxExponent <= B.maxExponent && A.minExponent >= B.minExponent &&
+  ආපසු A.maxExponent <= B.maxExponent && A.minExponent >= B.minExponent &&
          A.precision <= B.precision;
 }
 
 bool APFloatBase::isLosslesslyConvertibleTo(const fltSemantics &From,
                                             const fltSemantics &InitialTo,
                                             bool IgnoreNaNs) {
-  if (&From == &InitialTo)
-    return true;
+  නම් (&From == &InitialTo)
+    ආපසු true;
 
   // PPC double-double cannot be described by a conventional exponent range
   // and precision. In particular, converting it to another semantics drops
   // its low double, so conservatively reject conversions from it.
-  if (&From == &semPPCDoubleDouble)
-    return false;
+  නම් (&From == &semPPCDoubleDouble)
+    ආපසු false;
 
   // Converting to PPC double-double is lossless exactly when the value fits
   // in its high double. In other words, the conversion is lossless if the
@@ -253,12 +253,12 @@ bool APFloatBase::isLosslesslyConvertibleTo(const fltSemantics &From,
   const fltSemantics &To =
       &InitialTo == &semPPCDoubleDouble ? semIEEEdouble : InitialTo;
 
-  if (!isRepresentableBy(From, To))
-    return false;
+  නම් (!isRepresentableBy(From, To))
+    ආපසු false;
 
-  if ((From.hasZero && !To.hasZero) ||
+  නම් ((From.hasZero && !To.hasZero) ||
       (From.hasSignedRepr && !To.hasSignedRepr))
-    return false;
+    ආපසු false;
 
   // NegativeZero NaN encoding repurposes the negative-zero bit pattern, so a
   // conversion to such a format cannot preserve a source negative zero.
@@ -266,8 +266,8 @@ bool APFloatBase::isLosslesslyConvertibleTo(const fltSemantics &From,
                            From.nanEncoding != fltNanEncoding::NegativeZero;
   bool ToHasSignedZero = To.hasZero && To.hasSignedRepr &&
                          To.nanEncoding != fltNanEncoding::NegativeZero;
-  if (FromHasSignedZero && !ToHasSignedZero)
-    return false;
+  නම් (FromHasSignedZero && !ToHasSignedZero)
+    ආපසු false;
 
   // isRepresentableBy compares normalized exponent ranges. Also ensure that
   // the smallest source value, which may be denormal, is represented exactly
@@ -275,33 +275,33 @@ bool APFloatBase::isLosslesslyConvertibleTo(const fltSemantics &From,
   APFloat SmallestFrom = APFloat::getSmallest(From);
   bool LosesInfo = false;
   (void)SmallestFrom.convert(To, APFloat::rmNearestTiesToEven, &LosesInfo);
-  if (LosesInfo)
-    return false;
+  නම් (LosesInfo)
+    ආපසු false;
 
-  if (From.nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
-    return true;
+  නම් (From.nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
+    ආපසු true;
 
   // Even when NaN representations can be ignored, NaNs must remain NaNs and
   // infinities must remain infinities. Otherwise the conversion can change
   // whether an operation with nnan has poison-producing operands.
-  if (IgnoreNaNs) {
-    if (From.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754)
-      return To.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754;
-    return To.nonFiniteBehavior != fltNonfiniteBehavior::FiniteOnly;
+  නම් (IgnoreNaNs) {
+    නම් (From.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754)
+      ආපසු To.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754;
+    ආපසු To.nonFiniteBehavior != fltNonfiniteBehavior::FiniteOnly;
   }
 
-  if (From.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754) {
+  නම් (From.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754) {
     // Converting an IEEE signaling NaN to another semantics quiets it, so the
     // original value cannot be recovered by converting it back.
-    return false;
+    ආපසු false;
   }
 
   // NanOnly formats have no signaling NaNs. IEEE semantics can represent
   // their quiet NaNs; conversions between NanOnly formats are conservatively
   // accepted only when they use the same NaN encoding.
-  if (To.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754)
-    return true;
-  return To.nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
+  නම් (To.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754)
+    ආපසු true;
+  ආපසු To.nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
          From.nanEncoding == To.nanEncoding;
 }
 
@@ -323,120 +323,120 @@ bool APFloatBase::isLosslesslyConvertibleTo(const fltSemantics &From,
 // frame. Longer fractional spellings use heap storage.
 static constexpr unsigned NumPow5PartsOnStack = 16;
 
-static unsigned int powerOfFivePartsForExponent(unsigned int power) {
+static unsigned පූර්ණ_සංඛ්‍යා powerOfFivePartsForExponent(unsigned පූර්ණ_සංඛ්‍යා power) {
   assert(power <= maxExponent);
 
   // 815 / 351 is an upper bound on log2(5).  Reserve an additional part for
   // tcFullMultiply, which writes the full product width even when its most
   // significant part is zero.
-  return 2 + ((power * 815) / (351 * APFloatBase::integerPartWidth));
+  ආපසු 2 + ((power * 815) / (351 * APFloatBase::integerPartWidth));
 }
 
-unsigned int APFloatBase::semanticsPrecision(const fltSemantics &semantics) {
-  return semantics.precision;
+unsigned පූර්ණ_සංඛ්‍යා APFloatBase::semanticsPrecision(const fltSemantics &semantics) {
+  ආපසු semantics.precision;
 }
 APFloatBase::ExponentType
 APFloatBase::semanticsMaxExponent(const fltSemantics &semantics) {
-  return semantics.maxExponent;
+  ආපසු semantics.maxExponent;
 }
 APFloatBase::ExponentType
 APFloatBase::semanticsMinExponent(const fltSemantics &semantics) {
-  return semantics.minExponent;
+  ආපසු semantics.minExponent;
 }
-unsigned int APFloatBase::semanticsSizeInBits(const fltSemantics &semantics) {
-  return semantics.sizeInBits;
+unsigned පූර්ණ_සංඛ්‍යා APFloatBase::semanticsSizeInBits(const fltSemantics &semantics) {
+  ආපසු semantics.sizeInBits;
 }
-unsigned int APFloatBase::semanticsIntSizeInBits(const fltSemantics &semantics,
+unsigned පූර්ණ_සංඛ්‍යා APFloatBase::semanticsIntSizeInBits(const fltSemantics &semantics,
                                                  bool isSigned) {
   // The max FP value is pow(2, MaxExponent) * (1 + MaxFraction), so we need
   // at least one more bit than the MaxExponent to hold the max FP value.
-  unsigned int MinBitWidth = semanticsMaxExponent(semantics) + 1;
+  unsigned පූර්ණ_සංඛ්‍යා MinBitWidth = semanticsMaxExponent(semantics) + 1;
   // Extra sign bit needed.
-  if (isSigned)
+  නම් (isSigned)
     ++MinBitWidth;
-  return MinBitWidth;
+  ආපසු MinBitWidth;
 }
 
 bool APFloatBase::semanticsHasZero(const fltSemantics &semantics) {
-  return semantics.hasZero;
+  ආපසු semantics.hasZero;
 }
 
 bool APFloatBase::semanticsHasSignedRepr(const fltSemantics &semantics) {
-  return semantics.hasSignedRepr;
+  ආපසු semantics.hasSignedRepr;
 }
 
 bool APFloatBase::semanticsHasInf(const fltSemantics &semantics) {
-  return semantics.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754;
+  ආපසු semantics.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754;
 }
 
 bool APFloatBase::semanticsHasNaN(const fltSemantics &semantics) {
-  return semantics.nonFiniteBehavior != fltNonfiniteBehavior::FiniteOnly;
+  ආපසු semantics.nonFiniteBehavior != fltNonfiniteBehavior::FiniteOnly;
 }
 
 bool APFloatBase::isIEEELikeFP(const fltSemantics &semantics) {
   // Keep in sync with Type::isIEEELikeFPTy
-  return SemanticsToEnum(semantics) <= S_IEEEquad;
+  ආපසු SemanticsToEnum(semantics) <= S_IEEEquad;
 }
 
 bool APFloatBase::hasSignBitInMSB(const fltSemantics &semantics) {
-  return semantics.hasSignBitInMSB;
+  ආපසු semantics.hasSignBitInMSB;
 }
 
 bool APFloatBase::isRepresentableAsNormalIn(const fltSemantics &Src,
                                             const fltSemantics &Dst) {
   // Exponent range must be larger.
-  if (Src.maxExponent >= Dst.maxExponent || Src.minExponent <= Dst.minExponent)
-    return false;
+  නම් (Src.maxExponent >= Dst.maxExponent || Src.minExponent <= Dst.minExponent)
+    ආපසු false;
 
   // If the mantissa is long enough, the result value could still be denormal
   // with a larger exponent range.
   //
   // FIXME: This condition is probably not accurate but also shouldn't be a
   // practical concern with existing types.
-  return Dst.precision >= Src.precision;
+  ආපසු Dst.precision >= Src.precision;
 }
 
 unsigned APFloatBase::getSizeInBits(const fltSemantics &Sem) {
-  return Sem.sizeInBits;
+  ආපසු Sem.sizeInBits;
 }
 
 static constexpr APFloatBase::ExponentType
 exponentZero(const fltSemantics &semantics) {
-  return semantics.minExponent - 1;
+  ආපසු semantics.minExponent - 1;
 }
 
 static constexpr APFloatBase::ExponentType
 exponentInf(const fltSemantics &semantics) {
-  return semantics.maxExponent + 1;
+  ආපසු semantics.maxExponent + 1;
 }
 
 static constexpr APFloatBase::ExponentType
 exponentNaN(const fltSemantics &semantics) {
-  if (semantics.nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
-    if (semantics.nanEncoding == fltNanEncoding::NegativeZero)
-      return exponentZero(semantics);
-    if (semantics.hasSignedRepr || semantics.precision > 1)
-      return semantics.maxExponent;
+  නම් (semantics.nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
+    නම් (semantics.nanEncoding == fltNanEncoding::NegativeZero)
+      ආපසු exponentZero(semantics);
+    නම් (semantics.hasSignedRepr || semantics.precision > 1)
+      ආපසු semantics.maxExponent;
   }
-  return semantics.maxExponent + 1;
+  ආපසු semantics.maxExponent + 1;
 }
 
 /* A bunch of private, handy routines.  */
 
-static inline Error createError(const Twine &Err) {
-  return make_error<StringError>(Err, inconvertibleErrorCode());
+static anta_hstha Error createError(const Twine &Err) {
+  ආපසු make_error<StringError>(Err, inconvertibleErrorCode());
 }
 
-static constexpr inline unsigned int partCountForBits(unsigned int bits) {
-  return std::max(1u, (bits + APFloatBase::integerPartWidth - 1) /
+static constexpr anta_hstha unsigned පූර්ණ_සංඛ්‍යා partCountForBits(unsigned පූර්ණ_සංඛ්‍යා bits) {
+  ආපසු std::max(1u, (bits + APFloatBase::integerPartWidth - 1) /
                           APFloatBase::integerPartWidth);
 }
 
 /* Returns 0U-9U.  Return values >= 10U are not digits.  */
-static inline unsigned int
-decDigitValue(unsigned int c)
+static anta_hstha unsigned පූර්ණ_සංඛ්‍යා
+decDigitValue(unsigned පූර්ණ_සංඛ්‍යා c)
 {
-  return c - '0';
+  ආපසු c - '0';
 }
 
 /* Return the value of a decimal exponent of the form
@@ -444,93 +444,93 @@ decDigitValue(unsigned int c)
 
    If the exponent overflows, returns a large exponent with the
    appropriate sign.  */
-static Expected<int> readExponent(StringRef::iterator begin,
+static Expected<පූර්ණ_සංඛ්‍යා> readExponent(StringRef::iterator begin,
                                   StringRef::iterator end) {
-  const unsigned int overlargeExponent = 24000;  /* FIXME.  */
+  const unsigned පූර්ණ_සංඛ්‍යා overlargeExponent = 24000;  /* FIXME.  */
   StringRef::iterator p = begin;
 
   // Treat no exponent as 0 to match binutils
-  if (p == end || ((*p == '-' || *p == '+') && (p + 1) == end))
-    return 0;
+  නම් (p == end || ((*p == '-' || *p == '+') && (p + 1) == end))
+    ආපසු 0;
 
   bool isNegative = *p == '-';
-  if (*p == '-' || *p == '+') {
+  නම් (*p == '-' || *p == '+') {
     p++;
-    if (p == end)
-      return createError("Exponent has no digits");
+    නම් (p == end)
+      ආපසු createError("Exponent has no digits");
   }
 
   unsigned absExponent = decDigitValue(*p++);
-  if (absExponent >= 10U)
-    return createError("Invalid character in exponent");
+  නම් (absExponent >= 10U)
+    ආපසු createError("Invalid character in exponent");
 
-  for (; p != end; ++p) {
+  සඳහා (; p != end; ++p) {
     unsigned value = decDigitValue(*p);
-    if (value >= 10U)
-      return createError("Invalid character in exponent");
+    නම් (value >= 10U)
+      ආපසු createError("Invalid character in exponent");
 
     absExponent = absExponent * 10U + value;
-    if (absExponent >= overlargeExponent) {
+    නම් (absExponent >= overlargeExponent) {
       absExponent = overlargeExponent;
-      break;
+      bha_nga;
     }
   }
 
-  if (isNegative)
-    return -(int) absExponent;
-  else
-    return (int) absExponent;
+  නම් (isNegative)
+    ආපසු -(පූර්ණ_සංඛ්‍යා) absExponent;
+  නැතහොත්
+    ආපසු (පූර්ණ_සංඛ්‍යා) absExponent;
 }
 
 /* This is ugly and needs cleaning up, but I don't immediately see
    how whilst remaining safe.  */
-static Expected<int> totalExponent(StringRef::iterator p,
+static Expected<පූර්ණ_සංඛ්‍යා> totalExponent(StringRef::iterator p,
                                    StringRef::iterator end,
-                                   int exponentAdjustment) {
-  int exponent = 0;
+                                   පූර්ණ_සංඛ්‍යා exponentAdjustment) {
+  පූර්ණ_සංඛ්‍යා exponent = 0;
 
-  if (p == end)
-    return createError("Exponent has no digits");
+  නම් (p == end)
+    ආපසු createError("Exponent has no digits");
 
   bool negative = *p == '-';
-  if (*p == '-' || *p == '+') {
+  නම් (*p == '-' || *p == '+') {
     p++;
-    if (p == end)
-      return createError("Exponent has no digits");
+    නම් (p == end)
+      ආපසු createError("Exponent has no digits");
   }
 
-  int unsignedExponent = 0;
+  පූර්ණ_සංඛ්‍යා unsignedExponent = 0;
   bool overflow = false;
-  for (; p != end; ++p) {
-    unsigned int value;
+  සඳහා (; p != end; ++p) {
+    unsigned පූර්ණ_සංඛ්‍යා value;
 
     value = decDigitValue(*p);
-    if (value >= 10U)
-      return createError("Invalid character in exponent");
+    නම් (value >= 10U)
+      ආපසු createError("Invalid character in exponent");
 
     unsignedExponent = unsignedExponent * 10 + value;
-    if (unsignedExponent > 32767) {
+    නම් (unsignedExponent > 32767) {
       overflow = true;
-      break;
+      bha_nga;
     }
   }
 
-  if (exponentAdjustment > 32767 || exponentAdjustment < -32768)
+  නම් (exponentAdjustment > 32767 || exponentAdjustment < -32768)
     overflow = true;
 
-  if (!overflow) {
+  නම් (!overflow) {
     exponent = unsignedExponent;
-    if (negative)
+    නම් (negative)
       exponent = -exponent;
     exponent += exponentAdjustment;
-    if (exponent > 32767 || exponent < -32768)
+    නම් (exponent > 32767 || exponent < -32768)
       overflow = true;
   }
 
-  if (overflow)
+  නම් (overflow)
     exponent = negative ? -32768: 32767;
 
-  return exponent;
+  ආපසු exponent;
 }
 
 static Expected<StringRef::iterator>
@@ -538,20 +538,20 @@ skipLeadingZeroesAndAnyDot(StringRef::iterator begin, StringRef::iterator end,
                            StringRef::iterator *dot) {
   StringRef::iterator p = begin;
   *dot = end;
-  while (p != end && *p == '0')
+  අතරතුර (p != end && *p == '0')
     p++;
 
-  if (p != end && *p == '.') {
+  නම් (p != end && *p == '.') {
     *dot = p++;
 
-    if (end - begin == 1)
-      return createError("Significand has no digits");
+    නම් (end - begin == 1)
+      ආපසු createError("Significand has no digits");
 
-    while (p != end && *p == '0')
+    අතරතුර (p != end && *p == '0')
       p++;
   }
 
-  return p;
+  ආපසු p;
 }
 
 /* Given a normal decimal floating point number of the form
@@ -567,11 +567,11 @@ skipLeadingZeroesAndAnyDot(StringRef::iterator begin, StringRef::iterator end,
    If the value is zero, V->firstSigDigit points to a non-digit, and
    the return exponent is zero.
 */
-struct decimalInfo {
-  const char *firstSigDigit;
-  const char *lastSigDigit;
-  int exponent;
-  int normalizedExponent;
+sa_nracanaa decimalInfo {
+  const var_na *firstSigDigit;
+  const var_na *lastSigDigit;
+  පූර්ණ_සංඛ්‍යා exponent;
+  පූර්ණ_සංඛ්‍යා normalizedExponent;
 };
 
 static Error interpretDecimal(StringRef::iterator begin,
@@ -579,54 +579,54 @@ static Error interpretDecimal(StringRef::iterator begin,
   StringRef::iterator dot = end;
 
   auto PtrOrErr = skipLeadingZeroesAndAnyDot(begin, end, &dot);
-  if (!PtrOrErr)
-    return PtrOrErr.takeError();
+  නම් (!PtrOrErr)
+    ආපසු PtrOrErr.takeError();
   StringRef::iterator p = *PtrOrErr;
 
   D->firstSigDigit = p;
   D->exponent = 0;
   D->normalizedExponent = 0;
 
-  for (; p != end; ++p) {
-    if (*p == '.') {
-      if (dot != end)
-        return createError("String contains multiple dots");
+  සඳහා (; p != end; ++p) {
+    නම් (*p == '.') {
+      නම් (dot != end)
+        ආපසු createError("String contains multiple dots");
       dot = p++;
-      if (p == end)
-        break;
+      නම් (p == end)
+        bha_nga;
     }
-    if (decDigitValue(*p) >= 10U)
-      break;
+    නම් (decDigitValue(*p) >= 10U)
+      bha_nga;
   }
 
-  if (p != end) {
-    if (*p != 'e' && *p != 'E')
-      return createError("Invalid character in significand");
-    if (p == begin)
-      return createError("Significand has no digits");
-    if (dot != end && p - begin == 1)
-      return createError("Significand has no digits");
+  නම් (p != end) {
+    නම් (*p != 'e' && *p != 'E')
+      ආපසු createError("Invalid character in significand");
+    නම් (p == begin)
+      ආපසු createError("Significand has no digits");
+    නම් (dot != end && p - begin == 1)
+      ආපසු createError("Significand has no digits");
 
     /* p points to the first non-digit in the string */
     auto ExpOrErr = readExponent(p + 1, end);
-    if (!ExpOrErr)
-      return ExpOrErr.takeError();
+    නම් (!ExpOrErr)
+      ආපසු ExpOrErr.takeError();
     D->exponent = *ExpOrErr;
 
     /* Implied decimal point?  */
-    if (dot == end)
+    නම් (dot == end)
       dot = p;
   }
 
   /* If number is all zeroes accept any exponent.  */
-  if (p != D->firstSigDigit) {
+  නම් (p != D->firstSigDigit) {
     /* Drop insignificant trailing zeroes.  */
-    if (p != begin) {
+    නම් (p != begin) {
       do
         do
           p--;
-        while (p != begin && *p == '0');
-      while (p != begin && *p == '.');
+        අතරතුර (p != begin && *p == '0');
+      අතරතුර (p != begin && *p == '.');
     }
 
     /* Adjust the exponents for any decimal point.  */
@@ -637,7 +637,7 @@ static Error interpretDecimal(StringRef::iterator begin,
   }
 
   D->lastSigDigit = p;
-  return Error::success();
+  ආපසු Error::success();
 }
 
 /* Return the trailing fraction of a hexadecimal number.
@@ -645,61 +645,61 @@ static Error interpretDecimal(StringRef::iterator begin,
    the next digit.  */
 static Expected<lostFraction>
 trailingHexadecimalFraction(StringRef::iterator p, StringRef::iterator end,
-                            unsigned int digitValue) {
+                            unsigned පූර්ණ_සංඛ්‍යා digitValue) {
   /* If the first trailing digit isn't 0 or 8 we can work out the
      fraction immediately.  */
-  if (digitValue > 8)
-    return lfMoreThanHalf;
-  else if (digitValue < 8 && digitValue > 0)
-    return lfLessThanHalf;
+  නම් (digitValue > 8)
+    ආපසු lfMoreThanHalf;
+  නැතහොත් නම් (digitValue < 8 && digitValue > 0)
+    ආපසු lfLessThanHalf;
 
   // Otherwise we need to find the first non-zero digit.
-  while (p != end && (*p == '0' || *p == '.'))
+  අතරතුර (p != end && (*p == '0' || *p == '.'))
     p++;
 
-  if (p == end)
-    return createError("Invalid trailing hexadecimal fraction!");
+  නම් (p == end)
+    ආපසු createError("Invalid trailing hexadecimal fraction!");
 
   unsigned hexDigit = hexDigitValue(*p);
 
   /* If we ran off the end it is exactly zero or one-half, otherwise
      a little more.  */
-  if (hexDigit == UINT_MAX)
-    return digitValue == 0 ? lfExactlyZero: lfExactlyHalf;
-  else
-    return digitValue == 0 ? lfLessThanHalf: lfMoreThanHalf;
+  නම් (hexDigit == UINT_MAX)
+    ආපසු digitValue == 0 ? lfExactlyZero: lfExactlyHalf;
+  නැතහොත්
+    ආපසු digitValue == 0 ? lfLessThanHalf: lfMoreThanHalf;
 }
 
 /* Return the fraction lost were a bignum truncated losing the least
    significant BITS bits.  */
 static lostFraction
 lostFractionThroughTruncation(const APFloatBase::integerPart *parts,
-                              unsigned int partCount,
-                              unsigned int bits)
+                              unsigned පූර්ණ_සංඛ්‍යා partCount,
+                              unsigned පූර්ණ_සංඛ්‍යා bits)
 {
   unsigned lsb = APInt::tcLSB(parts, partCount);
 
   /* Note this is guaranteed true if bits == 0, or LSB == UINT_MAX.  */
-  if (bits <= lsb)
-    return lfExactlyZero;
-  if (bits == lsb + 1)
-    return lfExactlyHalf;
-  if (bits <= partCount * APFloatBase::integerPartWidth &&
+  නම් (bits <= lsb)
+    ආපසු lfExactlyZero;
+  නම් (bits == lsb + 1)
+    ආපසු lfExactlyHalf;
+  නම් (bits <= partCount * APFloatBase::integerPartWidth &&
       APInt::tcExtractBit(parts, bits - 1))
-    return lfMoreThanHalf;
+    ආපසු lfMoreThanHalf;
 
-  return lfLessThanHalf;
+  ආපසු lfLessThanHalf;
 }
 
 /* Shift DST right BITS bits noting lost fraction.  */
 static lostFraction
-shiftRight(APFloatBase::integerPart *dst, unsigned int parts, unsigned int bits)
+shiftRight(APFloatBase::integerPart *dst, unsigned පූර්ණ_සංඛ්‍යා parts, unsigned පූර්ණ_සංඛ්‍යා bits)
 {
   lostFraction lost_fraction = lostFractionThroughTruncation(dst, parts, bits);
 
   APInt::tcShiftRight(dst, parts, bits);
 
-  return lost_fraction;
+  ආපසු lost_fraction;
 }
 
 /* Combine the effect of two lost fractions.  */
@@ -707,14 +707,14 @@ static lostFraction
 combineLostFractions(lostFraction moreSignificant,
                      lostFraction lessSignificant)
 {
-  if (lessSignificant != lfExactlyZero) {
-    if (moreSignificant == lfExactlyZero)
+  නම් (lessSignificant != lfExactlyZero) {
+    නම් (moreSignificant == lfExactlyZero)
       moreSignificant = lfLessThanHalf;
-    else if (moreSignificant == lfExactlyHalf)
+    නැතහොත් නම් (moreSignificant == lfExactlyHalf)
       moreSignificant = lfMoreThanHalf;
   }
 
-  return moreSignificant;
+  ආපසු moreSignificant;
 }
 
 /* The error from the true value, in half-ulps, on multiplying two
@@ -724,22 +724,22 @@ combineLostFractions(lostFraction moreSignificant,
 
    See "How to Read Floating Point Numbers Accurately" by William D
    Clinger.  */
-static unsigned int
-HUerrBound(bool inexactMultiply, unsigned int HUerr1, unsigned int HUerr2)
+static unsigned පූර්ණ_සංඛ්‍යා
+HUerrBound(bool inexactMultiply, unsigned පූර්ණ_සංඛ්‍යා HUerr1, unsigned පූර්ණ_සංඛ්‍යා HUerr2)
 {
   assert(HUerr1 < 2 || HUerr2 < 2 || (HUerr1 + HUerr2 < 8));
 
-  if (HUerr1 + HUerr2 == 0)
-    return inexactMultiply * 2;  /* <= inexactMultiply half-ulps.  */
-  else
-    return inexactMultiply + 2 * (HUerr1 + HUerr2);
+  නම් (HUerr1 + HUerr2 == 0)
+    ආපසු inexactMultiply * 2;  /* <= inexactMultiply half-ulps.  */
+  නැතහොත්
+    ආපසු inexactMultiply + 2 * (HUerr1 + HUerr2);
 }
 
 /* The number of ulps from the boundary (zero, or half if ISNEAREST)
    when the least significant BITS are truncated.  BITS cannot be
    zero.  */
 static APFloatBase::integerPart
-ulpsFromBoundary(const APFloatBase::integerPart *parts, unsigned int bits,
+ulpsFromBoundary(const APFloatBase::integerPart *parts, unsigned පූර්ණ_සංඛ්‍යා bits,
                  bool isNearest) {
   assert(bits != 0);
 
@@ -752,33 +752,33 @@ ulpsFromBoundary(const APFloatBase::integerPart *parts, unsigned int bits,
                       (APFloatBase::integerPartWidth - partBits));
 
   APFloatBase::integerPart boundary;
-  if (isNearest)
+  නම් (isNearest)
     boundary = (APFloatBase::integerPart) 1 << (partBits - 1);
-  else
+  නැතහොත්
     boundary = 0;
 
-  if (count == 0) {
-    if (part - boundary <= boundary - part)
-      return part - boundary;
-    else
-      return boundary - part;
+  නම් (count == 0) {
+    නම් (part - boundary <= boundary - part)
+      ආපසු part - boundary;
+    නැතහොත්
+      ආපසු boundary - part;
   }
 
-  if (part == boundary) {
-    while (--count)
-      if (parts[count])
-        return ~(APFloatBase::integerPart) 0; /* A lot.  */
+  නම් (part == boundary) {
+    අතරතුර (--count)
+      නම් (parts[count])
+        ආපසු ~(APFloatBase::integerPart) 0; /* A lot.  */
 
-    return parts[0];
-  } else if (part == boundary - 1) {
-    while (--count)
-      if (~parts[count])
-        return ~(APFloatBase::integerPart) 0; /* A lot.  */
+    ආපසු parts[0];
+  } නැතහොත් නම් (part == boundary - 1) {
+    අතරතුර (--count)
+      නම් (~parts[count])
+        ආපසු ~(APFloatBase::integerPart) 0; /* A lot.  */
 
-    return -parts[0];
+    ආපසු -parts[0];
   }
 
-  return ~(APFloatBase::integerPart) 0; /* A lot.  */
+  ආපසු ~(APFloatBase::integerPart) 0; /* A lot.  */
 }
 
 static constexpr unsigned PowerOfFivePartCounts[] = {1,  1,  2,  3,   5,  10,
@@ -790,15 +790,15 @@ static constexpr APFloatBase::integerPart PowerOfFiveParts[] = {
 
 static_assert([] {
   unsigned Sum = 0;
-  for (unsigned Count : PowerOfFivePartCounts)
+  සඳහා (unsigned Count : PowerOfFivePartCounts)
     Sum += Count;
-  return Sum;
+  ආපසු Sum;
 }() == std::size(PowerOfFiveParts));
 
 /* Place pow(5, power) in DST, and return the number of parts used.
    DST must be at least one part larger than size of the answer.  */
-static unsigned int
-powerOf5(APFloatBase::integerPart *dst, unsigned int power) {
+static unsigned පූර්ණ_සංඛ්‍යා
+powerOf5(APFloatBase::integerPart *dst, unsigned පූර්ණ_සංඛ්‍යා power) {
   static const APFloatBase::integerPart firstEightPowers[] = {
       1, 5, 25, 125, 625, 3125, 15625, 78125};
 
@@ -817,15 +817,15 @@ powerOf5(APFloatBase::integerPart *dst, unsigned int power) {
   unsigned result = 1;
   pow5 = PowerOfFiveParts;
 
-  for (unsigned int n = 0; power; power >>= 1, n++) {
+  සඳහා (unsigned පූර්ණ_සංඛ්‍යා n = 0; power; power >>= 1, n++) {
     unsigned partsCount = PowerOfFivePartCounts[n];
 
-    if (power & 1) {
+    නම් (power & 1) {
       APFloatBase::integerPart *tmp;
 
       APInt::tcFullMultiply(p2, p1, pow5, result, partsCount);
       result += partsCount;
-      if (p2[result - 1] == 0)
+      නම් (p2[result - 1] == 0)
         result--;
 
       /* Now result is in p1 with partsCount parts and p2 is scratch
@@ -838,67 +838,67 @@ powerOf5(APFloatBase::integerPart *dst, unsigned int power) {
     pow5 += partsCount;
   }
 
-  if (p1 != dst)
+  නම් (p1 != dst)
     APInt::tcAssign(dst, p1, result);
 
-  return result;
+  ආපසු result;
 }
 
 /* Zero at the end to avoid modular arithmetic when adding one; used
    when rounding up during hexadecimal output.  */
-static const char hexDigitsLower[] = "0123456789abcdef0";
-static const char hexDigitsUpper[] = "0123456789ABCDEF0";
-static const char infinityL[] = "infinity";
-static const char infinityU[] = "INFINITY";
-static const char NaNL[] = "nan";
-static const char NaNU[] = "NAN";
+static const var_na hexDigitsLower[] = "0123456789abcdef0";
+static const var_na hexDigitsUpper[] = "0123456789ABCDEF0";
+static const var_na infinityL[] = "infinity";
+static const var_na infinityU[] = "INFINITY";
+static const var_na NaNL[] = "nan";
+static const var_na NaNU[] = "NAN";
 
 /* Write out an integerPart in hexadecimal, starting with the most
    significant nibble.  Write out exactly COUNT hexdigits, return
    COUNT.  */
-static unsigned int
-partAsHex (char *dst, APFloatBase::integerPart part, unsigned int count,
-           const char *hexDigitChars)
+static unsigned පූර්ණ_සංඛ්‍යා
+partAsHex (var_na *dst, APFloatBase::integerPart part, unsigned පූර්ණ_සංඛ්‍යා count,
+           const var_na *hexDigitChars)
 {
-  unsigned int result = count;
+  unsigned පූර්ණ_සංඛ්‍යා result = count;
 
   assert(count != 0 && count <= APFloatBase::integerPartWidth / 4);
 
   part >>= (APFloatBase::integerPartWidth - 4 * count);
-  while (count--) {
+  අතරතුර (count--) {
     dst[count] = hexDigitChars[part & 0xf];
     part >>= 4;
   }
 
-  return result;
+  ආපසු result;
 }
 
 /* Write out an unsigned decimal integer.  */
-static char *writeUnsignedDecimal(char *dst, unsigned int n) {
-  char buff[40], *p;
+static var_na *writeUnsignedDecimal(var_na *dst, unsigned පූර්ණ_සංඛ්‍යා n) {
+  var_na buff[40], *p;
 
   p = buff;
   do
     *p++ = '0' + n % 10;
-  while (n /= 10);
+  අතරතුර (n /= 10);
 
   do
     *dst++ = *--p;
-  while (p != buff);
+  අතරතුර (p != buff);
 
-  return dst;
+  ආපසු dst;
 }
 
 /* Write out a signed decimal integer.  */
-static char *writeSignedDecimal(char *dst, int value) {
-  if (value < 0) {
+static var_na *writeSignedDecimal(var_na *dst, පූර්ණ_සංඛ්‍යා value) {
+  නම් (value < 0) {
     *dst++ = '-';
     dst = writeUnsignedDecimal(dst, -(unsigned) value);
-  } else {
+  } නැතහොත් {
     dst = writeUnsignedDecimal(dst, value);
   }
 
-  return dst;
+  ආපසු dst;
 }
 
 // Compute the ULP of the input using a definition from:
@@ -907,21 +907,21 @@ static char *writeSignedDecimal(char *dst, int value) {
 static APFloat harrisonUlp(const APFloat &X) {
   const fltSemantics &Sem = X.getSemantics();
   switch (X.getCategory()) {
-  case APFloat::fcNaN:
-    return APFloat::getQNaN(Sem);
-  case APFloat::fcInfinity:
-    return APFloat::getInf(Sem);
-  case APFloat::fcZero:
-    return APFloat::getSmallest(Sem);
-  case APFloat::fcNormal:
-    break;
+  pak_sa APFloat::fcNaN:
+    ආපසු APFloat::getQNaN(Sem);
+  pak_sa APFloat::fcInfinity:
+    ආපසු APFloat::getInf(Sem);
+  pak_sa APFloat::fcZero:
+    ආපසු APFloat::getSmallest(Sem);
+  pak_sa APFloat::fcNormal:
+    bha_nga;
   }
-  if (X.isDenormal() || X.isSmallestNormalized())
-    return APFloat::getSmallest(Sem);
-  int Exp = ilogb(X);
-  if (X.getExactLog2() != INT_MIN)
+  නම් (X.isDenormal() || X.isSmallestNormalized())
+    ආපසු APFloat::getSmallest(Sem);
+  පූර්ණ_සංඛ්‍යා Exp = ilogb(X);
+  නම් (X.getExactLog2() != INT_MIN)
     Exp -= 1;
-  return scalbn(APFloat::getOne(Sem), Exp - (Sem.precision - 1),
+  ආපසු scalbn(APFloat::getOne(Sem), Exp - (Sem.precision - 1),
                 APFloat::rmNearestTiesToEven);
 }
 
@@ -930,12 +930,12 @@ namespace detail {
 void IEEEFloat::initialize(const fltSemantics *ourSemantics) {
   semantics = ourSemantics;
   unsigned count = partCount();
-  if (count > 1)
+  නම් (count > 1)
     significand.parts = new integerPart[count];
 }
 
 void IEEEFloat::freeSignificand() {
-  if (needsCleanup())
+  නම් (needsCleanup())
     delete [] significand.parts;
 }
 
@@ -945,7 +945,7 @@ void IEEEFloat::assign(const IEEEFloat &rhs) {
   sign = rhs.sign;
   category = rhs.category;
   exponent = rhs.exponent;
-  if (isFiniteNonZero() || category == fcNaN)
+  නම් (isFiniteNonZero() || category == fcNaN)
     copySignificand(rhs);
 }
 
@@ -961,10 +961,10 @@ void IEEEFloat::copySignificand(const IEEEFloat &rhs) {
    for the significand.  If double or longer, this is a signalling NaN,
    which may not be ideal.  If float, this is QNaN(0).  */
 void IEEEFloat::makeNaN(bool SNaN, bool Negative, const APInt *fill) {
-  if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
+  නම් (semantics->nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
     llvm_unreachable("This floating point format does not support NaN");
 
-  if (Negative && !semantics->hasSignedRepr)
+  නම් (Negative && !semantics->hasSignedRepr)
     llvm_unreachable(
         "This floating point format does not support signed values");
 
@@ -976,23 +976,23 @@ void IEEEFloat::makeNaN(bool SNaN, bool Negative, const APInt *fill) {
   unsigned numParts = partCount();
 
   APInt fill_storage;
-  if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
+  නම් (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
     // Finite-only types do not distinguish signalling and quiet NaN, so
     // make them all signalling.
     SNaN = false;
-    if (semantics->nanEncoding == fltNanEncoding::NegativeZero) {
+    නම් (semantics->nanEncoding == fltNanEncoding::NegativeZero) {
       sign = true;
       fill_storage = APInt::getZero(semantics->precision - 1);
-    } else {
+    } නැතහොත් {
       fill_storage = APInt::getAllOnes(semantics->precision - 1);
     }
     fill = &fill_storage;
   }
 
   // Set the significand bits to the fill.
-  if (!fill || fill->getNumWords() < numParts)
+  නම් (!fill || fill->getNumWords() < numParts)
     APInt::tcSet(significand, 0, numParts);
-  if (fill) {
+  නම් (fill) {
     APInt::tcAssign(significand, fill->getRawData(),
                     std::min(fill->getNumWords(), numParts));
 
@@ -1001,26 +1001,26 @@ void IEEEFloat::makeNaN(bool SNaN, bool Negative, const APInt *fill) {
     unsigned part = bitsToPreserve / 64;
     bitsToPreserve %= 64;
     significand[part] &= ((1ULL << bitsToPreserve) - 1);
-    for (part++; part != numParts; ++part)
+    සඳහා (part++; part != numParts; ++part)
       significand[part] = 0;
   }
 
   unsigned QNaNBit =
       (semantics->precision >= 2) ? (semantics->precision - 2) : 0;
 
-  if (SNaN) {
+  නම් (SNaN) {
     // We always have to clear the QNaN bit to make it an SNaN.
     APInt::tcClearBit(significand, QNaNBit);
 
     // If there are no bits set in the payload, we have to set
     // *something* to make it a NaN instead of an infinity;
     // conventionally, this is the next bit down from the QNaN bit.
-    if (APInt::tcIsZero(significand, numParts))
+    නම් (APInt::tcIsZero(significand, numParts))
       APInt::tcSetBit(significand, QNaNBit - 1);
-  } else if (semantics->nanEncoding == fltNanEncoding::NegativeZero) {
+  } නැතහොත් නම් (semantics->nanEncoding == fltNanEncoding::NegativeZero) {
     // The only NaN is a quiet NaN, and it has no bits sets in the significand.
     // Do nothing.
-  } else {
+  } නැතහොත් {
     // We always have to set the QNaN bit to make it a QNaN.
     APInt::tcSetBit(significand, QNaNBit);
   }
@@ -1028,20 +1028,20 @@ void IEEEFloat::makeNaN(bool SNaN, bool Negative, const APInt *fill) {
   // For x87 extended precision, we want to make a NaN, not a
   // pseudo-NaN.  Maybe we should expose the ability to make
   // pseudo-NaNs?
-  if (semantics == &APFloatBase::semX87DoubleExtended)
+  නම් (semantics == &APFloatBase::semX87DoubleExtended)
     APInt::tcSetBit(significand, QNaNBit + 1);
 }
 
 IEEEFloat &IEEEFloat::operator=(const IEEEFloat &rhs) {
-  if (this != &rhs) {
-    if (semantics != rhs.semantics) {
+  නම් (this != &rhs) {
+    නම් (semantics != rhs.semantics) {
       freeSignificand();
       initialize(rhs.semantics);
     }
     assign(rhs);
   }
 
-  return *this;
+  ආපසු *this;
 }
 
 IEEEFloat &IEEEFloat::operator=(IEEEFloat &&rhs) {
@@ -1054,11 +1054,11 @@ IEEEFloat &IEEEFloat::operator=(IEEEFloat &&rhs) {
   sign = rhs.sign;
 
   rhs.semantics = &APFloatBase::semBogus;
-  return *this;
+  ආපසු *this;
 }
 
 bool IEEEFloat::isDenormal() const {
-  return getSemantics().hasDenormals && isFiniteNonZero() &&
+  ආපසු getSemantics().hasDenormals && isFiniteNonZero() &&
          (exponent == semantics->minExponent) &&
          (APInt::tcExtractBit(significandParts(), semantics->precision - 1) ==
           0);
@@ -1068,26 +1068,26 @@ bool IEEEFloat::isSmallest() const {
   // The smallest number by magnitude in our format will be the smallest
   // denormal, i.e. the floating point number with exponent being minimum
   // exponent and significand bitwise equal to 1 (i.e. with MSB equal to 0).
-  return isFiniteNonZero() && exponent == semantics->minExponent &&
+  ආපසු isFiniteNonZero() && exponent == semantics->minExponent &&
     significandMSB() == 0;
 }
 
 bool IEEEFloat::isSmallestNormalized() const {
-  return getCategory() == fcNormal && exponent == semantics->minExponent &&
+  ආපසු getCategory() == fcNormal && exponent == semantics->minExponent &&
          isSignificandAllZerosExceptMSB();
 }
 
-unsigned int IEEEFloat::getNumHighBits() const {
-  const unsigned int PartCount = partCountForBits(semantics->precision);
-  const unsigned int Bits = PartCount * integerPartWidth;
+unsigned පූර්ණ_සංඛ්‍යා IEEEFloat::getNumHighBits() const {
+  const unsigned පූර්ණ_සංඛ්‍යා PartCount = partCountForBits(semantics->precision);
+  const unsigned පූර්ණ_සංඛ්‍යා Bits = PartCount * integerPartWidth;
 
   // Compute how many bits are used in the final word.
   // When precision is just 1, it represents the 'Pth'
   // Precision bit and not the actual significand bit.
-  const unsigned int NumHighBits = (semantics->precision > 1)
+  const unsigned පූර්ණ_සංඛ්‍යා NumHighBits = (semantics->precision > 1)
                                        ? (Bits - semantics->precision + 1)
                                        : (Bits - semantics->precision);
-  return NumHighBits;
+  ආපසු NumHighBits;
 }
 
 bool IEEEFloat::isSignificandAllOnes() const {
@@ -1095,9 +1095,9 @@ bool IEEEFloat::isSignificandAllOnes() const {
   // us to test for binade boundaries.
   const integerPart *Parts = significandParts();
   const unsigned PartCount = partCountForBits(semantics->precision);
-  for (unsigned i = 0; i < PartCount - 1; i++)
-    if (~Parts[i])
-      return false;
+  සඳහා (unsigned i = 0; i < PartCount - 1; i++)
+    නම් (~Parts[i])
+      ආපසු false;
 
   // Set the unused high bits to all ones when we compare.
   const unsigned NumHighBits = getNumHighBits();
@@ -1105,10 +1105,10 @@ bool IEEEFloat::isSignificandAllOnes() const {
          "Can not have more high bits to fill than integerPartWidth");
   const integerPart HighBitFill =
     ~integerPart(0) << (integerPartWidth - NumHighBits);
-  if ((semantics->precision <= 1) || (~(Parts[PartCount - 1] | HighBitFill)))
-    return false;
+  නම් ((semantics->precision <= 1) || (~(Parts[PartCount - 1] | HighBitFill)))
+    ආපසු false;
 
-  return true;
+  ආපසු true;
 }
 
 bool IEEEFloat::isSignificandAllOnesExceptLSB() const {
@@ -1116,13 +1116,13 @@ bool IEEEFloat::isSignificandAllOnesExceptLSB() const {
   // the least significant bit.
   const integerPart *Parts = significandParts();
 
-  if (Parts[0] & 1)
-    return false;
+  නම් (Parts[0] & 1)
+    ආපසු false;
 
   const unsigned PartCount = partCountForBits(semantics->precision);
-  for (unsigned i = 0; i < PartCount - 1; i++) {
-    if (~Parts[i] & ~unsigned{!i})
-      return false;
+  සඳහා (unsigned i = 0; i < PartCount - 1; i++) {
+    නම් (~Parts[i] & ~unsigned{!i})
+      ආපසු false;
   }
 
   // Set the unused high bits to all ones when we compare.
@@ -1131,10 +1131,10 @@ bool IEEEFloat::isSignificandAllOnesExceptLSB() const {
          "Can not have more high bits to fill than integerPartWidth");
   const integerPart HighBitFill = ~integerPart(0)
                                   << (integerPartWidth - NumHighBits);
-  if (~(Parts[PartCount - 1] | HighBitFill | 0x1))
-    return false;
+  නම් (~(Parts[PartCount - 1] | HighBitFill | 0x1))
+    ආපසු false;
 
-  return true;
+  ආපසු true;
 }
 
 bool IEEEFloat::isSignificandAllZeros() const {
@@ -1143,9 +1143,9 @@ bool IEEEFloat::isSignificandAllZeros() const {
   const integerPart *Parts = significandParts();
   const unsigned PartCount = partCountForBits(semantics->precision);
 
-  for (unsigned i = 0; i < PartCount - 1; i++)
-    if (Parts[i])
-      return false;
+  සඳහා (unsigned i = 0; i < PartCount - 1; i++)
+    නම් (Parts[i])
+      ආපසු false;
 
   // Compute how many bits are used in the final word.
   const unsigned NumHighBits = getNumHighBits();
@@ -1153,66 +1153,66 @@ bool IEEEFloat::isSignificandAllZeros() const {
          "clear than integerPartWidth");
   const integerPart HighBitMask = ~integerPart(0) >> NumHighBits;
 
-  if ((semantics->precision > 1) && (Parts[PartCount - 1] & HighBitMask))
-    return false;
+  නම් ((semantics->precision > 1) && (Parts[PartCount - 1] & HighBitMask))
+    ආපසු false;
 
-  return true;
+  ආපසු true;
 }
 
 bool IEEEFloat::isSignificandAllZerosExceptMSB() const {
   const integerPart *Parts = significandParts();
   const unsigned PartCount = partCountForBits(semantics->precision);
 
-  for (unsigned i = 0; i < PartCount - 1; i++) {
-    if (Parts[i])
-      return false;
+  සඳහා (unsigned i = 0; i < PartCount - 1; i++) {
+    නම් (Parts[i])
+      ආපසු false;
   }
 
   const unsigned NumHighBits = getNumHighBits();
   const integerPart MSBMask = integerPart(1)
                               << (integerPartWidth - NumHighBits);
-  return ((semantics->precision <= 1) || (Parts[PartCount - 1] == MSBMask));
+  ආපසු ((semantics->precision <= 1) || (Parts[PartCount - 1] == MSBMask));
 }
 
 bool IEEEFloat::isLargest() const {
   bool IsMaxExp = isFiniteNonZero() && exponent == semantics->maxExponent;
-  if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
+  නම් (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
       semantics->nanEncoding == fltNanEncoding::AllOnes) {
     // The largest number by magnitude in our format will be the floating point
     // number with maximum exponent and with significand that is all ones except
     // the LSB.
-    return (IsMaxExp && APFloat::hasSignificand(*semantics))
+    ආපසු (IsMaxExp && APFloat::hasSignificand(*semantics))
                ? isSignificandAllOnesExceptLSB()
                : IsMaxExp;
-  } else {
+  } නැතහොත් {
     // The largest number by magnitude in our format will be the floating point
     // number with maximum exponent and with significand that is all ones.
-    return IsMaxExp && isSignificandAllOnes();
+    ආපසු IsMaxExp && isSignificandAllOnes();
   }
 }
 
 bool IEEEFloat::isInteger() const {
   // This could be made more efficient; I'm going for obviously correct.
-  if (!isFinite()) return false;
+  නම් (!isFinite()) ආපසු false;
   IEEEFloat truncated = *this;
   truncated.roundToIntegral(rmTowardZero);
-  return compare(truncated) == cmpEqual;
+  ආපසු compare(truncated) == cmpEqual;
 }
 
 bool IEEEFloat::bitwiseIsEqual(const IEEEFloat &rhs) const {
-  if (this == &rhs)
-    return true;
-  if (semantics != rhs.semantics ||
+  නම් (this == &rhs)
+    ආපසු true;
+  නම් (semantics != rhs.semantics ||
       category != rhs.category ||
       sign != rhs.sign)
-    return false;
-  if (category==fcZero || category==fcInfinity)
-    return true;
+    ආපසු false;
+  නම් (category==fcZero || category==fcInfinity)
+    ආපසු true;
 
-  if (isFiniteNonZero() && exponent != rhs.exponent)
-    return false;
+  නම් (isFiniteNonZero() && exponent != rhs.exponent)
+    ආපසු false;
 
-  return std::equal(significandParts(), significandParts() + partCount(),
+  ආපසු std::equal(significandParts(), significandParts() + partCount(),
                     rhs.significandParts());
 }
 
@@ -1253,19 +1253,19 @@ IEEEFloat::IEEEFloat(IEEEFloat &&rhs) : semantics(&APFloatBase::semBogus) {
 
 IEEEFloat::~IEEEFloat() { freeSignificand(); }
 
-unsigned int IEEEFloat::partCount() const {
-  return partCountForBits(semantics->precision + 1);
+unsigned පූර්ණ_සංඛ්‍යා IEEEFloat::partCount() const {
+  ආපසු partCountForBits(semantics->precision + 1);
 }
 
 const APFloat::integerPart *IEEEFloat::significandParts() const {
-  return const_cast<IEEEFloat *>(this)->significandParts();
+  ආපසු const_cast<IEEEFloat *>(this)->significandParts();
 }
 
 APFloat::integerPart *IEEEFloat::significandParts() {
-  if (partCount() > 1)
-    return significand.parts;
-  else
-    return &significand.part;
+  නම් (partCount() > 1)
+    ආපසු significand.parts;
+  නැතහොත්
+    ආපසු &significand.part;
 }
 
 void IEEEFloat::zeroSignificand() {
@@ -1288,7 +1288,7 @@ APFloat::integerPart IEEEFloat::addSignificand(const IEEEFloat &rhs) {
   assert(semantics == rhs.semantics);
   assert(exponent == rhs.exponent);
 
-  return APInt::tcAdd(parts, rhs.significandParts(), 0, partCount());
+  ආපසු APInt::tcAdd(parts, rhs.significandParts(), 0, partCount());
 }
 
 /* Subtract the significand of the RHS with a borrow flag.  Returns
@@ -1300,7 +1300,7 @@ APFloat::integerPart IEEEFloat::subtractSignificand(const IEEEFloat &rhs,
   assert(semantics == rhs.semantics);
   assert(exponent == rhs.exponent);
 
-  return APInt::tcSubtract(parts, rhs.significandParts(), borrow,
+  ආපසු APInt::tcSubtract(parts, rhs.significandParts(), borrow,
                            partCount());
 }
 
@@ -1348,7 +1348,7 @@ lostFraction IEEEFloat::multiplySignificand(const IEEEFloat &rhs,
   // toward left by two bits, and adjust exponent accordingly.
   exponent += 2;
 
-  if (!ignoreAddend && addend.isNonZero()) {
+  නම් (!ignoreAddend && addend.isNonZero()) {
     // The intermediate result of the multiplication has "2 * precision"
     // signicant bit; adjust the addend to be consistent with mul result.
     //
@@ -1357,7 +1357,7 @@ lostFraction IEEEFloat::multiplySignificand(const IEEEFloat &rhs,
 
     // Normalize our MSB to one below the top bit to allow for overflow.
     unsigned extendedPrecision = 2 * precision + 1;
-    if (omsb != extendedPrecision - 1) {
+    නම් (omsb != extendedPrecision - 1) {
       assert(extendedPrecision > omsb);
       APInt::tcShiftLeft(fullSignificand, newPartsCount,
                          (extendedPrecision - 1) - omsb);
@@ -1368,9 +1368,9 @@ lostFraction IEEEFloat::multiplySignificand(const IEEEFloat &rhs,
     fltSemantics extendedSemantics = *semantics;
     extendedSemantics.precision = extendedPrecision;
 
-    if (newPartsCount == 1)
+    නම් (newPartsCount == 1)
       significand.part = fullSignificand[0];
-    else
+    නැතහොත්
       significand.parts = fullSignificand;
     semantics = &extendedSemantics;
 
@@ -1392,7 +1392,7 @@ lostFraction IEEEFloat::multiplySignificand(const IEEEFloat &rhs,
     lost_fraction = addOrSubtractSignificand(extendedAddend, false);
 
     /* Restore our state.  */
-    if (newPartsCount == 1)
+    නම් (newPartsCount == 1)
       fullSignificand[0] = significand.part;
     significand = savedSignificand;
     semantics = savedSemantics;
@@ -1413,8 +1413,8 @@ lostFraction IEEEFloat::multiplySignificand(const IEEEFloat &rhs,
   // Note that the result is not normalized when "omsb < precision". So, the
   // caller needs to call IEEEFloat::normalize() if normalized value is
   // expected.
-  if (omsb > precision) {
-    unsigned int bits, significantParts;
+  නම් (omsb > precision) {
+    unsigned පූර්ණ_සංඛ්‍යා bits, significantParts;
     lostFraction lf;
 
     bits = omsb - precision;
@@ -1426,10 +1426,10 @@ lostFraction IEEEFloat::multiplySignificand(const IEEEFloat &rhs,
 
   APInt::tcAssign(lhsSignificand, fullSignificand, partsCount);
 
-  if (newPartsCount > 4)
+  නම් (newPartsCount > 4)
     delete [] fullSignificand;
 
-  return lost_fraction;
+  ආපසු lost_fraction;
 }
 
 lostFraction IEEEFloat::multiplySignificand(const IEEEFloat &rhs) {
@@ -1438,7 +1438,7 @@ lostFraction IEEEFloat::multiplySignificand(const IEEEFloat &rhs) {
   // But when the semantics does not support zero, we need to
   // explicitly convey that this addend should be ignored
   // for multiplication.
-  return multiplySignificand(rhs, IEEEFloat(*semantics), !semantics->hasZero);
+  ආපසු multiplySignificand(rhs, IEEEFloat(*semantics), !semantics->hasZero);
 }
 
 /* Multiply the significands of LHS and RHS to DST.  */
@@ -1456,7 +1456,7 @@ lostFraction IEEEFloat::divideSignificand(const IEEEFloat &rhs) {
   integerPart *divisor = dividend + partsCount;
 
   /* Copy the dividend and divisor as they will be modified in-place.  */
-  for (unsigned i = 0; i < partsCount; i++) {
+  සඳහා (unsigned i = 0; i < partsCount; i++) {
     dividend[i] = lhsSignificand[i];
     divisor[i] = rhsSignificand[i];
     lhsSignificand[i] = 0;
@@ -1464,18 +1464,18 @@ lostFraction IEEEFloat::divideSignificand(const IEEEFloat &rhs) {
 
   exponent -= rhs.exponent;
 
-  unsigned int precision = semantics->precision;
+  unsigned පූර්ණ_සංඛ්‍යා precision = semantics->precision;
 
   /* Normalize the divisor.  */
   unsigned bit = precision - APInt::tcMSB(divisor, partsCount) - 1;
-  if (bit) {
+  නම් (bit) {
     exponent += bit;
     APInt::tcShiftLeft(divisor, partsCount, bit);
   }
 
   /* Normalize the dividend.  */
   bit = precision - APInt::tcMSB(dividend, partsCount) - 1;
-  if (bit) {
+  නම් (bit) {
     exponent -= bit;
     APInt::tcShiftLeft(dividend, partsCount, bit);
   }
@@ -1483,15 +1483,15 @@ lostFraction IEEEFloat::divideSignificand(const IEEEFloat &rhs) {
   /* Ensure the dividend >= divisor initially for the loop below.
      Incidentally, this means that the division loop below is
      guaranteed to set the integer bit to one.  */
-  if (APInt::tcCompare(dividend, divisor, partsCount) < 0) {
+  නම් (APInt::tcCompare(dividend, divisor, partsCount) < 0) {
     exponent--;
     APInt::tcShiftLeft(dividend, partsCount, 1);
     assert(APInt::tcCompare(dividend, divisor, partsCount) >= 0);
   }
 
   /* Long division.  */
-  for (bit = precision; bit; bit -= 1) {
-    if (APInt::tcCompare(dividend, divisor, partsCount) >= 0) {
+  සඳහා (bit = precision; bit; bit -= 1) {
+    නම් (APInt::tcCompare(dividend, divisor, partsCount) >= 0) {
       APInt::tcSubtract(dividend, divisor, 0, partsCount);
       APInt::tcSetBit(lhsSignificand, bit - 1);
     }
@@ -1500,49 +1500,49 @@ lostFraction IEEEFloat::divideSignificand(const IEEEFloat &rhs) {
   }
 
   /* Figure out the lost fraction.  */
-  int cmp = APInt::tcCompare(dividend, divisor, partsCount);
+  පූර්ණ_සංඛ්‍යා cmp = APInt::tcCompare(dividend, divisor, partsCount);
 
   lostFraction lost_fraction;
-  if (cmp > 0)
+  නම් (cmp > 0)
     lost_fraction = lfMoreThanHalf;
-  else if (cmp == 0)
+  නැතහොත් නම් (cmp == 0)
     lost_fraction = lfExactlyHalf;
-  else if (APInt::tcIsZero(dividend, partsCount))
+  නැතහොත් නම් (APInt::tcIsZero(dividend, partsCount))
     lost_fraction = lfExactlyZero;
-  else
+  නැතහොත්
     lost_fraction = lfLessThanHalf;
 
-  if (partsCount > 2)
+  නම් (partsCount > 2)
     delete [] dividend;
 
-  return lost_fraction;
+  ආපසු lost_fraction;
 }
 
-unsigned int IEEEFloat::significandMSB() const {
-  return APInt::tcMSB(significandParts(), partCount());
+unsigned පූර්ණ_සංඛ්‍යා IEEEFloat::significandMSB() const {
+  ආපසු APInt::tcMSB(significandParts(), partCount());
 }
 
-unsigned int IEEEFloat::significandLSB() const {
-  return APInt::tcLSB(significandParts(), partCount());
+unsigned පූර්ණ_සංඛ්‍යා IEEEFloat::significandLSB() const {
+  ආපසු APInt::tcLSB(significandParts(), partCount());
 }
 
 /* Note that a zero result is NOT normalized to fcZero.  */
-lostFraction IEEEFloat::shiftSignificandRight(unsigned int bits) {
+lostFraction IEEEFloat::shiftSignificandRight(unsigned පූර්ණ_සංඛ්‍යා bits) {
   /* Our exponent should not overflow.  */
   assert((ExponentType) (exponent + bits) >= exponent);
 
   exponent += bits;
 
-  return shiftRight(significandParts(), partCount(), bits);
+  ආපසු shiftRight(significandParts(), partCount(), bits);
 }
 
 /* Shift the significand left BITS bits, subtract BITS from its exponent.  */
-void IEEEFloat::shiftSignificandLeft(unsigned int bits) {
+void IEEEFloat::shiftSignificandLeft(unsigned පූර්ණ_සංඛ්‍යා bits) {
   assert(bits < semantics->precision ||
          (semantics->precision == 1 && bits <= 1));
 
-  if (bits) {
-    unsigned int partsCount = partCount();
+  නම් (bits) {
+    unsigned පූර්ණ_සංඛ්‍යා partsCount = partCount();
 
     APInt::tcShiftLeft(significandParts(), partsCount, bits);
     exponent -= bits;
@@ -1556,20 +1556,20 @@ APFloat::cmpResult IEEEFloat::compareAbsoluteValue(const IEEEFloat &rhs) const {
   assert(isFiniteNonZero());
   assert(rhs.isFiniteNonZero());
 
-  int compare = exponent - rhs.exponent;
+  පූර්ණ_සංඛ්‍යා compare = exponent - rhs.exponent;
 
   /* If exponents are equal, do an unsigned bignum comparison of the
      significands.  */
-  if (compare == 0)
+  නම් (compare == 0)
     compare = APInt::tcCompare(significandParts(), rhs.significandParts(),
                                partCount());
 
-  if (compare > 0)
-    return cmpGreaterThan;
-  else if (compare < 0)
-    return cmpLessThan;
-  else
-    return cmpEqual;
+  නම් (compare > 0)
+    ආපසු cmpGreaterThan;
+  නැතහොත් නම් (compare < 0)
+    ආපසු cmpLessThan;
+  නැතහොත්
+    ආපසු cmpEqual;
 }
 
 /* Set the least significant BITS bits of a bignum, clear the
@@ -1577,32 +1577,32 @@ APFloat::cmpResult IEEEFloat::compareAbsoluteValue(const IEEEFloat &rhs) const {
 static void tcSetLeastSignificantBits(APInt::WordType *dst, unsigned parts,
                                       unsigned bits) {
   unsigned i = 0;
-  while (bits > APInt::APINT_BITS_PER_WORD) {
+  අතරතුර (bits > APInt::APINT_BITS_PER_WORD) {
     dst[i++] = ~(APInt::WordType)0;
     bits -= APInt::APINT_BITS_PER_WORD;
   }
 
-  if (bits)
+  නම් (bits)
     dst[i++] = ~(APInt::WordType)0 >> (APInt::APINT_BITS_PER_WORD - bits);
 
-  while (i < parts)
+  අතරතුර (i < parts)
     dst[i++] = 0;
 }
 
 /* Handle overflow.  Sign is preserved.  We either become infinity or
    the largest finite number.  */
 APFloat::opStatus IEEEFloat::handleOverflow(roundingMode rounding_mode) {
-  if (semantics->nonFiniteBehavior != fltNonfiniteBehavior::FiniteOnly) {
+  නම් (semantics->nonFiniteBehavior != fltNonfiniteBehavior::FiniteOnly) {
     /* Infinity?  */
-    if (rounding_mode == rmNearestTiesToEven ||
+    නම් (rounding_mode == rmNearestTiesToEven ||
         rounding_mode == rmNearestTiesToAway ||
         (rounding_mode == rmTowardPositive && !sign) ||
         (rounding_mode == rmTowardNegative && sign)) {
-      if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly)
+      නම් (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly)
         makeNaN(false, sign);
-      else
+      නැතහොත්
         category = fcInfinity;
-      return static_cast<opStatus>(opOverflow | opInexact);
+      ආපසු static_cast<opStatus>(opOverflow | opInexact);
     }
   }
 
@@ -1611,11 +1611,11 @@ APFloat::opStatus IEEEFloat::handleOverflow(roundingMode rounding_mode) {
   exponent = semantics->maxExponent;
   tcSetLeastSignificantBits(significandParts(), partCount(),
                             semantics->precision);
-  if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
+  නම් (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
       semantics->nanEncoding == fltNanEncoding::AllOnes)
     APInt::tcClearBit(significandParts(), 0);
 
-  return opInexact;
+  ආපසු opInexact;
 }
 
 /* Returns TRUE if, when truncating the current number, with BIT the
@@ -1625,7 +1625,7 @@ APFloat::opStatus IEEEFloat::handleOverflow(roundingMode rounding_mode) {
    fcNormal numbers.  */
 bool IEEEFloat::roundAwayFromZero(roundingMode rounding_mode,
                                   lostFraction lost_fraction,
-                                  unsigned int bit) const {
+                                  unsigned පූර්ණ_සංඛ්‍යා bit) const {
   /* NaNs and infinities should not have lost fractions.  */
   assert(isFiniteNonZero() || category == fcZero);
 
@@ -1633,70 +1633,70 @@ bool IEEEFloat::roundAwayFromZero(roundingMode rounding_mode,
   assert(lost_fraction != lfExactlyZero);
 
   switch (rounding_mode) {
-  case rmNearestTiesToAway:
-    return lost_fraction == lfExactlyHalf || lost_fraction == lfMoreThanHalf;
+  pak_sa rmNearestTiesToAway:
+    ආපසු lost_fraction == lfExactlyHalf || lost_fraction == lfMoreThanHalf;
 
-  case rmNearestTiesToEven:
-    if (lost_fraction == lfMoreThanHalf)
-      return true;
+  pak_sa rmNearestTiesToEven:
+    නම් (lost_fraction == lfMoreThanHalf)
+      ආපසු true;
 
     /* Our zeroes don't have a significand to test.  */
-    if (lost_fraction == lfExactlyHalf && category != fcZero)
-      return APInt::tcExtractBit(significandParts(), bit);
+    නම් (lost_fraction == lfExactlyHalf && category != fcZero)
+      ආපසු APInt::tcExtractBit(significandParts(), bit);
 
-    return false;
+    ආපසු false;
 
-  case rmTowardZero:
-    return false;
+  pak_sa rmTowardZero:
+    ආපසු false;
 
-  case rmTowardPositive:
-    return !sign;
+  pak_sa rmTowardPositive:
+    ආපසු !sign;
 
-  case rmTowardNegative:
-    return sign;
+  pak_sa rmTowardNegative:
+    ආපසු sign;
 
   default:
-    break;
+    bha_nga;
   }
   llvm_unreachable("Invalid rounding mode found");
 }
 
 APFloat::opStatus IEEEFloat::normalize(roundingMode rounding_mode,
                                        lostFraction lost_fraction) {
-  if (!isFiniteNonZero())
-    return opOK;
+  නම් (!isFiniteNonZero())
+    ආපසු opOK;
 
   /* Before rounding normalize the exponent of fcNormal numbers.  */
   /* One, not zero, based MSB.  */
   unsigned omsb = significandMSB() + 1;
 
   // Only skip this `if` if the value is exactly zero.
-  if (omsb || lost_fraction != lfExactlyZero) {
+  නම් (omsb || lost_fraction != lfExactlyZero) {
     /* OMSB is numbered from 1.  We want to place it in the integer
        bit numbered PRECISION if possible, with a compensating change in
        the exponent.  */
-    int exponentChange = omsb - semantics->precision;
+    පූර්ණ_සංඛ්‍යා exponentChange = omsb - semantics->precision;
 
     /* If the resulting exponent is too high, overflow according to
        the rounding mode.  */
-    if (exponent + exponentChange > semantics->maxExponent)
-      return handleOverflow(rounding_mode);
+    නම් (exponent + exponentChange > semantics->maxExponent)
+      ආපසු handleOverflow(rounding_mode);
 
     /* Subnormal numbers have exponent minExponent, and their MSB
        is forced based on that.  */
-    if (exponent + exponentChange < semantics->minExponent)
+    නම් (exponent + exponentChange < semantics->minExponent)
       exponentChange = semantics->minExponent - exponent;
 
     /* Shifting left is easy as we don't lose precision.  */
-    if (exponentChange < 0) {
+    නම් (exponentChange < 0) {
       assert(lost_fraction == lfExactlyZero);
 
       shiftSignificandLeft(-exponentChange);
 
-      return opOK;
+      ආපසු opOK;
     }
 
-    if (exponentChange > 0) {
+    නම් (exponentChange > 0) {
       lostFraction lf;
 
       /* Shift right and capture any new lost fraction.  */
@@ -1705,93 +1705,93 @@ APFloat::opStatus IEEEFloat::normalize(roundingMode rounding_mode,
       lost_fraction = combineLostFractions(lf, lost_fraction);
 
       /* Keep OMSB up-to-date.  */
-      if (omsb > (unsigned) exponentChange)
+      නම් (omsb > (unsigned) exponentChange)
         omsb -= exponentChange;
-      else
+      නැතහොත්
         omsb = 0;
     }
   }
 
   // The all-ones values is an overflow if NaN is all ones. If NaN is
   // represented by negative zero, then it is a valid finite value.
-  if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
+  නම් (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
       semantics->nanEncoding == fltNanEncoding::AllOnes &&
       exponent == semantics->maxExponent && isSignificandAllOnes())
-    return handleOverflow(rounding_mode);
+    ආපසු handleOverflow(rounding_mode);
 
   /* Now round the number according to rounding_mode given the lost
      fraction.  */
 
   /* As specified in IEEE 754, since we do not trap we do not report
      underflow for exact results.  */
-  if (lost_fraction == lfExactlyZero) {
+  නම් (lost_fraction == lfExactlyZero) {
     /* Canonicalize zeroes.  */
-    if (omsb == 0) {
+    නම් (omsb == 0) {
       category = fcZero;
-      if (semantics->nanEncoding == fltNanEncoding::NegativeZero)
+      නම් (semantics->nanEncoding == fltNanEncoding::NegativeZero)
         sign = false;
-      if (!semantics->hasZero)
+      නම් (!semantics->hasZero)
         makeSmallestNormalized(false);
     }
 
-    return opOK;
+    ආපසු opOK;
   }
 
   /* Increment the significand if we're rounding away from zero.  */
-  if (roundAwayFromZero(rounding_mode, lost_fraction, 0)) {
-    if (omsb == 0)
+  නම් (roundAwayFromZero(rounding_mode, lost_fraction, 0)) {
+    නම් (omsb == 0)
       exponent = semantics->minExponent;
 
     incrementSignificand();
     omsb = significandMSB() + 1;
 
     /* Did the significand increment overflow?  */
-    if (omsb == (unsigned) semantics->precision + 1) {
+    නම් (omsb == (unsigned) semantics->precision + 1) {
       /* Renormalize by incrementing the exponent and shifting our
          significand right one.  However if we already have the
          maximum exponent we overflow to infinity.  */
-      if (exponent == semantics->maxExponent)
+      නම් (exponent == semantics->maxExponent)
         // Invoke overflow handling with a rounding mode that will guarantee
         // that the result gets turned into the correct infinity representation.
         // This is needed instead of just setting the category to infinity to
         // account for 8-bit floating point types that have no inf, only NaN.
-        return handleOverflow(sign ? rmTowardNegative : rmTowardPositive);
+        ආපසු handleOverflow(sign ? rmTowardNegative : rmTowardPositive);
 
       shiftSignificandRight(1);
 
-      return opInexact;
+      ආපසු opInexact;
     }
 
     // The all-ones values is an overflow if NaN is all ones. If NaN is
     // represented by negative zero, then it is a valid finite value.
-    if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
+    නම් (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
         semantics->nanEncoding == fltNanEncoding::AllOnes &&
         exponent == semantics->maxExponent && isSignificandAllOnes())
-      return handleOverflow(rounding_mode);
+      ආපසු handleOverflow(rounding_mode);
   }
 
   /* The normal case - we were and are not denormal, and any
      significand increment above didn't overflow.  */
-  if (omsb == semantics->precision)
-    return opInexact;
+  නම් (omsb == semantics->precision)
+    ආපසු opInexact;
 
   /* We have a non-zero denormal.  */
   assert(omsb < semantics->precision);
 
   /* Canonicalize zeroes.  */
-  if (omsb == 0) {
+  නම් (omsb == 0) {
     category = fcZero;
-    if (semantics->nanEncoding == fltNanEncoding::NegativeZero)
+    නම් (semantics->nanEncoding == fltNanEncoding::NegativeZero)
       sign = false;
     // This condition handles the case where the semantics
     // does not have zero but uses the all-zero encoding
     // to represent the smallest normal value.
-    if (!semantics->hasZero)
+    නම් (!semantics->hasZero)
       makeSmallestNormalized(false);
   }
 
   /* The fcZero case is a denormal that underflowed to zero.  */
-  return (opStatus) (opUnderflow | opInexact);
+  ආපසු (opStatus) (opUnderflow | opInexact);
 }
 
 APFloat::opStatus IEEEFloat::addOrSubtractSpecials(const IEEEFloat &rhs,
@@ -1800,53 +1800,53 @@ APFloat::opStatus IEEEFloat::addOrSubtractSpecials(const IEEEFloat &rhs,
   default:
     llvm_unreachable(nullptr);
 
-  case PackCategoriesIntoKey(fcZero, fcNaN):
-  case PackCategoriesIntoKey(fcNormal, fcNaN):
-  case PackCategoriesIntoKey(fcInfinity, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcZero, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcNormal, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcNaN):
     assign(rhs);
     [[fallthrough]];
-  case PackCategoriesIntoKey(fcNaN, fcZero):
-  case PackCategoriesIntoKey(fcNaN, fcNormal):
-  case PackCategoriesIntoKey(fcNaN, fcInfinity):
-  case PackCategoriesIntoKey(fcNaN, fcNaN):
-    if (isSignaling()) {
+  pak_sa PackCategoriesIntoKey(fcNaN, fcZero):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcNormal):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcNaN):
+    නම් (isSignaling()) {
       makeQuiet();
-      return opInvalidOp;
+      ආපසු opInvalidOp;
     }
-    return rhs.isSignaling() ? opInvalidOp : opOK;
+    ආපසු rhs.isSignaling() ? opInvalidOp : opOK;
 
-  case PackCategoriesIntoKey(fcNormal, fcZero):
-  case PackCategoriesIntoKey(fcInfinity, fcNormal):
-  case PackCategoriesIntoKey(fcInfinity, fcZero):
-    return opOK;
+  pak_sa PackCategoriesIntoKey(fcNormal, fcZero):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcNormal):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcZero):
+    ආපසු opOK;
 
-  case PackCategoriesIntoKey(fcNormal, fcInfinity):
-  case PackCategoriesIntoKey(fcZero, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcNormal, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcZero, fcInfinity):
     category = fcInfinity;
     sign = rhs.sign ^ subtract;
-    return opOK;
+    ආපසු opOK;
 
-  case PackCategoriesIntoKey(fcZero, fcNormal):
+  pak_sa PackCategoriesIntoKey(fcZero, fcNormal):
     assign(rhs);
     sign = rhs.sign ^ subtract;
-    return opOK;
+    ආපසු opOK;
 
-  case PackCategoriesIntoKey(fcZero, fcZero):
+  pak_sa PackCategoriesIntoKey(fcZero, fcZero):
     /* Sign depends on rounding mode; handled by caller.  */
-    return opOK;
+    ආපසු opOK;
 
-  case PackCategoriesIntoKey(fcInfinity, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcInfinity):
     /* Differently signed infinities can only be validly
        subtracted.  */
-    if (((sign ^ rhs.sign)!=0) != subtract) {
+    නම් (((sign ^ rhs.sign)!=0) != subtract) {
       makeNaN();
-      return opInvalidOp;
+      ආපසු opInvalidOp;
     }
 
-    return opOK;
+    ආපසු opOK;
 
-  case PackCategoriesIntoKey(fcNormal, fcNormal):
-    return opDivByZero;
+  pak_sa PackCategoriesIntoKey(fcNormal, fcNormal):
+    ආපසු opDivByZero;
   }
 }
 
@@ -1861,58 +1861,58 @@ lostFraction IEEEFloat::addOrSubtractSignificand(const IEEEFloat &rhs,
   subtract ^= static_cast<bool>(sign ^ rhs.sign);
 
   /* Are we bigger exponent-wise than the RHS?  */
-  int bits = exponent - rhs.exponent;
+  පූර්ණ_සංඛ්‍යා bits = exponent - rhs.exponent;
 
   /* Subtraction is more subtle than one might naively expect.  */
-  if (subtract) {
-    if ((bits < 0) && !semantics->hasSignedRepr)
+  නම් (subtract) {
+    නම් ((bits < 0) && !semantics->hasSignedRepr)
       llvm_unreachable(
           "This floating point format does not support signed values");
 
     IEEEFloat temp_rhs(rhs);
     bool lost_fraction_is_from_rhs = false;
 
-    if (bits == 0)
+    නම් (bits == 0)
       lost_fraction = lfExactlyZero;
-    else if (bits > 0) {
+    නැතහොත් නම් (bits > 0) {
       lost_fraction = temp_rhs.shiftSignificandRight(bits - 1);
       lost_fraction_is_from_rhs = true;
       shiftSignificandLeft(1);
-    } else {
+    } නැතහොත් {
       lost_fraction = shiftSignificandRight(-bits - 1);
       temp_rhs.shiftSignificandLeft(1);
     }
 
     // Should we reverse the subtraction.
     cmpResult cmp_result = compareAbsoluteValue(temp_rhs);
-    if (cmp_result == cmpLessThan) {
+    නම් (cmp_result == cmpLessThan) {
       bool borrow =
           lost_fraction != lfExactlyZero && !lost_fraction_is_from_rhs;
-      if (borrow) {
+      නම් (borrow) {
         // The lost fraction is being subtracted, borrow from the significand
         // and invert `lost_fraction`.
-        if (lost_fraction == lfLessThanHalf)
+        නම් (lost_fraction == lfLessThanHalf)
           lost_fraction = lfMoreThanHalf;
-        else if (lost_fraction == lfMoreThanHalf)
+        නැතහොත් නම් (lost_fraction == lfMoreThanHalf)
           lost_fraction = lfLessThanHalf;
       }
       carry = temp_rhs.subtractSignificand(*this, borrow);
       copySignificand(temp_rhs);
       sign = !sign;
-    } else if (cmp_result == cmpGreaterThan) {
+    } නැතහොත් නම් (cmp_result == cmpGreaterThan) {
       bool borrow = lost_fraction != lfExactlyZero && lost_fraction_is_from_rhs;
-      if (borrow) {
+      නම් (borrow) {
         // The lost fraction is being subtracted, borrow from the significand
         // and invert `lost_fraction`.
-        if (lost_fraction == lfLessThanHalf)
+        නම් (lost_fraction == lfLessThanHalf)
           lost_fraction = lfMoreThanHalf;
-        else if (lost_fraction == lfMoreThanHalf)
+        නැතහොත් නම් (lost_fraction == lfMoreThanHalf)
           lost_fraction = lfLessThanHalf;
       }
       carry = subtractSignificand(temp_rhs, borrow);
-    } else { // cmpEqual
+    } නැතහොත් { // cmpEqual
       zeroSignificand();
-      if (lost_fraction != lfExactlyZero && lost_fraction_is_from_rhs) {
+      නම් (lost_fraction != lfExactlyZero && lost_fraction_is_from_rhs) {
         // rhs is slightly larger due to the lost fraction, flip the sign.
         sign = !sign;
       }
@@ -1921,13 +1921,13 @@ lostFraction IEEEFloat::addOrSubtractSignificand(const IEEEFloat &rhs,
     /* The code above is intended to ensure that no borrow is
        necessary.  */
     assert(!carry);
-  } else {
-    if (bits > 0) {
+  } නැතහොත් {
+    නම් (bits > 0) {
       IEEEFloat temp_rhs(rhs);
 
       lost_fraction = temp_rhs.shiftSignificandRight(bits);
       carry = addSignificand(temp_rhs);
-    } else {
+    } නැතහොත් {
       lost_fraction = shiftSignificandRight(-bits);
       carry = addSignificand(rhs);
     }
@@ -1936,7 +1936,7 @@ lostFraction IEEEFloat::addOrSubtractSignificand(const IEEEFloat &rhs,
     assert(!carry);
   }
 
-  return lost_fraction;
+  ආපසු lost_fraction;
 }
 
 APFloat::opStatus IEEEFloat::multiplySpecials(const IEEEFloat &rhs) {
@@ -1944,42 +1944,42 @@ APFloat::opStatus IEEEFloat::multiplySpecials(const IEEEFloat &rhs) {
   default:
     llvm_unreachable(nullptr);
 
-  case PackCategoriesIntoKey(fcZero, fcNaN):
-  case PackCategoriesIntoKey(fcNormal, fcNaN):
-  case PackCategoriesIntoKey(fcInfinity, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcZero, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcNormal, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcNaN):
     assign(rhs);
     sign = false;
     [[fallthrough]];
-  case PackCategoriesIntoKey(fcNaN, fcZero):
-  case PackCategoriesIntoKey(fcNaN, fcNormal):
-  case PackCategoriesIntoKey(fcNaN, fcInfinity):
-  case PackCategoriesIntoKey(fcNaN, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcZero):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcNormal):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcNaN):
     sign ^= rhs.sign; // restore the original sign
-    if (isSignaling()) {
+    නම් (isSignaling()) {
       makeQuiet();
-      return opInvalidOp;
+      ආපසු opInvalidOp;
     }
-    return rhs.isSignaling() ? opInvalidOp : opOK;
+    ආපසු rhs.isSignaling() ? opInvalidOp : opOK;
 
-  case PackCategoriesIntoKey(fcNormal, fcInfinity):
-  case PackCategoriesIntoKey(fcInfinity, fcNormal):
-  case PackCategoriesIntoKey(fcInfinity, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcNormal, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcNormal):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcInfinity):
     category = fcInfinity;
-    return opOK;
+    ආපසු opOK;
 
-  case PackCategoriesIntoKey(fcZero, fcNormal):
-  case PackCategoriesIntoKey(fcNormal, fcZero):
-  case PackCategoriesIntoKey(fcZero, fcZero):
+  pak_sa PackCategoriesIntoKey(fcZero, fcNormal):
+  pak_sa PackCategoriesIntoKey(fcNormal, fcZero):
+  pak_sa PackCategoriesIntoKey(fcZero, fcZero):
     category = fcZero;
-    return opOK;
+    ආපසු opOK;
 
-  case PackCategoriesIntoKey(fcZero, fcInfinity):
-  case PackCategoriesIntoKey(fcInfinity, fcZero):
+  pak_sa PackCategoriesIntoKey(fcZero, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcZero):
     makeNaN();
-    return opInvalidOp;
+    ආපසු opInvalidOp;
 
-  case PackCategoriesIntoKey(fcNormal, fcNormal):
-    return opOK;
+  pak_sa PackCategoriesIntoKey(fcNormal, fcNormal):
+    ආපසු opOK;
   }
 }
 
@@ -1988,47 +1988,47 @@ APFloat::opStatus IEEEFloat::divideSpecials(const IEEEFloat &rhs) {
   default:
     llvm_unreachable(nullptr);
 
-  case PackCategoriesIntoKey(fcZero, fcNaN):
-  case PackCategoriesIntoKey(fcNormal, fcNaN):
-  case PackCategoriesIntoKey(fcInfinity, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcZero, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcNormal, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcNaN):
     assign(rhs);
     sign = false;
     [[fallthrough]];
-  case PackCategoriesIntoKey(fcNaN, fcZero):
-  case PackCategoriesIntoKey(fcNaN, fcNormal):
-  case PackCategoriesIntoKey(fcNaN, fcInfinity):
-  case PackCategoriesIntoKey(fcNaN, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcZero):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcNormal):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcNaN):
     sign ^= rhs.sign; // restore the original sign
-    if (isSignaling()) {
+    නම් (isSignaling()) {
       makeQuiet();
-      return opInvalidOp;
+      ආපසු opInvalidOp;
     }
-    return rhs.isSignaling() ? opInvalidOp : opOK;
+    ආපසු rhs.isSignaling() ? opInvalidOp : opOK;
 
-  case PackCategoriesIntoKey(fcInfinity, fcZero):
-  case PackCategoriesIntoKey(fcInfinity, fcNormal):
-  case PackCategoriesIntoKey(fcZero, fcInfinity):
-  case PackCategoriesIntoKey(fcZero, fcNormal):
-    return opOK;
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcZero):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcNormal):
+  pak_sa PackCategoriesIntoKey(fcZero, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcZero, fcNormal):
+    ආපසු opOK;
 
-  case PackCategoriesIntoKey(fcNormal, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcNormal, fcInfinity):
     category = fcZero;
-    return opOK;
+    ආපසු opOK;
 
-  case PackCategoriesIntoKey(fcNormal, fcZero):
-    if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly)
+  pak_sa PackCategoriesIntoKey(fcNormal, fcZero):
+    නම් (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly)
       makeNaN(false, sign);
-    else
+    නැතහොත්
       category = fcInfinity;
-    return opDivByZero;
+    ආපසු opDivByZero;
 
-  case PackCategoriesIntoKey(fcInfinity, fcInfinity):
-  case PackCategoriesIntoKey(fcZero, fcZero):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcZero, fcZero):
     makeNaN();
-    return opInvalidOp;
+    ආපසු opInvalidOp;
 
-  case PackCategoriesIntoKey(fcNormal, fcNormal):
-    return opOK;
+  pak_sa PackCategoriesIntoKey(fcNormal, fcNormal):
+    ආපසු opOK;
   }
 }
 
@@ -2037,36 +2037,36 @@ APFloat::opStatus IEEEFloat::modSpecials(const IEEEFloat &rhs) {
   default:
     llvm_unreachable(nullptr);
 
-  case PackCategoriesIntoKey(fcZero, fcNaN):
-  case PackCategoriesIntoKey(fcNormal, fcNaN):
-  case PackCategoriesIntoKey(fcInfinity, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcZero, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcNormal, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcNaN):
     assign(rhs);
     [[fallthrough]];
-  case PackCategoriesIntoKey(fcNaN, fcZero):
-  case PackCategoriesIntoKey(fcNaN, fcNormal):
-  case PackCategoriesIntoKey(fcNaN, fcInfinity):
-  case PackCategoriesIntoKey(fcNaN, fcNaN):
-    if (isSignaling()) {
+  pak_sa PackCategoriesIntoKey(fcNaN, fcZero):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcNormal):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcNaN):
+    නම් (isSignaling()) {
       makeQuiet();
-      return opInvalidOp;
+      ආපසු opInvalidOp;
     }
-    return rhs.isSignaling() ? opInvalidOp : opOK;
+    ආපසු rhs.isSignaling() ? opInvalidOp : opOK;
 
-  case PackCategoriesIntoKey(fcZero, fcInfinity):
-  case PackCategoriesIntoKey(fcZero, fcNormal):
-  case PackCategoriesIntoKey(fcNormal, fcInfinity):
-    return opOK;
+  pak_sa PackCategoriesIntoKey(fcZero, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcZero, fcNormal):
+  pak_sa PackCategoriesIntoKey(fcNormal, fcInfinity):
+    ආපසු opOK;
 
-  case PackCategoriesIntoKey(fcNormal, fcZero):
-  case PackCategoriesIntoKey(fcInfinity, fcZero):
-  case PackCategoriesIntoKey(fcInfinity, fcNormal):
-  case PackCategoriesIntoKey(fcInfinity, fcInfinity):
-  case PackCategoriesIntoKey(fcZero, fcZero):
+  pak_sa PackCategoriesIntoKey(fcNormal, fcZero):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcZero):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcNormal):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcZero, fcZero):
     makeNaN();
-    return opInvalidOp;
+    ආපසු opInvalidOp;
 
-  case PackCategoriesIntoKey(fcNormal, fcNormal):
-    return opOK;
+  pak_sa PackCategoriesIntoKey(fcNormal, fcNormal):
+    ආපසු opOK;
   }
 }
 
@@ -2075,36 +2075,36 @@ APFloat::opStatus IEEEFloat::remainderSpecials(const IEEEFloat &rhs) {
   default:
     llvm_unreachable(nullptr);
 
-  case PackCategoriesIntoKey(fcZero, fcNaN):
-  case PackCategoriesIntoKey(fcNormal, fcNaN):
-  case PackCategoriesIntoKey(fcInfinity, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcZero, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcNormal, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcNaN):
     assign(rhs);
     [[fallthrough]];
-  case PackCategoriesIntoKey(fcNaN, fcZero):
-  case PackCategoriesIntoKey(fcNaN, fcNormal):
-  case PackCategoriesIntoKey(fcNaN, fcInfinity):
-  case PackCategoriesIntoKey(fcNaN, fcNaN):
-    if (isSignaling()) {
+  pak_sa PackCategoriesIntoKey(fcNaN, fcZero):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcNormal):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcNaN):
+    නම් (isSignaling()) {
       makeQuiet();
-      return opInvalidOp;
+      ආපසු opInvalidOp;
     }
-    return rhs.isSignaling() ? opInvalidOp : opOK;
+    ආපසු rhs.isSignaling() ? opInvalidOp : opOK;
 
-  case PackCategoriesIntoKey(fcZero, fcInfinity):
-  case PackCategoriesIntoKey(fcZero, fcNormal):
-  case PackCategoriesIntoKey(fcNormal, fcInfinity):
-    return opOK;
+  pak_sa PackCategoriesIntoKey(fcZero, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcZero, fcNormal):
+  pak_sa PackCategoriesIntoKey(fcNormal, fcInfinity):
+    ආපසු opOK;
 
-  case PackCategoriesIntoKey(fcNormal, fcZero):
-  case PackCategoriesIntoKey(fcInfinity, fcZero):
-  case PackCategoriesIntoKey(fcInfinity, fcNormal):
-  case PackCategoriesIntoKey(fcInfinity, fcInfinity):
-  case PackCategoriesIntoKey(fcZero, fcZero):
+  pak_sa PackCategoriesIntoKey(fcNormal, fcZero):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcZero):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcNormal):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcZero, fcZero):
     makeNaN();
-    return opInvalidOp;
+    ආපසු opInvalidOp;
 
-  case PackCategoriesIntoKey(fcNormal, fcNormal):
-    return opDivByZero; // fake status, indicating this is not a special case
+  pak_sa PackCategoriesIntoKey(fcNormal, fcNormal):
+    ආපසු opDivByZero; // fake status, indicating this is not a special case
   }
 }
 
@@ -2112,9 +2112,9 @@ APFloat::opStatus IEEEFloat::remainderSpecials(const IEEEFloat &rhs) {
 void IEEEFloat::changeSign() {
   // With NaN-as-negative-zero, neither NaN or negative zero can change
   // their signs.
-  if (semantics->nanEncoding == fltNanEncoding::NegativeZero &&
+  නම් (semantics->nanEncoding == fltNanEncoding::NegativeZero &&
       (isZero() || isNaN()))
-    return;
+    ආපසු;
   /* Look mummy, this one's easy.  */
   sign = !sign;
 }
@@ -2126,7 +2126,7 @@ APFloat::opStatus IEEEFloat::addOrSubtract(const IEEEFloat &rhs,
   opStatus fs = addOrSubtractSpecials(rhs, subtract);
 
   /* This return code means it was not a simple case.  */
-  if (fs == opDivByZero) {
+  නම් (fs == opDivByZero) {
     lostFraction lost_fraction;
 
     lost_fraction = addOrSubtractSignificand(rhs, subtract);
@@ -2139,27 +2139,27 @@ APFloat::opStatus IEEEFloat::addOrSubtract(const IEEEFloat &rhs,
   /* If two numbers add (exactly) to zero, IEEE 754 decrees it is a
      positive zero unless rounding to minus infinity, except that
      adding two like-signed zeroes gives that zero.  */
-  if (category == fcZero) {
-    if (rhs.category != fcZero || (sign == rhs.sign) == subtract)
+  නම් (category == fcZero) {
+    නම් (rhs.category != fcZero || (sign == rhs.sign) == subtract)
       sign = (rounding_mode == rmTowardNegative);
     // NaN-in-negative-zero means zeros need to be normalized to +0.
-    if (semantics->nanEncoding == fltNanEncoding::NegativeZero)
+    නම් (semantics->nanEncoding == fltNanEncoding::NegativeZero)
       sign = false;
   }
 
-  return fs;
+  ආපසු fs;
 }
 
 /* Normalized addition.  */
 APFloat::opStatus IEEEFloat::add(const IEEEFloat &rhs,
                                  roundingMode rounding_mode) {
-  return addOrSubtract(rhs, rounding_mode, false);
+  ආපසු addOrSubtract(rhs, rounding_mode, false);
 }
 
 /* Normalized subtraction.  */
 APFloat::opStatus IEEEFloat::subtract(const IEEEFloat &rhs,
                                       roundingMode rounding_mode) {
-  return addOrSubtract(rhs, rounding_mode, true);
+  ආපසු addOrSubtract(rhs, rounding_mode, true);
 }
 
 /* Normalized multiply.  */
@@ -2168,16 +2168,16 @@ APFloat::opStatus IEEEFloat::multiply(const IEEEFloat &rhs,
   sign ^= rhs.sign;
   opStatus fs = multiplySpecials(rhs);
 
-  if (isZero() && semantics->nanEncoding == fltNanEncoding::NegativeZero)
+  නම් (isZero() && semantics->nanEncoding == fltNanEncoding::NegativeZero)
     sign = false;
-  if (isFiniteNonZero()) {
+  නම් (isFiniteNonZero()) {
     lostFraction lost_fraction = multiplySignificand(rhs);
     fs = normalize(rounding_mode, lost_fraction);
-    if (lost_fraction != lfExactlyZero)
+    නම් (lost_fraction != lfExactlyZero)
       fs = (opStatus) (fs | opInexact);
   }
 
-  return fs;
+  ආපසු fs;
 }
 
 /* Normalized divide.  */
@@ -2186,26 +2186,26 @@ APFloat::opStatus IEEEFloat::divide(const IEEEFloat &rhs,
   sign ^= rhs.sign;
   opStatus fs = divideSpecials(rhs);
 
-  if (isZero() && semantics->nanEncoding == fltNanEncoding::NegativeZero)
+  නම් (isZero() && semantics->nanEncoding == fltNanEncoding::NegativeZero)
     sign = false;
-  if (isFiniteNonZero()) {
+  නම් (isFiniteNonZero()) {
     lostFraction lost_fraction = divideSignificand(rhs);
     fs = normalize(rounding_mode, lost_fraction);
-    if (lost_fraction != lfExactlyZero)
+    නම් (lost_fraction != lfExactlyZero)
       fs = (opStatus) (fs | opInexact);
   }
 
-  return fs;
+  ආපසු fs;
 }
 
 /* Normalized remainder.  */
 APFloat::opStatus IEEEFloat::remainder(const IEEEFloat &rhs) {
-  unsigned int origSign = sign;
+  unsigned පූර්ණ_සංඛ්‍යා origSign = sign;
 
   // First handle the special cases.
   opStatus fs = remainderSpecials(rhs);
-  if (fs != opDivByZero)
-    return fs;
+  නම් (fs != opDivByZero)
+    ආපසු fs;
 
   fs = opOK;
 
@@ -2214,7 +2214,7 @@ APFloat::opStatus IEEEFloat::remainder(const IEEEFloat &rhs) {
   // value we currently posses must be less than twice the denom (as we are
   // using the same semantics).
   IEEEFloat P2 = rhs;
-  if (P2.add(rhs, rmNearestTiesToEven) == opOK) {
+  නම් (P2.add(rhs, rmNearestTiesToEven) == opOK) {
     fs = mod(P2);
     assert(fs == opOK);
   }
@@ -2276,7 +2276,7 @@ APFloat::opStatus IEEEFloat::remainder(const IEEEFloat &rhs) {
   fs = VEx.add(VEx, rmNearestTiesToEven);
   assert(fs == opOK);
 
-  if (VEx.compare(PEx) == cmpGreaterThan) {
+  නම් (VEx.compare(PEx) == cmpGreaterThan) {
     fs = subtract(P, rmNearestTiesToEven);
     assert(fs == opOK);
 
@@ -2289,35 +2289,35 @@ APFloat::opStatus IEEEFloat::remainder(const IEEEFloat &rhs) {
     assert(fs == opOK);
 
     cmpResult result = VEx.compare(PEx);
-    if (result == cmpGreaterThan || result == cmpEqual) {
+    නම් (result == cmpGreaterThan || result == cmpEqual) {
       fs = subtract(P, rmNearestTiesToEven);
       assert(fs == opOK);
     }
   }
 
-  if (isZero()) {
+  නම් (isZero()) {
     sign = origSign;    // IEEE754 requires this
-    if (semantics->nanEncoding == fltNanEncoding::NegativeZero)
+    නම් (semantics->nanEncoding == fltNanEncoding::NegativeZero)
       // But some 8-bit floats only have positive 0.
       sign = false;
-  } else {
+  } නැතහොත් {
     sign ^= origSign;
   }
-  return fs;
+  ආපසු fs;
 }
 
 /* Normalized llvm frem (C fmod). */
 APFloat::opStatus IEEEFloat::mod(const IEEEFloat &rhs) {
   opStatus fs = modSpecials(rhs);
-  unsigned int origSign = sign;
+  unsigned පූර්ණ_සංඛ්‍යා origSign = sign;
 
-  while (isFiniteNonZero() && rhs.isFiniteNonZero() &&
+  අතරතුර (isFiniteNonZero() && rhs.isFiniteNonZero() &&
          compareAbsoluteValue(rhs) != cmpLessThan) {
-    int Exp = ilogb(*this) - ilogb(rhs);
+    පූර්ණ_සංඛ්‍යා Exp = ilogb(*this) - ilogb(rhs);
     IEEEFloat V = scalbn(rhs, Exp, rmNearestTiesToEven);
     // V can overflow to NaN with fltNonfiniteBehavior::NanOnly, so explicitly
     // check for it.
-    if (V.isNaN() || compareAbsoluteValue(V) == cmpLessThan)
+    නම් (V.isNaN() || compareAbsoluteValue(V) == cmpLessThan)
       V = scalbn(rhs, Exp - 1, rmNearestTiesToEven);
     V.sign = sign;
 
@@ -2330,17 +2330,17 @@ APFloat::opStatus IEEEFloat::mod(const IEEEFloat &rhs) {
     // minimum possible value, (and any further subtract
     // will underflow to the same value) explicitly
     // provide an exit-path here.
-    if (!semantics->hasZero && this->isSmallest())
-      break;
+    නම් (!semantics->hasZero && this->isSmallest())
+      bha_nga;
 
     assert(fs==opOK);
   }
-  if (isZero()) {
+  නම් (isZero()) {
     sign = origSign; // fmod requires this
-    if (semantics->nanEncoding == fltNanEncoding::NegativeZero)
+    නම් (semantics->nanEncoding == fltNanEncoding::NegativeZero)
       sign = false;
   }
-  return fs;
+  ආපසු fs;
 }
 
 /* Normalized fused-multiply-add.  */
@@ -2354,25 +2354,25 @@ APFloat::opStatus IEEEFloat::fusedMultiplyAdd(const IEEEFloat &multiplicand,
 
   /* If and only if all arguments are normal do we need to do an
      extended-precision calculation.  */
-  if (isFiniteNonZero() &&
+  නම් (isFiniteNonZero() &&
       multiplicand.isFiniteNonZero() &&
       addend.isFinite()) {
     lostFraction lost_fraction;
 
     lost_fraction = multiplySignificand(multiplicand, addend);
     fs = normalize(rounding_mode, lost_fraction);
-    if (lost_fraction != lfExactlyZero)
+    නම් (lost_fraction != lfExactlyZero)
       fs = (opStatus) (fs | opInexact);
 
     /* If two numbers add (exactly) to zero, IEEE 754 decrees it is a
        positive zero unless rounding to minus infinity, except that
        adding two like-signed zeroes gives that zero.  */
-    if (category == fcZero && !(fs & opUnderflow) && sign != addend.sign) {
+    නම් (category == fcZero && !(fs & opUnderflow) && sign != addend.sign) {
       sign = (rounding_mode == rmTowardNegative);
-      if (semantics->nanEncoding == fltNanEncoding::NegativeZero)
+      නම් (semantics->nanEncoding == fltNanEncoding::NegativeZero)
         sign = false;
     }
-  } else {
+  } නැතහොත් {
     fs = multiplySpecials(multiplicand);
 
     /* FS can only be opOK or opInvalidOp.  There is no more work
@@ -2382,16 +2382,16 @@ APFloat::opStatus IEEEFloat::fusedMultiplyAdd(const IEEEFloat &multiplicand,
 
        If we need to do the addition we can do so with normal
        precision.  */
-    if (fs == opOK)
+    නම් (fs == opOK)
       fs = addOrSubtract(addend, rounding_mode, false);
   }
 
-  return fs;
+  ආපසු fs;
 }
 
 /* Rounding-mode correct round to integral value.  */
 APFloat::opStatus IEEEFloat::roundToIntegral(roundingMode rounding_mode) {
-  if (isInfinity())
+  නම් (isInfinity())
     // [IEEE Std 754-2008 6.1]:
     // The behavior of infinity in floating-point arithmetic is derived from the
     // limiting cases of real arithmetic with operands of arbitrarily
@@ -2399,10 +2399,10 @@ APFloat::opStatus IEEEFloat::roundToIntegral(roundingMode rounding_mode) {
     // ...
     // Operations on infinite operands are usually exact and therefore signal no
     // exceptions ...
-    return opOK;
+    ආපසු opOK;
 
-  if (isNaN()) {
-    if (isSignaling()) {
+  නම් (isNaN()) {
+    නම් (isSignaling()) {
       // [IEEE Std 754-2008 6.2]:
       // Under default exception handling, any operation signaling an invalid
       // operation exception and for which a floating-point result is to be
@@ -2413,8 +2413,8 @@ APFloat::opStatus IEEEFloat::roundToIntegral(roundingMode rounding_mode) {
       // handling, signal the invalid operation exception(see 7.2) for every
       // general-computational and signaling-computational operation except for
       // the conversions described in 5.12.
-      return opInvalidOp;
-    } else {
+      ආපසු opInvalidOp;
+    } නැතහොත් {
       // [IEEE Std 754-2008 6.2]:
       // For an operation with quiet NaN inputs, other than maximum and minimum
       // operations, if a floating-point result is to be delivered the result
@@ -2424,23 +2424,23 @@ APFloat::opStatus IEEEFloat::roundToIntegral(roundingMode rounding_mode) {
       // one or more input NaNs, none of them signaling, shall signal no
       // exception, except fusedMultiplyAdd might signal the invalid operation
       // exception(see 7.2).
-      return opOK;
+      ආපසු opOK;
     }
   }
 
-  if (isZero()) {
+  නම් (isZero()) {
     // [IEEE Std 754-2008 6.3]:
     // ... the sign of the result of conversions, the quantize operation, the
     // roundToIntegral operations, and the roundToIntegralExact(see 5.3.1) is
     // the sign of the first or only operand.
-    return opOK;
+    ආපසු opOK;
   }
 
   // If the exponent is large enough, we know that this value is already
   // integral, and the arithmetic below would potentially cause it to saturate
   // to +/-Inf.  Bail out early instead.
-  if (exponent + 1 >= (int)APFloat::semanticsPrecision(*semantics))
-    return opOK;
+  නම් (exponent + 1 >= (පූර්ණ_සංඛ්‍යා)APFloat::semanticsPrecision(*semantics))
+    ආපසු opOK;
 
   // The algorithm here is quite simple: we add 2^(p-1), where p is the
   // precision of our format, and then subtract it back off again.  The choice
@@ -2468,10 +2468,10 @@ APFloat::opStatus IEEEFloat::roundToIntegral(roundingMode rounding_mode) {
   subtract(MagicConstant, rounding_mode);
 
   // Restore the input sign.
-  if (inputSign != isNegative())
+  නම් (inputSign != isNegative())
     changeSign();
 
-  return fs;
+  ආපසු fs;
 }
 
 /* Comparison requires normalized numbers.  */
@@ -2482,66 +2482,66 @@ APFloat::cmpResult IEEEFloat::compare(const IEEEFloat &rhs) const {
   default:
     llvm_unreachable(nullptr);
 
-  case PackCategoriesIntoKey(fcNaN, fcZero):
-  case PackCategoriesIntoKey(fcNaN, fcNormal):
-  case PackCategoriesIntoKey(fcNaN, fcInfinity):
-  case PackCategoriesIntoKey(fcNaN, fcNaN):
-  case PackCategoriesIntoKey(fcZero, fcNaN):
-  case PackCategoriesIntoKey(fcNormal, fcNaN):
-  case PackCategoriesIntoKey(fcInfinity, fcNaN):
-    return cmpUnordered;
+  pak_sa PackCategoriesIntoKey(fcNaN, fcZero):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcNormal):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcNaN, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcZero, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcNormal, fcNaN):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcNaN):
+    ආපසු cmpUnordered;
 
-  case PackCategoriesIntoKey(fcInfinity, fcNormal):
-  case PackCategoriesIntoKey(fcInfinity, fcZero):
-  case PackCategoriesIntoKey(fcNormal, fcZero):
-    if (sign)
-      return cmpLessThan;
-    else
-      return cmpGreaterThan;
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcNormal):
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcZero):
+  pak_sa PackCategoriesIntoKey(fcNormal, fcZero):
+    නම් (sign)
+      ආපසු cmpLessThan;
+    නැතහොත්
+      ආපසු cmpGreaterThan;
 
-  case PackCategoriesIntoKey(fcNormal, fcInfinity):
-  case PackCategoriesIntoKey(fcZero, fcInfinity):
-  case PackCategoriesIntoKey(fcZero, fcNormal):
-    if (rhs.sign)
-      return cmpGreaterThan;
-    else
-      return cmpLessThan;
+  pak_sa PackCategoriesIntoKey(fcNormal, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcZero, fcInfinity):
+  pak_sa PackCategoriesIntoKey(fcZero, fcNormal):
+    නම් (rhs.sign)
+      ආපසු cmpGreaterThan;
+    නැතහොත්
+      ආපසු cmpLessThan;
 
-  case PackCategoriesIntoKey(fcInfinity, fcInfinity):
-    if (sign == rhs.sign)
-      return cmpEqual;
-    else if (sign)
-      return cmpLessThan;
-    else
-      return cmpGreaterThan;
+  pak_sa PackCategoriesIntoKey(fcInfinity, fcInfinity):
+    නම් (sign == rhs.sign)
+      ආපසු cmpEqual;
+    නැතහොත් නම් (sign)
+      ආපසු cmpLessThan;
+    නැතහොත්
+      ආපසු cmpGreaterThan;
 
-  case PackCategoriesIntoKey(fcZero, fcZero):
-    return cmpEqual;
+  pak_sa PackCategoriesIntoKey(fcZero, fcZero):
+    ආපසු cmpEqual;
 
-  case PackCategoriesIntoKey(fcNormal, fcNormal):
-    break;
+  pak_sa PackCategoriesIntoKey(fcNormal, fcNormal):
+    bha_nga;
   }
 
   cmpResult result;
   /* Two normal numbers.  Do they have the same sign?  */
-  if (sign != rhs.sign) {
-    if (sign)
+  නම් (sign != rhs.sign) {
+    නම් (sign)
       result = cmpLessThan;
-    else
+    නැතහොත්
       result = cmpGreaterThan;
-  } else {
+  } නැතහොත් {
     /* Compare absolute values; invert result if negative.  */
     result = compareAbsoluteValue(rhs);
 
-    if (sign) {
-      if (result == cmpLessThan)
+    නම් (sign) {
+      නම් (result == cmpLessThan)
         result = cmpGreaterThan;
-      else if (result == cmpGreaterThan)
+      නැතහොත් නම් (result == cmpGreaterThan)
         result = cmpLessThan;
     }
   }
 
-  return result;
+  ආපසු result;
 }
 
 /// IEEEFloat::convert - convert a value of one floating point type to another.
@@ -2561,10 +2561,10 @@ APFloat::opStatus IEEEFloat::convert(const fltSemantics &toSemantics,
   lostFraction lostFraction = lfExactlyZero;
   unsigned newPartCount = partCountForBits(toSemantics.precision + 1);
   unsigned oldPartCount = partCount();
-  int shift = toSemantics.precision - fromSemantics.precision;
+  පූර්ණ_සංඛ්‍යා shift = toSemantics.precision - fromSemantics.precision;
 
   bool X86SpecialNan = false;
-  if (&fromSemantics == &APFloatBase::semX87DoubleExtended &&
+  නම් (&fromSemantics == &APFloatBase::semX87DoubleExtended &&
       &toSemantics != &APFloatBase::semX87DoubleExtended && category == fcNaN &&
       (!(*significandParts() & 0x8000000000000000ULL) ||
        !(*significandParts() & 0x4000000000000000ULL))) {
@@ -2580,16 +2580,16 @@ APFloat::opStatus IEEEFloat::convert(const fltSemantics &toSemantics,
   // of performing excessive shift.
   // Also do a similar trick in case shifting denormal would produce zero
   // significand as this case isn't handled correctly by normalize.
-  if (shift < 0 && isFiniteNonZero()) {
-    int omsb = significandMSB() + 1;
-    int exponentChange = omsb - fromSemantics.precision;
-    if (exponent + exponentChange < toSemantics.minExponent)
+  නම් (shift < 0 && isFiniteNonZero()) {
+    පූර්ණ_සංඛ්‍යා omsb = significandMSB() + 1;
+    පූර්ණ_සංඛ්‍යා exponentChange = omsb - fromSemantics.precision;
+    නම් (exponent + exponentChange < toSemantics.minExponent)
       exponentChange = toSemantics.minExponent - exponent;
     exponentChange = std::max(exponentChange, shift);
-    if (exponentChange < 0) {
+    නම් (exponentChange < 0) {
       shift -= exponentChange;
       exponent += exponentChange;
-    } else if (omsb <= -shift) {
+    } නැතහොත් නම් (omsb <= -shift) {
       exponentChange = omsb + shift - 1; // leave at least one bit set
       shift -= exponentChange;
       exponent += exponentChange;
@@ -2597,25 +2597,25 @@ APFloat::opStatus IEEEFloat::convert(const fltSemantics &toSemantics,
   }
 
   // If this is a truncation, perform the shift before we narrow the storage.
-  if (shift < 0 && (isFiniteNonZero() ||
+  නම් (shift < 0 && (isFiniteNonZero() ||
                     (category == fcNaN && semantics->nonFiniteBehavior !=
                                               fltNonfiniteBehavior::NanOnly)))
     lostFraction = shiftRight(significandParts(), oldPartCount, -shift);
 
   // Fix the storage so it can hold to new value.
-  if (newPartCount > oldPartCount) {
+  නම් (newPartCount > oldPartCount) {
     // The new type requires more storage; make it available.
     integerPart *newParts;
     newParts = new integerPart[newPartCount];
     APInt::tcSet(newParts, 0, newPartCount);
-    if (isFiniteNonZero() || category==fcNaN)
+    නම් (isFiniteNonZero() || category==fcNaN)
       APInt::tcAssign(newParts, significandParts(), oldPartCount);
     freeSignificand();
     significand.parts = newParts;
-  } else if (newPartCount == 1 && oldPartCount != 1) {
+  } නැතහොත් නම් (newPartCount == 1 && oldPartCount != 1) {
     // Switch to built-in storage for a single part.
     integerPart newPart = 0;
-    if (isFiniteNonZero() || category==fcNaN)
+    නම් (isFiniteNonZero() || category==fcNaN)
       newPart = significandParts()[0];
     freeSignificand();
     significand.part = newPart;
@@ -2626,54 +2626,54 @@ APFloat::opStatus IEEEFloat::convert(const fltSemantics &toSemantics,
 
   // If this is an extension, perform the shift now that the storage is
   // available.
-  if (shift > 0 && (isFiniteNonZero() || category==fcNaN))
+  නම් (shift > 0 && (isFiniteNonZero() || category==fcNaN))
     APInt::tcShiftLeft(significandParts(), newPartCount, shift);
 
-  if (isFiniteNonZero()) {
+  නම් (isFiniteNonZero()) {
     fs = normalize(rounding_mode, lostFraction);
     *losesInfo = (fs != opOK);
-  } else if (category == fcNaN) {
-    if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
+  } නැතහොත් නම් (category == fcNaN) {
+    නම් (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
       *losesInfo =
           fromSemantics.nonFiniteBehavior != fltNonfiniteBehavior::NanOnly;
       makeNaN(false, sign);
       fs = is_signaling ? opInvalidOp : opOK;
-    } else {
+    } නැතහොත් {
       // If NaN is negative zero, we need to create a new NaN to avoid
       // converting NaN to -Inf.
-      if (fromSemantics.nanEncoding == fltNanEncoding::NegativeZero &&
+      නම් (fromSemantics.nanEncoding == fltNanEncoding::NegativeZero &&
           semantics->nanEncoding != fltNanEncoding::NegativeZero)
         makeNaN(false, false);
 
       // If the source has no significand, there are no payload bits to carry
       // over, and an all-zero significand would encode an Inf. Create a new
       // NaN.
-      if (!APFloat::hasSignificand(fromSemantics))
+      නම් (!APFloat::hasSignificand(fromSemantics))
         makeNaN(false, sign);
 
       *losesInfo = lostFraction != lfExactlyZero || X86SpecialNan;
 
       // For x87 extended precision, we want to make a NaN, not a special NaN
       // if the input wasn't special either.
-      if (!X86SpecialNan && semantics == &APFloatBase::semX87DoubleExtended)
+      නම් (!X86SpecialNan && semantics == &APFloatBase::semX87DoubleExtended)
         APInt::tcSetBit(significandParts(), semantics->precision - 1);
 
       // Convert of sNaN creates qNaN and raises an exception (invalid op).
       // This also guarantees that a sNaN does not become Inf on a truncation
       // that loses all payload bits.
-      if (is_signaling) {
+      නම් (is_signaling) {
         makeQuiet();
         fs = opInvalidOp;
-      } else {
+      } නැතහොත් {
         fs = opOK;
       }
     }
-  } else if (category == fcInfinity &&
+  } නැතහොත් නම් (category == fcInfinity &&
              semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
     makeNaN(false, sign);
     *losesInfo = true;
     fs = opInexact;
-  } else if (category == fcZero &&
+  } නැතහොත් නම් (category == fcZero &&
              semantics->nanEncoding == fltNanEncoding::NegativeZero) {
     // Negative zero loses info, but positive zero doesn't.
     *losesInfo =
@@ -2681,7 +2681,7 @@ APFloat::opStatus IEEEFloat::convert(const fltSemantics &toSemantics,
     fs = *losesInfo ? opInexact : opOK;
     // NaN is negative zero means -0 -> +0, which can lose information
     sign = false;
-  } else {
+  } නැතහොත් {
     *losesInfo = false;
     fs = opOK;
   }
@@ -2690,16 +2690,16 @@ APFloat::opStatus IEEEFloat::convert(const fltSemantics &toSemantics,
   // The paths above only report what rounding lost, so report these here too:
   // a caller that checks losesInfo would otherwise accept a result the target
   // cannot represent, and printing that result asserts.
-  if ((sign && !semantics->hasSignedRepr) ||
+  නම් ((sign && !semantics->hasSignedRepr) ||
       (category == fcZero && !semantics->hasZero)) {
     *losesInfo = true;
-    if (fs == opOK)
+    නම් (fs == opOK)
       fs = opInexact;
   }
 
-  if (category == fcZero && !semantics->hasZero)
+  නම් (category == fcZero && !semantics->hasZero)
     makeSmallestNormalized(false);
-  return fs;
+  ආපසු fs;
 }
 
 /* Convert a floating point number to an integer according to the
@@ -2713,22 +2713,22 @@ APFloat::opStatus IEEEFloat::convert(const fltSemantics &toSemantics,
    Note that for conversions to integer type the C standard requires
    round-to-zero to always be used.  */
 APFloat::opStatus IEEEFloat::convertToSignExtendedInteger(
-    MutableArrayRef<integerPart> parts, unsigned int width, bool isSigned,
+    MutableArrayRef<integerPart> parts, unsigned පූර්ණ_සංඛ්‍යා width, bool isSigned,
     roundingMode rounding_mode, bool *isExact) const {
   *isExact = false;
 
   /* Handle the three special cases first.  */
-  if (category == fcInfinity || category == fcNaN)
-    return opInvalidOp;
+  නම් (category == fcInfinity || category == fcNaN)
+    ආපසු opInvalidOp;
 
   unsigned dstPartsCount = partCountForBits(width);
   assert(dstPartsCount <= parts.size() && "Integer too big");
 
-  if (category == fcZero) {
+  නම් (category == fcZero) {
     APInt::tcSet(parts.data(), 0, dstPartsCount);
     // Negative zero can't be represented as an int.
     *isExact = !sign;
-    return opOK;
+    ආපසු opOK;
   }
 
   const integerPart *src = significandParts();
@@ -2736,26 +2736,26 @@ APFloat::opStatus IEEEFloat::convertToSignExtendedInteger(
   unsigned truncatedBits;
   /* Step 1: place our absolute value, with any fraction truncated, in
      the destination.  */
-  if (exponent < 0) {
+  නම් (exponent < 0) {
     /* Our absolute value is less than one; truncate everything.  */
     APInt::tcSet(parts.data(), 0, dstPartsCount);
     /* For exponent -1 the integer bit represents .5, look at that.
        For smaller exponents leftmost truncated bit is 0. */
     truncatedBits = semantics->precision -1U - exponent;
-  } else {
+  } නැතහොත් {
     /* We want the most significant (exponent + 1) bits; the rest are
        truncated.  */
-    unsigned int bits = exponent + 1U;
+    unsigned පූර්ණ_සංඛ්‍යා bits = exponent + 1U;
 
     /* Hopelessly large in magnitude?  */
-    if (bits > width)
-      return opInvalidOp;
+    නම් (bits > width)
+      ආපසු opInvalidOp;
 
-    if (bits < semantics->precision) {
+    නම් (bits < semantics->precision) {
       /* We truncate (semantics->precision - bits) bits.  */
       truncatedBits = semantics->precision - bits;
       APInt::tcExtract(parts.data(), dstPartsCount, src, bits, truncatedBits);
-    } else {
+    } නැතහොත් {
       /* We want at least as many bits as are available.  */
       APInt::tcExtract(parts.data(), dstPartsCount, src, semantics->precision,
                        0);
@@ -2768,50 +2768,50 @@ APFloat::opStatus IEEEFloat::convertToSignExtendedInteger(
   /* Step 2: work out any lost fraction, and increment the absolute
      value if we would round away from zero.  */
   lostFraction lost_fraction;
-  if (truncatedBits) {
+  නම් (truncatedBits) {
     lost_fraction = lostFractionThroughTruncation(src, partCount(),
                                                   truncatedBits);
-    if (lost_fraction != lfExactlyZero &&
+    නම් (lost_fraction != lfExactlyZero &&
         roundAwayFromZero(rounding_mode, lost_fraction, truncatedBits)) {
-      if (APInt::tcIncrement(parts.data(), dstPartsCount))
-        return opInvalidOp;     /* Overflow.  */
+      නම් (APInt::tcIncrement(parts.data(), dstPartsCount))
+        ආපසු opInvalidOp;     /* Overflow.  */
     }
-  } else {
+  } නැතහොත් {
     lost_fraction = lfExactlyZero;
   }
 
   /* Step 3: check if we fit in the destination.  */
-  unsigned int omsb = APInt::tcMSB(parts.data(), dstPartsCount) + 1;
+  unsigned පූර්ණ_සංඛ්‍යා omsb = APInt::tcMSB(parts.data(), dstPartsCount) + 1;
 
-  if (sign) {
-    if (!isSigned) {
+  නම් (sign) {
+    නම් (!isSigned) {
       /* Negative numbers cannot be represented as unsigned.  */
-      if (omsb != 0)
-        return opInvalidOp;
-    } else {
+      නම් (omsb != 0)
+        ආපසු opInvalidOp;
+    } නැතහොත් {
       /* It takes omsb bits to represent the unsigned integer value.
          We lose a bit for the sign, but care is needed as the
          maximally negative integer is a special case.  */
-      if (omsb == width &&
+      නම් (omsb == width &&
           APInt::tcLSB(parts.data(), dstPartsCount) + 1 != omsb)
-        return opInvalidOp;
+        ආපසු opInvalidOp;
 
       /* This case can happen because of rounding.  */
-      if (omsb > width)
-        return opInvalidOp;
+      නම් (omsb > width)
+        ආපසු opInvalidOp;
     }
 
     APInt::tcNegate (parts.data(), dstPartsCount);
-  } else {
-    if (omsb >= width + !isSigned)
-      return opInvalidOp;
+  } නැතහොත් {
+    නම් (omsb >= width + !isSigned)
+      ආපසු opInvalidOp;
   }
 
-  if (lost_fraction == lfExactlyZero) {
+  නම් (lost_fraction == lfExactlyZero) {
     *isExact = true;
-    return opOK;
+    ආපසු opOK;
   }
-  return opInexact;
+  ආපසු opInexact;
 }
 
 /* Same as convertToSignExtendedInteger, except we provide
@@ -2825,37 +2825,37 @@ APFloat::opStatus IEEEFloat::convertToSignExtendedInteger(
 */
 APFloat::opStatus
 IEEEFloat::convertToInteger(MutableArrayRef<integerPart> parts,
-                            unsigned int width, bool isSigned,
+                            unsigned පූර්ණ_සංඛ්‍යා width, bool isSigned,
                             roundingMode rounding_mode, bool *isExact) const {
   opStatus fs = convertToSignExtendedInteger(parts, width, isSigned,
                                              rounding_mode, isExact);
 
-  if (fs == opInvalidOp) {
-    unsigned int bits, dstPartsCount;
+  නම් (fs == opInvalidOp) {
+    unsigned පූර්ණ_සංඛ්‍යා bits, dstPartsCount;
 
     dstPartsCount = partCountForBits(width);
     assert(dstPartsCount <= parts.size() && "Integer too big");
 
-    if (category == fcNaN)
+    නම් (category == fcNaN)
       bits = 0;
-    else if (sign)
+    නැතහොත් නම් (sign)
       bits = isSigned;
-    else
+    නැතහොත්
       bits = width - isSigned;
 
     tcSetLeastSignificantBits(parts.data(), dstPartsCount, bits);
-    if (sign && isSigned)
+    නම් (sign && isSigned)
       APInt::tcShiftLeft(parts.data(), dstPartsCount, width - 1);
   }
 
-  return fs;
+  ආපසු fs;
 }
 
 /* Convert an unsigned integer SRC to a floating point number,
    rounding according to ROUNDING_MODE.  The sign of the floating
    point number is not modified.  */
 APFloat::opStatus IEEEFloat::convertFromUnsignedParts(
-    const integerPart *src, unsigned int srcCount, roundingMode rounding_mode) {
+    const integerPart *src, unsigned පූර්ණ_සංඛ්‍යා srcCount, roundingMode rounding_mode) {
   category = fcNormal;
   unsigned omsb = APInt::tcMSB(src, srcCount) + 1;
   integerPart *dst = significandParts();
@@ -2865,32 +2865,32 @@ APFloat::opStatus IEEEFloat::convertFromUnsignedParts(
   /* We want the most significant PRECISION bits of SRC.  There may not
      be that many; extract what we can.  */
   lostFraction lost_fraction;
-  if (precision <= omsb) {
+  නම් (precision <= omsb) {
     exponent = omsb - 1;
     lost_fraction = lostFractionThroughTruncation(src, srcCount,
                                                   omsb - precision);
     APInt::tcExtract(dst, dstCount, src, precision, omsb - precision);
-  } else {
+  } නැතහොත් {
     exponent = precision - 1;
     lost_fraction = lfExactlyZero;
     APInt::tcExtract(dst, dstCount, src, omsb, 0);
   }
 
-  return normalize(rounding_mode, lost_fraction);
+  ආපසු normalize(rounding_mode, lost_fraction);
 }
 
 APFloat::opStatus IEEEFloat::convertFromAPInt(const APInt &Val, bool isSigned,
                                               roundingMode rounding_mode) {
-  unsigned int partCount = Val.getNumWords();
+  unsigned පූර්ණ_සංඛ්‍යා partCount = Val.getNumWords();
   APInt api = Val;
 
   sign = false;
-  if (isSigned && api.isNegative()) {
+  නම් (isSigned && api.isNegative()) {
     sign = true;
     api = -api;
   }
 
-  return convertFromUnsignedParts(api.getRawData(), partCount, rounding_mode);
+  ආපසු convertFromUnsignedParts(api.getRawData(), partCount, rounding_mode);
 }
 
 Expected<APFloat::opStatus>
@@ -2912,63 +2912,63 @@ IEEEFloat::convertFromHexadecimalString(StringRef s,
   StringRef::iterator end = s.end();
   StringRef::iterator dot;
   auto PtrOrErr = skipLeadingZeroesAndAnyDot(begin, end, &dot);
-  if (!PtrOrErr)
-    return PtrOrErr.takeError();
+  නම් (!PtrOrErr)
+    ආපසු PtrOrErr.takeError();
   StringRef::iterator p = *PtrOrErr;
   StringRef::iterator firstSignificantDigit = p;
 
-  while (p != end) {
+  අතරතුර (p != end) {
     integerPart hex_value;
 
-    if (*p == '.') {
-      if (dot != end)
-        return createError("String contains multiple dots");
+    නම් (*p == '.') {
+      නම් (dot != end)
+        ආපසු createError("String contains multiple dots");
       dot = p++;
       continue;
     }
 
     hex_value = hexDigitValue(*p);
-    if (hex_value == UINT_MAX)
-      break;
+    නම් (hex_value == UINT_MAX)
+      bha_nga;
 
     p++;
 
     // Store the number while we have space.
-    if (bitPos) {
+    නම් (bitPos) {
       bitPos -= 4;
       hex_value <<= bitPos % integerPartWidth;
       significand[bitPos / integerPartWidth] |= hex_value;
-    } else if (!computedTrailingFraction) {
+    } නැතහොත් නම් (!computedTrailingFraction) {
       auto FractOrErr = trailingHexadecimalFraction(p, end, hex_value);
-      if (!FractOrErr)
-        return FractOrErr.takeError();
+      නම් (!FractOrErr)
+        ආපසු FractOrErr.takeError();
       lost_fraction = *FractOrErr;
       computedTrailingFraction = true;
     }
   }
 
   /* Hex floats require an exponent but not a hexadecimal point.  */
-  if (p == end)
-    return createError("Hex strings require an exponent");
-  if (*p != 'p' && *p != 'P')
-    return createError("Invalid character in significand");
-  if (p == begin)
-    return createError("Significand has no digits");
-  if (dot != end && p - begin == 1)
-    return createError("Significand has no digits");
+  නම් (p == end)
+    ආපසු createError("Hex strings require an exponent");
+  නම් (*p != 'p' && *p != 'P')
+    ආපසු createError("Invalid character in significand");
+  නම් (p == begin)
+    ආපසු createError("Significand has no digits");
+  නම් (dot != end && p - begin == 1)
+    ආපසු createError("Significand has no digits");
 
   /* Ignore the exponent if we are zero.  */
-  if (p != firstSignificantDigit) {
-    int expAdjustment;
+  නම් (p != firstSignificantDigit) {
+    පූර්ණ_සංඛ්‍යා expAdjustment;
 
     /* Implicit hexadecimal point?  */
-    if (dot == end)
+    නම් (dot == end)
       dot = p;
 
     /* Calculate the exponent adjustment implicit in the number of
        significant digits.  */
-    expAdjustment = static_cast<int>(dot - firstSignificantDigit);
-    if (expAdjustment < 0)
+    expAdjustment = static_cast<පූර්ණ_සංඛ්‍යා>(dot - firstSignificantDigit);
+    නම් (expAdjustment < 0)
       expAdjustment++;
     expAdjustment = expAdjustment * 4 - 1;
 
@@ -2979,21 +2979,21 @@ IEEEFloat::convertFromHexadecimalString(StringRef s,
 
     /* Adjust for the given exponent.  */
     auto ExpOrErr = totalExponent(p + 1, end, expAdjustment);
-    if (!ExpOrErr)
-      return ExpOrErr.takeError();
+    නම් (!ExpOrErr)
+      ආපසු ExpOrErr.takeError();
     exponent = *ExpOrErr;
   }
 
-  return normalize(rounding_mode, lost_fraction);
+  ආපසු normalize(rounding_mode, lost_fraction);
 }
 
 APFloat::opStatus
 IEEEFloat::roundSignificandWithExponent(const integerPart *decSigParts,
-                                        unsigned sigPartCount, int exp,
+                                        unsigned sigPartCount, පූර්ණ_සංඛ්‍යා exp,
                                         roundingMode rounding_mode) {
   fltSemantics calcSemantics = { 32767, -32767, 0, 0 };
-  unsigned int power = exp >= 0 ? exp : -exp;
-  unsigned int pow5PartCapacity = powerOfFivePartsForExponent(power);
+  unsigned පූර්ණ_සංඛ්‍යා power = exp >= 0 ? exp : -exp;
+  unsigned පූර්ණ_සංඛ්‍යා pow5PartCapacity = powerOfFivePartsForExponent(power);
   SmallVector<integerPart, NumPow5PartsOnStack> pow5Parts;
   pow5Parts.resize_for_overwrite(pow5PartCapacity);
 
@@ -3005,8 +3005,8 @@ IEEEFloat::roundSignificandWithExponent(const integerPart *decSigParts,
   /* Calculate pow(5, abs(exp)).  */
   unsigned pow5PartCount = powerOf5(pow5Parts.data(), power);
 
-  for (;; parts *= 2) {
-    unsigned int excessPrecision, truncatedBits;
+  සඳහා (;; parts *= 2) {
+    unsigned පූර්ණ_සංඛ්‍යා excessPrecision, truncatedBits;
 
     calcSemantics.precision = parts * integerPartWidth - 1;
     excessPrecision = calcSemantics.precision - semantics->precision;
@@ -3025,16 +3025,16 @@ IEEEFloat::roundSignificandWithExponent(const integerPart *decSigParts,
 
     lostFraction calcLostFraction;
     integerPart HUerr, HUdistance;
-    unsigned int powHUerr;
+    unsigned පූර්ණ_සංඛ්‍යා powHUerr;
 
-    if (exp >= 0) {
+    නම් (exp >= 0) {
       /* multiplySignificand leaves the precision-th bit set to 1.  */
       calcLostFraction = decSig.multiplySignificand(pow5);
       powHUerr = powStatus != opOK;
-    } else {
+    } නැතහොත් {
       calcLostFraction = decSig.divideSignificand(pow5);
       /* Denormal numbers have less precision.  */
-      if (decSig.exponent < semantics->minExponent) {
+      නම් (decSig.exponent < semantics->minExponent) {
         excessPrecision += (semantics->minExponent - decSig.exponent);
         truncatedBits = excessPrecision;
         excessPrecision = std::min(excessPrecision, calcSemantics.precision);
@@ -3054,7 +3054,7 @@ IEEEFloat::roundSignificandWithExponent(const integerPart *decSigParts,
                                       excessPrecision, isNearest);
 
     /* Are we guaranteed to round correctly if we truncate?  */
-    if (HUdistance >= HUerr) {
+    නම් (HUdistance >= HUerr) {
       APInt::tcExtract(significandParts(), partCount(), decSig.significandParts(),
                        calcSemantics.precision - excessPrecision,
                        excessPrecision);
@@ -3066,7 +3066,7 @@ IEEEFloat::roundSignificandWithExponent(const integerPart *decSigParts,
       calcLostFraction = lostFractionThroughTruncation(decSig.significandParts(),
                                                        decSig.partCount(),
                                                        truncatedBits);
-      return static_cast<opStatus>(normalize(rounding_mode, calcLostFraction) |
+      ආපසු static_cast<opStatus>(normalize(rounding_mode, calcLostFraction) |
                                    ((sigStatus | powStatus) & opInexact));
     }
   }
@@ -3079,8 +3079,8 @@ IEEEFloat::convertFromDecimalString(StringRef str, roundingMode rounding_mode) {
 
   /* Scan the text.  */
   StringRef::iterator p = str.begin();
-  if (Error Err = interpretDecimal(p, str.end(), &D))
-    return std::move(Err);
+  නම් (Error Err = interpretDecimal(p, str.end(), &D))
+    ආපසු std::move(Err);
 
   /* Handle the quick cases.  First the case of no significant digits,
      i.e. zero, and then exponents that are obviously too large or too
@@ -3106,45 +3106,45 @@ IEEEFloat::convertFromDecimalString(StringRef str, roundingMode rounding_mode) {
   // D->firstSigDigit equals str.end(), every digit must be a zero and there can
   // be at most one dot. On the other hand, if we have a zero with a non-zero
   // exponent, then we know that D.firstSigDigit will be non-numeric.
-  if (D.firstSigDigit == str.end() || decDigitValue(*D.firstSigDigit) >= 10U) {
+  නම් (D.firstSigDigit == str.end() || decDigitValue(*D.firstSigDigit) >= 10U) {
     category = fcZero;
     fs = opOK;
-    if (semantics->nanEncoding == fltNanEncoding::NegativeZero)
+    නම් (semantics->nanEncoding == fltNanEncoding::NegativeZero)
       sign = false;
-    if (!semantics->hasZero)
+    නම් (!semantics->hasZero)
       makeSmallestNormalized(false);
 
     /* Check whether the normalized exponent is high enough to overflow
        max during the log-rebasing in the max-exponent check below. */
-  } else if (D.normalizedExponent - 1 > INT_MAX / 42039) {
+  } නැතහොත් නම් (D.normalizedExponent - 1 > INT_MAX / 42039) {
     fs = handleOverflow(rounding_mode);
 
   /* If it wasn't, then it also wasn't high enough to overflow max
      during the log-rebasing in the min-exponent check.  Check that it
      won't overflow min in either check, then perform the min-exponent
      check. */
-  } else if (D.normalizedExponent - 1 < INT_MIN / 42039 ||
+  } නැතහොත් නම් (D.normalizedExponent - 1 < INT_MIN / 42039 ||
              (D.normalizedExponent + 1) * 28738 <=
-               8651 * (semantics->minExponent - (int) semantics->precision)) {
+               8651 * (semantics->minExponent - (පූර්ණ_සංඛ්‍යා) semantics->precision)) {
     /* Underflow to zero and round.  */
     category = fcNormal;
     zeroSignificand();
     fs = normalize(rounding_mode, lfLessThanHalf);
 
   /* We can finally safely perform the max-exponent check. */
-  } else if ((D.normalizedExponent - 1) * 42039
+  } නැතහොත් නම් ((D.normalizedExponent - 1) * 42039
              >= 12655 * semantics->maxExponent) {
     /* Overflow and round.  */
     fs = handleOverflow(rounding_mode);
-  } else {
+  } නැතහොත් {
     integerPart *decSignificand;
-    unsigned int partCount;
+    unsigned පූර්ණ_සංඛ්‍යා partCount;
 
     /* A tight upper bound on number of bits required to hold an
        N-digit decimal integer is N * 196 / 59.  Allocate enough space
        to hold the full significand, and an extra part required by
        tcMultiplyPart.  */
-    partCount = static_cast<unsigned int>(D.lastSigDigit - D.firstSigDigit) + 1;
+    partCount = static_cast<unsigned පූර්ණ_සංඛ්‍යා>(D.lastSigDigit - D.firstSigDigit) + 1;
     partCount = partCountForBits(1 + 196 * partCount / 59);
     decSignificand = new integerPart[partCount + 1];
     partCount = 0;
@@ -3160,22 +3160,22 @@ IEEEFloat::convertFromDecimalString(StringRef str, roundingMode rounding_mode) {
       multiplier = 1;
 
       do {
-        if (*p == '.') {
+        නම් (*p == '.') {
           p++;
-          if (p == str.end()) {
-            break;
+          නම් (p == str.end()) {
+            bha_nga;
           }
         }
         decValue = decDigitValue(*p++);
-        if (decValue >= 10U) {
+        නම් (decValue >= 10U) {
           delete[] decSignificand;
-          return createError("Invalid character in significand");
+          ආපසු createError("Invalid character in significand");
         }
         multiplier *= 10;
         val = val * 10 + decValue;
         /* The maximum number that can be multiplied by ten with any
            digit added without overflowing an integerPart.  */
-      } while (p <= D.lastSigDigit && multiplier <= (~ (integerPart) 0 - 9) / 10);
+      } අතරතුර (p <= D.lastSigDigit && multiplier <= (~ (integerPart) 0 - 9) / 10);
 
       /* Multiply out the current part.  */
       APInt::tcMultiplyPart(decSignificand, decSignificand, multiplier, val,
@@ -3183,9 +3183,9 @@ IEEEFloat::convertFromDecimalString(StringRef str, roundingMode rounding_mode) {
 
       /* If we used another part (likely but not guaranteed), increase
          the count.  */
-      if (decSignificand[partCount])
+      නම් (decSignificand[partCount])
         partCount++;
-    } while (p <= D.lastSigDigit);
+    } අතරතුර (p <= D.lastSigDigit);
 
     category = fcNormal;
     fs = roundSignificandWithExponent(decSignificand, partCount,
@@ -3194,108 +3194,108 @@ IEEEFloat::convertFromDecimalString(StringRef str, roundingMode rounding_mode) {
     delete [] decSignificand;
   }
 
-  return fs;
+  ආපසු fs;
 }
 
 bool IEEEFloat::convertFromStringSpecials(StringRef str) {
   const size_t MIN_NAME_SIZE = 3;
 
-  if (str.size() < MIN_NAME_SIZE)
-    return false;
+  නම් (str.size() < MIN_NAME_SIZE)
+    ආපසු false;
 
-  if (str == "inf" || str == "INFINITY" || str == "+Inf" || str == "+inf") {
+  නම් (str == "inf" || str == "INFINITY" || str == "+Inf" || str == "+inf") {
     makeInf(false);
-    return true;
+    ආපසු true;
   }
 
   bool IsNegative = str.consume_front("-");
-  if (IsNegative) {
-    if (str.size() < MIN_NAME_SIZE)
-      return false;
+  නම් (IsNegative) {
+    නම් (str.size() < MIN_NAME_SIZE)
+      ආපසු false;
 
-    if (str == "inf" || str == "INFINITY" || str == "Inf") {
+    නම් (str == "inf" || str == "INFINITY" || str == "Inf") {
       makeInf(true);
-      return true;
+      ආපසු true;
     }
   }
 
   // If we have a 's' (or 'S') prefix, then this is a Signaling NaN.
   bool IsSignaling = str.consume_front_insensitive("s");
-  if (IsSignaling) {
-    if (str.size() < MIN_NAME_SIZE)
-      return false;
+  නම් (IsSignaling) {
+    නම් (str.size() < MIN_NAME_SIZE)
+      ආපසු false;
   }
 
-  if (str.consume_front("nan") || str.consume_front("NaN")) {
+  නම් (str.consume_front("nan") || str.consume_front("NaN")) {
     // A NaN without payload.
-    if (str.empty()) {
+    නම් (str.empty()) {
       makeNaN(IsSignaling, IsNegative);
-      return true;
+      ආපසු true;
     }
 
     // Allow the payload to be inside parentheses.
-    if (str.front() == '(') {
+    නම් (str.front() == '(') {
       // Parentheses should be balanced (and not empty).
-      if (str.size() <= 2 || str.back() != ')')
-        return false;
+      නම් (str.size() <= 2 || str.back() != ')')
+        ආපසු false;
 
       str = str.slice(1, str.size() - 1);
     }
 
     // Determine the payload number's radix.
     unsigned Radix = 10;
-    if (str[0] == '0') {
-      if (str.size() > 1 && tolower(str[1]) == 'x') {
+    නම් (str[0] == '0') {
+      නම් (str.size() > 1 && tolower(str[1]) == 'x') {
         str = str.drop_front(2);
         Radix = 16;
-      } else {
+      } නැතහොත් {
         Radix = 8;
       }
     }
 
     // Parse the payload and make the NaN.
     APInt Payload;
-    if (!str.getAsInteger(Radix, Payload)) {
+    නම් (!str.getAsInteger(Radix, Payload)) {
       makeNaN(IsSignaling, IsNegative, &Payload);
-      return true;
+      ආපසු true;
     }
   }
 
-  return false;
+  ආපසු false;
 }
 
 Expected<APFloat::opStatus>
 IEEEFloat::convertFromString(StringRef str, roundingMode rounding_mode) {
-  if (str.empty())
-    return createError("Invalid string length");
+  නම් (str.empty())
+    ආපසු createError("Invalid string length");
 
   // Handle special cases.
-  if (convertFromStringSpecials(str))
-    return opOK;
+  නම් (convertFromStringSpecials(str))
+    ආපසු opOK;
 
   /* Handle a leading minus sign.  */
   StringRef::iterator p = str.begin();
   size_t slen = str.size();
   sign = *p == '-' ? 1 : 0;
-  if (sign && !semantics->hasSignedRepr)
+  නම් (sign && !semantics->hasSignedRepr)
     llvm_unreachable(
         "This floating point format does not support signed values");
 
-  if (*p == '-' || *p == '+') {
+  නම් (*p == '-' || *p == '+') {
     p++;
     slen--;
-    if (!slen)
-      return createError("String has no digits");
+    නම් (!slen)
+      ආපසු createError("String has no digits");
   }
 
-  if (slen >= 2 && p[0] == '0' && (p[1] == 'x' || p[1] == 'X')) {
-    if (slen == 2)
-      return createError("Invalid string");
-    return convertFromHexadecimalString(StringRef(p + 2, slen - 2),
+  නම් (slen >= 2 && p[0] == '0' && (p[1] == 'x' || p[1] == 'X')) {
+    නම් (slen == 2)
+      ආපසු createError("Invalid string");
+    ආපසු convertFromHexadecimalString(StringRef(p + 2, slen - 2),
                                         rounding_mode);
   }
 
-  return convertFromDecimalString(StringRef(p, slen), rounding_mode);
+  ආපසු convertFromDecimalString(StringRef(p, slen), rounding_mode);
 }
 
 /* Write out a hexadecimal representation of the floating point value
@@ -3322,59 +3322,59 @@ IEEEFloat::convertFromString(StringRef str, roundingMode rounding_mode) {
    1 (normal numbers) or 2 (normal numbers rounded-away-from-zero with
    any other digits zero).
 */
-unsigned int IEEEFloat::convertToHexString(char *dst, unsigned int hexDigits,
+unsigned පූර්ණ_සංඛ්‍යා IEEEFloat::convertToHexString(var_na *dst, unsigned පූර්ණ_සංඛ්‍යා hexDigits,
                                            bool upperCase,
                                            roundingMode rounding_mode) const {
-  char *p = dst;
-  if (sign)
+  var_na *p = dst;
+  නම් (sign)
     *dst++ = '-';
 
   switch (category) {
-  case fcInfinity:
-    memcpy (dst, upperCase ? infinityU: infinityL, sizeof infinityU - 1);
-    dst += sizeof infinityL - 1;
-    break;
+  pak_sa fcInfinity:
+    memcpy (dst, upperCase ? infinityU: infinityL, parimaa_na infinityU - 1);
+    dst += parimaa_na infinityL - 1;
+    bha_nga;
 
-  case fcNaN:
-    memcpy (dst, upperCase ? NaNU: NaNL, sizeof NaNU - 1);
-    dst += sizeof NaNU - 1;
-    break;
+  pak_sa fcNaN:
+    memcpy (dst, upperCase ? NaNU: NaNL, parimaa_na NaNU - 1);
+    dst += parimaa_na NaNU - 1;
+    bha_nga;
 
-  case fcZero:
+  pak_sa fcZero:
     *dst++ = '0';
     *dst++ = upperCase ? 'X': 'x';
     *dst++ = '0';
-    if (hexDigits > 1) {
+    නම් (hexDigits > 1) {
       *dst++ = '.';
       memset (dst, '0', hexDigits - 1);
       dst += hexDigits - 1;
     }
     *dst++ = upperCase ? 'P': 'p';
     *dst++ = '0';
-    break;
+    bha_nga;
 
-  case fcNormal:
+  pak_sa fcNormal:
     dst = convertNormalToHexString (dst, hexDigits, upperCase, rounding_mode);
-    break;
+    bha_nga;
   }
 
   *dst = 0;
 
-  return static_cast<unsigned int>(dst - p);
+  ආපසු static_cast<unsigned පූර්ණ_සංඛ්‍යා>(dst - p);
 }
 
 /* Does the hard work of outputting the correctly rounded hexadecimal
    form of a normal floating point number with the specified number of
    hexadecimal digits.  If HEXDIGITS is zero the minimum number of
    digits necessary to print the value precisely is output.  */
-char *IEEEFloat::convertNormalToHexString(char *dst, unsigned int hexDigits,
+var_na *IEEEFloat::convertNormalToHexString(var_na *dst, unsigned පූර්ණ_සංඛ්‍යා hexDigits,
                                           bool upperCase,
                                           roundingMode rounding_mode) const {
   *dst++ = '0';
   *dst++ = upperCase ? 'X': 'x';
 
   bool roundUp = false;
-  const char *hexDigitChars = upperCase ? hexDigitsUpper : hexDigitsLower;
+  const var_na *hexDigitChars = upperCase ? hexDigitsUpper : hexDigitsLower;
 
   const integerPart *significand = significandParts();
   unsigned partsCount = partCount();
@@ -3391,11 +3391,11 @@ char *IEEEFloat::convertNormalToHexString(char *dst, unsigned int hexDigits,
   /* hexDigits of zero means use the required number for the
      precision.  Otherwise, see if we are truncating.  If we are,
      find out if we need to round away from zero.  */
-  if (hexDigits) {
-    if (hexDigits < outputDigits) {
+  නම් (hexDigits) {
+    නම් (hexDigits < outputDigits) {
       /* We are dropping non-zero bits, so need to check how to round.
          "bits" is the number of dropped bits.  */
-      unsigned int bits;
+      unsigned පූර්ණ_සංඛ්‍යා bits;
       lostFraction fraction;
 
       bits = valueBits - hexDigits * 4;
@@ -3408,40 +3408,40 @@ char *IEEEFloat::convertNormalToHexString(char *dst, unsigned int hexDigits,
   /* Write the digits consecutively, and start writing in the location
      of the hexadecimal point.  We move the most significant digit
      left and add the hexadecimal point later.  */
-  char *p = ++dst;
+  var_na *p = ++dst;
 
   unsigned count = (valueBits + integerPartWidth - 1) / integerPartWidth;
 
-  while (outputDigits && count) {
+  අතරතුර (outputDigits && count) {
     integerPart part;
 
     /* Put the most significant integerPartWidth bits in "part".  */
-    if (--count == partsCount)
+    නම් (--count == partsCount)
       part = 0;  /* An imaginary higher zero part.  */
-    else
+    නැතහොත්
       part = significand[count] << shift;
 
-    if (count && shift)
+    නම් (count && shift)
       part |= significand[count - 1] >> (integerPartWidth - shift);
 
     /* Convert as much of "part" to hexdigits as we can.  */
-    unsigned int curDigits = integerPartWidth / 4;
+    unsigned පූර්ණ_සංඛ්‍යා curDigits = integerPartWidth / 4;
 
     curDigits = std::min(curDigits, outputDigits);
     dst += partAsHex (dst, part, curDigits, hexDigitChars);
     outputDigits -= curDigits;
   }
 
-  if (roundUp) {
-    char *q = dst;
+  නම් (roundUp) {
+    var_na *q = dst;
 
     /* Note that hexDigitChars has a trailing '0'.  */
     do {
       q--;
       *q = hexDigitChars[hexDigitValue (*q) + 1];
-    } while (*q == '0');
+    } අතරතුර (*q == '0');
     assert(q >= p);
-  } else {
+  } නැතහොත් {
     /* Add trailing zeroes.  */
     memset (dst, '0', outputDigits);
     dst += outputDigits;
@@ -3451,26 +3451,26 @@ char *IEEEFloat::convertNormalToHexString(char *dst, unsigned int hexDigits,
      is something after the decimal point add it.  This must come
      after rounding above.  */
   p[-1] = p[0];
-  if (dst -1 == p)
+  නම් (dst -1 == p)
     dst--;
-  else
+  නැතහොත්
     p[0] = '.';
 
   /* Finally output the exponent.  */
   *dst++ = upperCase ? 'P': 'p';
 
-  return writeSignedDecimal (dst, exponent);
+  ආපසු writeSignedDecimal (dst, exponent);
 }
 
 hash_code hash_value(const IEEEFloat &Arg) {
-  if (!Arg.isFiniteNonZero())
-    return hash_combine((uint8_t)Arg.category,
+  නම් (!Arg.isFiniteNonZero())
+    ආපසු hash_combine((uint8_t)Arg.category,
                         // NaN has no sign, fix it at zero.
                         Arg.isNaN() ? (uint8_t)0 : (uint8_t)Arg.sign,
                         Arg.semantics->precision);
 
   // Normal floats need their exponent and significand hashed.
-  return hash_combine((uint8_t)Arg.category, (uint8_t)Arg.sign,
+  ආපසු hash_combine((uint8_t)Arg.category, (uint8_t)Arg.sign,
                       Arg.semantics->precision, Arg.exponent,
                       hash_combine_range(
                         Arg.significandParts(),
@@ -3488,7 +3488,7 @@ hash_code hash_value(const IEEEFloat &Arg) {
 
 APInt IEEEFloat::convertF80LongDoubleAPFloatToAPInt() const {
   assert(partCount() == 2);
-  return convertIEEEFloatToAPInt<APFloatBase::semX87DoubleExtended>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::semX87DoubleExtended>();
 }
 
 APInt IEEEFloat::convertPPCDoubleDoubleLegacyAPFloatToAPInt() const {
@@ -3521,7 +3521,7 @@ APInt IEEEFloat::convertPPCDoubleDoubleLegacyAPFloatToAPInt() const {
   // just set the second double to zero.  Otherwise, re-convert back to
   // the extended format and compute the difference.  This now should
   // convert exactly to double.
-  if (u.isFiniteNonZero() && losesInfo) {
+  නම් (u.isFiniteNonZero() && losesInfo) {
     fs = u.convert(extendedSemantics, rmNearestTiesToEven, &losesInfo);
     assert(fs == opOK && !losesInfo);
 
@@ -3530,57 +3530,57 @@ APInt IEEEFloat::convertPPCDoubleDoubleLegacyAPFloatToAPInt() const {
     fs = v.convert(APFloatBase::semIEEEdouble, rmNearestTiesToEven, &losesInfo);
     assert(fs == opOK && !losesInfo);
     words[1] = *v.convertDoubleAPFloatToAPInt().getRawData();
-  } else {
+  } නැතහොත් {
     words[1] = 0;
   }
 
-  return APInt(128, words);
+  ආපසු APInt(128, words);
 }
 
 template <const fltSemantics &S>
 APInt IEEEFloat::convertIEEEFloatToAPInt() const {
   assert(semantics == &S);
-  constexpr unsigned int trailing_significand_bits =
+  constexpr unsigned පූර්ණ_සංඛ්‍යා trailing_significand_bits =
       S.precision - 1 + S.hasExplicitIntegerBit;
-  constexpr int integer_bit_part = (S.precision - 1) / integerPartWidth;
+  constexpr පූර්ණ_සංඛ්‍යා integer_bit_part = (S.precision - 1) / integerPartWidth;
   constexpr integerPart integer_bit = integerPart{1}
                                       << ((S.precision - 1) % integerPartWidth);
   constexpr uint64_t significand_mask = integer_bit - 1;
-  constexpr unsigned int exponent_bits =
+  constexpr unsigned පූර්ණ_සංඛ්‍යා exponent_bits =
       S.sizeInBits - (S.hasSignedRepr ? 1 : 0) - trailing_significand_bits;
   static_assert(exponent_bits < 64);
   constexpr uint64_t exponent_mask = (uint64_t{1} << exponent_bits) - 1;
   constexpr bool is_zero_exp_reserved = S.hasDenormals || S.hasZero;
-  constexpr int bias = -(S.minExponent - (is_zero_exp_reserved ? 1 : 0));
+  constexpr පූර්ණ_සංඛ්‍යා bias = -(S.minExponent - (is_zero_exp_reserved ? 1 : 0));
 
   uint64_t myexponent;
   std::array<integerPart, partCountForBits(trailing_significand_bits)>
       mysignificand;
 
-  if (isFiniteNonZero()) {
+  නම් (isFiniteNonZero()) {
     myexponent = exponent + bias;
     std::copy_n(significandParts(), mysignificand.size(),
                 mysignificand.begin());
-    if (myexponent == 1 &&
+    නම් (myexponent == 1 &&
         !(significandParts()[integer_bit_part] & integer_bit))
       myexponent = 0; // denormal
-  } else if (category == fcZero) {
-    if (!S.hasZero)
+  } නැතහොත් නම් (category == fcZero) {
+    නම් (!S.hasZero)
       llvm_unreachable("semantics does not support zero!");
     myexponent = ::exponentZero(S) + bias;
     mysignificand.fill(0);
-  } else if (category == fcInfinity) {
-    if (S.nonFiniteBehavior == fltNonfiniteBehavior::NanOnly ||
+  } නැතහොත් නම් (category == fcInfinity) {
+    නම් (S.nonFiniteBehavior == fltNonfiniteBehavior::NanOnly ||
         S.nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
       llvm_unreachable("semantics don't support inf!");
     myexponent = ::exponentInf(S) + bias;
     mysignificand.fill(0);
-    if constexpr (S.hasExplicitIntegerBit) {
+    නම් constexpr (S.hasExplicitIntegerBit) {
       mysignificand[0] = integerPart{1} << (trailing_significand_bits - 1);
     }
-  } else {
+  } නැතහොත් {
     assert(category == fcNaN && "Unknown category!");
-    if (S.nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
+    නම් (S.nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
       llvm_unreachable("semantics don't support NaN!");
     myexponent = ::exponentNaN(S) + bias;
     std::copy_n(significandParts(), mysignificand.size(),
@@ -3589,15 +3589,15 @@ APInt IEEEFloat::convertIEEEFloatToAPInt() const {
   std::array<uint64_t, (S.sizeInBits + 63) / 64> words;
   auto words_iter =
       std::copy_n(mysignificand.begin(), mysignificand.size(), words.begin());
-  if constexpr (!S.hasExplicitIntegerBit) {
-    if constexpr (significand_mask != 0 || trailing_significand_bits == 0) {
+  නම් constexpr (!S.hasExplicitIntegerBit) {
+    නම් constexpr (significand_mask != 0 || trailing_significand_bits == 0) {
       // Clear the integer bit.
       words[mysignificand.size() - 1] &= significand_mask;
     }
   }
   std::fill(words_iter, words.end(), uint64_t{0});
   constexpr size_t last_word = words.size() - 1;
-  if constexpr (S.hasSignedRepr) {
+  නම් constexpr (S.hasSignedRepr) {
     uint64_t shifted_sign = static_cast<uint64_t>(sign & 1)
                             << ((S.sizeInBits - 1) % 64);
     words[last_word] |= shifted_sign;
@@ -3605,100 +3605,100 @@ APInt IEEEFloat::convertIEEEFloatToAPInt() const {
   uint64_t shifted_exponent = (myexponent & exponent_mask)
                               << (trailing_significand_bits % 64);
   words[last_word] |= shifted_exponent;
-  if constexpr (last_word == 0) {
-    return APInt(S.sizeInBits, words[0]);
+  නම් constexpr (last_word == 0) {
+    ආපසු APInt(S.sizeInBits, words[0]);
   }
-  return APInt(S.sizeInBits, words);
+  ආපසු APInt(S.sizeInBits, words);
 }
 
 APInt IEEEFloat::convertQuadrupleAPFloatToAPInt() const {
   assert(partCount() == 2);
-  return convertIEEEFloatToAPInt<APFloatBase::semIEEEquad>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::semIEEEquad>();
 }
 
 APInt IEEEFloat::convertDoubleAPFloatToAPInt() const {
   assert(partCount()==1);
-  return convertIEEEFloatToAPInt<APFloatBase::semIEEEdouble>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::semIEEEdouble>();
 }
 
 APInt IEEEFloat::convertFloatAPFloatToAPInt() const {
   assert(partCount()==1);
-  return convertIEEEFloatToAPInt<APFloatBase::semIEEEsingle>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::semIEEEsingle>();
 }
 
 APInt IEEEFloat::convertBFloatAPFloatToAPInt() const {
   assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semBFloat>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::semBFloat>();
 }
 
 APInt IEEEFloat::convertHalfAPFloatToAPInt() const {
   assert(partCount()==1);
-  return convertIEEEFloatToAPInt<APFloatBase::APFloatBase::semIEEEhalf>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::APFloatBase::semIEEEhalf>();
 }
 
 APInt IEEEFloat::convertFloat8E5M2APFloatToAPInt() const {
   assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat8E5M2>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::semFloat8E5M2>();
 }
 
 APInt IEEEFloat::convertFloat8E5M2FNUZAPFloatToAPInt() const {
   assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat8E5M2FNUZ>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::semFloat8E5M2FNUZ>();
 }
 
 APInt IEEEFloat::convertFloat8E4M3APFloatToAPInt() const {
   assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat8E4M3>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::semFloat8E4M3>();
 }
 
 APInt IEEEFloat::convertFloat8E4M3FNAPFloatToAPInt() const {
   assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat8E4M3FN>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::semFloat8E4M3FN>();
 }
 
 APInt IEEEFloat::convertFloat8E4M3FNUZAPFloatToAPInt() const {
   assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat8E4M3FNUZ>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::semFloat8E4M3FNUZ>();
 }
 
 APInt IEEEFloat::convertFloat8E4M3B11FNUZAPFloatToAPInt() const {
   assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat8E4M3B11FNUZ>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::semFloat8E4M3B11FNUZ>();
 }
 
 APInt IEEEFloat::convertFloat8E3M4APFloatToAPInt() const {
   assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat8E3M4>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::semFloat8E3M4>();
 }
 
 APInt IEEEFloat::convertFloatTF32APFloatToAPInt() const {
   assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloatTF32>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::semFloatTF32>();
 }
 
 APInt IEEEFloat::convertFloat8E8M0FNUAPFloatToAPInt() const {
   assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat8E8M0FNU>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::semFloat8E8M0FNU>();
 }
 
 APInt IEEEFloat::convertFloat8E5M3FNUAPFloatToAPInt() const {
   assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat8E5M3FNU>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::semFloat8E5M3FNU>();
 }
 
 APInt IEEEFloat::convertFloat6E3M2FNAPFloatToAPInt() const {
   assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat6E3M2FN>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::semFloat6E3M2FN>();
 }
 
 APInt IEEEFloat::convertFloat6E2M3FNAPFloatToAPInt() const {
   assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat6E2M3FN>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::semFloat6E2M3FN>();
 }
 
 APInt IEEEFloat::convertFloat4E2M1FNAPFloatToAPInt() const {
   assert(partCount() == 1);
-  return convertIEEEFloatToAPInt<APFloatBase::semFloat4E2M1FN>();
+  ආපසු convertIEEEFloatToAPInt<APFloatBase::semFloat4E2M1FN>();
 }
 
 // This function creates an APInt that is just a bit map of the floating
@@ -3706,68 +3706,68 @@ APInt IEEEFloat::convertFloat4E2M1FNAPFloatToAPInt() const {
 // and treating the result as a normal integer is unlikely to be useful.
 
 APInt IEEEFloat::bitcastToAPInt() const {
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semIEEEhalf)
-    return convertHalfAPFloatToAPInt();
+  නම් (semantics == (const llvm::fltSemantics *)&APFloatBase::semIEEEhalf)
+    ආපසු convertHalfAPFloatToAPInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semBFloat)
-    return convertBFloatAPFloatToAPInt();
+  නම් (semantics == (const llvm::fltSemantics *)&APFloatBase::semBFloat)
+    ආපසු convertBFloatAPFloatToAPInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semIEEEsingle)
-    return convertFloatAPFloatToAPInt();
+  නම් (semantics == (const llvm::fltSemantics *)&APFloatBase::semIEEEsingle)
+    ආපසු convertFloatAPFloatToAPInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semIEEEdouble)
-    return convertDoubleAPFloatToAPInt();
+  නම් (semantics == (const llvm::fltSemantics *)&APFloatBase::semIEEEdouble)
+    ආපසු convertDoubleAPFloatToAPInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semIEEEquad)
-    return convertQuadrupleAPFloatToAPInt();
+  නම් (semantics == (const llvm::fltSemantics *)&APFloatBase::semIEEEquad)
+    ආපසු convertQuadrupleAPFloatToAPInt();
 
-  if (semantics ==
+  නම් (semantics ==
       (const llvm::fltSemantics *)&APFloatBase::semX87DoubleExtended)
-    return convertF80LongDoubleAPFloatToAPInt();
+    ආපසු convertF80LongDoubleAPFloatToAPInt();
 
-  if (semantics ==
+  නම් (semantics ==
       (const llvm::fltSemantics *)&APFloatBase::semPPCDoubleDoubleLegacy)
-    return convertPPCDoubleDoubleLegacyAPFloatToAPInt();
+    ආපසු convertPPCDoubleDoubleLegacyAPFloatToAPInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E5M2)
-    return convertFloat8E5M2APFloatToAPInt();
+  නම් (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E5M2)
+    ආපසු convertFloat8E5M2APFloatToAPInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E5M2FNUZ)
-    return convertFloat8E5M2FNUZAPFloatToAPInt();
+  නම් (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E5M2FNUZ)
+    ආපසු convertFloat8E5M2FNUZAPFloatToAPInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E4M3)
-    return convertFloat8E4M3APFloatToAPInt();
+  නම් (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E4M3)
+    ආපසු convertFloat8E4M3APFloatToAPInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E4M3FN)
-    return convertFloat8E4M3FNAPFloatToAPInt();
+  නම් (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E4M3FN)
+    ආපසු convertFloat8E4M3FNAPFloatToAPInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E4M3FNUZ)
-    return convertFloat8E4M3FNUZAPFloatToAPInt();
+  නම් (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E4M3FNUZ)
+    ආපසු convertFloat8E4M3FNUZAPFloatToAPInt();
 
-  if (semantics ==
+  නම් (semantics ==
       (const llvm::fltSemantics *)&APFloatBase::semFloat8E4M3B11FNUZ)
-    return convertFloat8E4M3B11FNUZAPFloatToAPInt();
+    ආපසු convertFloat8E4M3B11FNUZAPFloatToAPInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E3M4)
-    return convertFloat8E3M4APFloatToAPInt();
+  නම් (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E3M4)
+    ආපසු convertFloat8E3M4APFloatToAPInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloatTF32)
-    return convertFloatTF32APFloatToAPInt();
+  නම් (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloatTF32)
+    ආපසු convertFloatTF32APFloatToAPInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E8M0FNU)
-    return convertFloat8E8M0FNUAPFloatToAPInt();
+  නම් (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E8M0FNU)
+    ආපසු convertFloat8E8M0FNUAPFloatToAPInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E5M3FNU)
-    return convertFloat8E5M3FNUAPFloatToAPInt();
+  නම් (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat8E5M3FNU)
+    ආපසු convertFloat8E5M3FNUAPFloatToAPInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat6E3M2FN)
-    return convertFloat6E3M2FNAPFloatToAPInt();
+  නම් (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat6E3M2FN)
+    ආපසු convertFloat6E3M2FNAPFloatToAPInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat6E2M3FN)
-    return convertFloat6E2M3FNAPFloatToAPInt();
+  නම් (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat6E2M3FN)
+    ආපසු convertFloat6E2M3FNAPFloatToAPInt();
 
-  if (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat4E2M1FN)
-    return convertFloat4E2M1FNAPFloatToAPInt();
+  නම් (semantics == (const llvm::fltSemantics *)&APFloatBase::semFloat4E2M1FN)
+    ආපසු convertFloat4E2M1FNAPFloatToAPInt();
 
   llvm_unreachable("unknown format!");
 }
@@ -3776,14 +3776,14 @@ float IEEEFloat::convertToFloat() const {
   assert(semantics == (const llvm::fltSemantics *)&APFloatBase::semIEEEsingle &&
          "Float semantics are not IEEEsingle");
   APInt api = bitcastToAPInt();
-  return api.bitsToFloat();
+  ආපසු api.bitsToFloat();
 }
 
-double IEEEFloat::convertToDouble() const {
+dviguu_na IEEEFloat::convertToDouble() const {
   assert(semantics == (const llvm::fltSemantics *)&APFloatBase::semIEEEdouble &&
          "Float semantics are not IEEEdouble");
   APInt api = bitcastToAPInt();
-  return api.bitsToDouble();
+  ආපසු api.bitsToDouble();
 }
 
 #ifdef HAS_IEE754_FLOAT128
@@ -3791,12 +3791,12 @@ float128 IEEEFloat::convertToQuad() const {
   assert(semantics == (const llvm::fltSemantics *)&APFloatBase::semIEEEquad &&
          "Float semantics are not IEEEquads");
   APInt api = bitcastToAPInt();
-  return api.bitsToQuad();
+  ආපසු api.bitsToQuad();
 }
 #endif
 
 void IEEEFloat::initFromF80LongDoubleAPInt(const APInt &api) {
-  return initFromIEEEAPInt<APFloatBase::semX87DoubleExtended>(api);
+  ආපසු initFromIEEEAPInt<APFloatBase::semX87DoubleExtended>(api);
 }
 
 void IEEEFloat::initFromPPCDoubleDoubleLegacyAPInt(const APInt &api) {
@@ -3812,11 +3812,11 @@ void IEEEFloat::initFromPPCDoubleDoubleLegacyAPInt(const APInt &api) {
   assert((fs == opOK || fs == opInvalidOp) && !losesInfo);
 
   // Unless we have a special case, add in second double.
-  if (isFiniteNonZero()) {
+  නම් (isFiniteNonZero()) {
     IEEEFloat v(APFloatBase::semIEEEdouble, APInt(64, i2));
     // The first double determines the category, so ignore a non-canonical
     // second double.
-    if (v.isFinite()) {
+    නම් (v.isFinite()) {
       fs = v.convert(APFloatBase::semPPCDoubleDoubleLegacy, rmNearestTiesToEven,
                      &losesInfo);
       assert(fs == opOK && !losesInfo);
@@ -3843,30 +3843,30 @@ template <const fltSemantics &S>
 void IEEEFloat::initFromIEEEAPInt(const APInt &api) {
   assert(api.getBitWidth() == S.sizeInBits);
 
-  constexpr unsigned int trailing_significand_bits =
+  constexpr unsigned පූර්ණ_සංඛ්‍යා trailing_significand_bits =
       S.precision - 1 + S.hasExplicitIntegerBit;
   constexpr integerPart integer_bit =
       integerPart{1} << (trailing_significand_bits % integerPartWidth);
   constexpr uint64_t significand_mask = integer_bit - 1;
-  constexpr unsigned int exponent_bits =
+  constexpr unsigned පූර්ණ_සංඛ්‍යා exponent_bits =
       S.sizeInBits - (S.hasSignedRepr ? 1 : 0) - trailing_significand_bits;
   static_assert(exponent_bits < 64);
-  constexpr unsigned int stored_significand_parts =
+  constexpr unsigned පූර්ණ_සංඛ්‍යා stored_significand_parts =
       partCountForBits(trailing_significand_bits + 1);
   constexpr uint64_t exponent_mask = (uint64_t{1} << exponent_bits) - 1;
   constexpr bool is_zero_exp_reserved = S.hasDenormals || S.hasZero;
-  constexpr int bias = -(S.minExponent - (is_zero_exp_reserved ? 1 : 0));
+  constexpr පූර්ණ_සංඛ්‍යා bias = -(S.minExponent - (is_zero_exp_reserved ? 1 : 0));
   constexpr bool has_significand = trailing_significand_bits > 0;
 
   // Copy the bits of the significand. We need to clear out the exponent and
   // sign bit in the last word.
   std::array<integerPart, stored_significand_parts> mysignificand;
-  if constexpr (has_significand) {
+  නම් constexpr (has_significand) {
     std::copy_n(api.getRawData(), mysignificand.size(), mysignificand.begin());
-    if constexpr (significand_mask != 0 || S.precision >= integerPartWidth) {
+    නම් constexpr (significand_mask != 0 || S.precision >= integerPartWidth) {
       mysignificand[mysignificand.size() - 1] &= significand_mask;
     }
-  } else {
+  } නැතහොත් {
     std::fill_n(mysignificand.begin(), mysignificand.size(), 0);
     // Always set integer bit to 1 for consistency in APFloat's internal
     // representation.
@@ -3883,7 +3883,7 @@ void IEEEFloat::initFromIEEEAPInt(const APInt &api) {
   assert(partCount() == mysignificand.size());
 
   sign = S.hasSignedRepr
-             ? static_cast<unsigned int>(last_word >> ((S.sizeInBits - 1) % 64))
+             ? static_cast<unsigned පූර්ණ_සංඛ්‍යා>(last_word >> ((S.sizeInBits - 1) % 64))
              : 0;
 
   bool all_zero_significand =
@@ -3891,10 +3891,10 @@ void IEEEFloat::initFromIEEEAPInt(const APInt &api) {
 
   bool is_zero = myexponent == 0 && all_zero_significand && S.hasZero;
 
-  if constexpr (S.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754) {
+  නම් constexpr (S.nonFiniteBehavior == fltNonfiniteBehavior::IEEE754) {
     bool is_inf = false;
 
-    if constexpr (S.hasExplicitIntegerBit) {
+    නම් constexpr (S.hasExplicitIntegerBit) {
       // This is only used and tested for x87DoubleExtended
       static_assert(S.precision == 64);
       constexpr integerPart significand_mask_no_int_bit =
@@ -3904,20 +3904,20 @@ void IEEEFloat::initFromIEEEAPInt(const APInt &api) {
 
       is_inf = myexponent - bias == ::exponentInf(S) && myintegerbit == 1 &&
                (mysignificand[0] & significand_mask_no_int_bit) == 0;
-    } else {
+    } නැතහොත් {
       is_inf = myexponent - bias == ::exponentInf(S) && all_zero_significand;
     }
 
-    if (is_inf) {
+    නම් (is_inf) {
       makeInf(sign);
-      return;
+      ආපසු;
     }
   }
 
   bool is_nan = false;
 
-  if constexpr (S.nanEncoding == fltNanEncoding::IEEE) {
-    if constexpr (S.hasExplicitIntegerBit) {
+  නම් constexpr (S.nanEncoding == fltNanEncoding::IEEE) {
+    නම් constexpr (S.hasExplicitIntegerBit) {
       // This is only used and tested for x87DoubleExtended
       static_assert(S.precision == 64);
       const integerPart myintegerbit =
@@ -3925,53 +3925,53 @@ void IEEEFloat::initFromIEEEAPInt(const APInt &api) {
       constexpr integerPart significand_mask_no_int_bit =
           (uint64_t{1} << (trailing_significand_bits - 1)) - 1;
 
-      if (myexponent - bias == ::exponentNaN(S) &&
+      නම් (myexponent - bias == ::exponentNaN(S) &&
           (mysignificand[0] & significand_mask_no_int_bit) != 0) {
         // regular NaN and pseudoNaN
         is_nan = true;
-      } else if (myexponent - bias == ::exponentNaN(S) &&
+      } නැතහොත් නම් (myexponent - bias == ::exponentNaN(S) &&
                  (mysignificand[0] & significand_mask_no_int_bit) == 0) {
         // pseudoinfinity
         is_nan = true;
-      } else if (myexponent - bias != ::exponentNaN(S) && myexponent != 0 &&
+      } නැතහොත් නම් (myexponent - bias != ::exponentNaN(S) && myexponent != 0 &&
                  myintegerbit == 0) {
         // unnormal
         is_nan = true;
       }
-    } else {
+    } නැතහොත් {
       is_nan = myexponent - bias == ::exponentNaN(S) && !all_zero_significand;
     }
-  } else if constexpr (S.nanEncoding == fltNanEncoding::AllOnes) {
+  } නැතහොත් නම් constexpr (S.nanEncoding == fltNanEncoding::AllOnes) {
     bool all_ones_significand =
         std::all_of(mysignificand.begin(), mysignificand.end() - 1,
-                    [](integerPart bits) { return bits == ~integerPart{0}; }) &&
+                    [](integerPart bits) { ආපසු bits == ~integerPart{0}; }) &&
         (!significand_mask ||
          mysignificand[mysignificand.size() - 1] == significand_mask);
     is_nan = myexponent - bias == ::exponentNaN(S) && all_ones_significand;
-  } else if constexpr (S.nanEncoding == fltNanEncoding::NegativeZero) {
+  } නැතහොත් නම් constexpr (S.nanEncoding == fltNanEncoding::NegativeZero) {
     is_nan = is_zero && sign;
   }
 
-  if (is_nan) {
+  නම් (is_nan) {
     category = fcNaN;
     exponent = ::exponentNaN(S);
     std::copy_n(mysignificand.begin(), mysignificand.size(),
                 significandParts());
-    return;
+    ආපසු;
   }
 
-  if (is_zero) {
+  නම් (is_zero) {
     makeZero(sign);
-    return;
+    ආපසු;
   }
 
   category = fcNormal;
   exponent = myexponent - bias;
   std::copy_n(mysignificand.begin(), mysignificand.size(), significandParts());
-  if (myexponent == 0 && S.hasDenormals) // denormal
+  නම් (myexponent == 0 && S.hasDenormals) // denormal
     exponent = S.minExponent;
-  else {
-    if constexpr (!S.hasExplicitIntegerBit) {
+  නැතහොත් {
+    නම් constexpr (!S.hasExplicitIntegerBit) {
       significandParts()[mysignificand.size() - 1] |= integer_bit;
     }
   }
@@ -4044,46 +4044,46 @@ void IEEEFloat::initFromFloat4E2M1FNAPInt(const APInt &api) {
 /// Treat api as containing the bits of a floating point number.
 void IEEEFloat::initFromAPInt(const fltSemantics *Sem, const APInt &api) {
   assert(api.getBitWidth() == Sem->sizeInBits);
-  if (Sem == &APFloatBase::semIEEEhalf)
-    return initFromHalfAPInt(api);
-  if (Sem == &APFloatBase::semBFloat)
-    return initFromBFloatAPInt(api);
-  if (Sem == &APFloatBase::semIEEEsingle)
-    return initFromFloatAPInt(api);
-  if (Sem == &APFloatBase::semIEEEdouble)
-    return initFromDoubleAPInt(api);
-  if (Sem == &APFloatBase::semIEEEquad)
-    return initFromQuadrupleAPInt(api);
-  if (Sem == &APFloatBase::semX87DoubleExtended)
-    return initFromF80LongDoubleAPInt(api);
-  if (Sem == &APFloatBase::semPPCDoubleDoubleLegacy)
-    return initFromPPCDoubleDoubleLegacyAPInt(api);
-  if (Sem == &APFloatBase::semFloat8E5M2)
-    return initFromFloat8E5M2APInt(api);
-  if (Sem == &APFloatBase::semFloat8E5M2FNUZ)
-    return initFromFloat8E5M2FNUZAPInt(api);
-  if (Sem == &APFloatBase::semFloat8E4M3)
-    return initFromFloat8E4M3APInt(api);
-  if (Sem == &APFloatBase::semFloat8E4M3FN)
-    return initFromFloat8E4M3FNAPInt(api);
-  if (Sem == &APFloatBase::semFloat8E4M3FNUZ)
-    return initFromFloat8E4M3FNUZAPInt(api);
-  if (Sem == &APFloatBase::semFloat8E4M3B11FNUZ)
-    return initFromFloat8E4M3B11FNUZAPInt(api);
-  if (Sem == &APFloatBase::semFloat8E3M4)
-    return initFromFloat8E3M4APInt(api);
-  if (Sem == &APFloatBase::semFloatTF32)
-    return initFromFloatTF32APInt(api);
-  if (Sem == &APFloatBase::semFloat8E8M0FNU)
-    return initFromFloat8E8M0FNUAPInt(api);
-  if (Sem == &APFloatBase::semFloat8E5M3FNU)
-    return initFromFloat8E5M3FNUAPInt(api);
-  if (Sem == &APFloatBase::semFloat6E3M2FN)
-    return initFromFloat6E3M2FNAPInt(api);
-  if (Sem == &APFloatBase::semFloat6E2M3FN)
-    return initFromFloat6E2M3FNAPInt(api);
-  if (Sem == &APFloatBase::semFloat4E2M1FN)
-    return initFromFloat4E2M1FNAPInt(api);
+  නම් (Sem == &APFloatBase::semIEEEhalf)
+    ආපසු initFromHalfAPInt(api);
+  නම් (Sem == &APFloatBase::semBFloat)
+    ආපසු initFromBFloatAPInt(api);
+  නම් (Sem == &APFloatBase::semIEEEsingle)
+    ආපසු initFromFloatAPInt(api);
+  නම් (Sem == &APFloatBase::semIEEEdouble)
+    ආපසු initFromDoubleAPInt(api);
+  නම් (Sem == &APFloatBase::semIEEEquad)
+    ආපසු initFromQuadrupleAPInt(api);
+  නම් (Sem == &APFloatBase::semX87DoubleExtended)
+    ආපසු initFromF80LongDoubleAPInt(api);
+  නම් (Sem == &APFloatBase::semPPCDoubleDoubleLegacy)
+    ආපසු initFromPPCDoubleDoubleLegacyAPInt(api);
+  නම් (Sem == &APFloatBase::semFloat8E5M2)
+    ආපසු initFromFloat8E5M2APInt(api);
+  නම් (Sem == &APFloatBase::semFloat8E5M2FNUZ)
+    ආපසු initFromFloat8E5M2FNUZAPInt(api);
+  නම් (Sem == &APFloatBase::semFloat8E4M3)
+    ආපසු initFromFloat8E4M3APInt(api);
+  නම් (Sem == &APFloatBase::semFloat8E4M3FN)
+    ආපසු initFromFloat8E4M3FNAPInt(api);
+  නම් (Sem == &APFloatBase::semFloat8E4M3FNUZ)
+    ආපසු initFromFloat8E4M3FNUZAPInt(api);
+  නම් (Sem == &APFloatBase::semFloat8E4M3B11FNUZ)
+    ආපසු initFromFloat8E4M3B11FNUZAPInt(api);
+  නම් (Sem == &APFloatBase::semFloat8E3M4)
+    ආපසු initFromFloat8E3M4APInt(api);
+  නම් (Sem == &APFloatBase::semFloatTF32)
+    ආපසු initFromFloatTF32APInt(api);
+  නම් (Sem == &APFloatBase::semFloat8E8M0FNU)
+    ආපසු initFromFloat8E8M0FNUAPInt(api);
+  නම් (Sem == &APFloatBase::semFloat8E5M3FNU)
+    ආපසු initFromFloat8E5M3FNUAPInt(api);
+  නම් (Sem == &APFloatBase::semFloat6E3M2FN)
+    ආපසු initFromFloat6E3M2FNAPInt(api);
+  නම් (Sem == &APFloatBase::semFloat6E2M3FN)
+    ආපසු initFromFloat6E2M3FNAPInt(api);
+  නම් (Sem == &APFloatBase::semFloat4E2M1FN)
+    ආපසු initFromFloat4E2M1FNAPInt(api);
 
   llvm_unreachable("unsupported semantics");
 }
@@ -4091,7 +4091,7 @@ void IEEEFloat::initFromAPInt(const fltSemantics *Sem, const APInt &api) {
 /// Make this number the largest magnitude normal number in the given
 /// semantics.
 void IEEEFloat::makeLargest(bool Negative) {
-  if (Negative && !semantics->hasSignedRepr)
+  නම් (Negative && !semantics->hasSignedRepr)
     llvm_unreachable(
         "This floating point format does not support signed values");
   // We want (in interchange format):
@@ -4105,7 +4105,7 @@ void IEEEFloat::makeLargest(bool Negative) {
   // Use memset to set all but the highest integerPart to all ones.
   integerPart *significand = significandParts();
   unsigned PartCount = partCount();
-  memset(significand, 0xFF, sizeof(integerPart)*(PartCount - 1));
+  memset(significand, 0xFF, parimaa_na(integerPart)*(PartCount - 1));
 
   // Set the high integerPart especially setting all unused top bits for
   // internal consistency.
@@ -4114,7 +4114,7 @@ void IEEEFloat::makeLargest(bool Negative) {
   significand[PartCount - 1] = (NumUnusedHighBits < integerPartWidth)
                                    ? (~integerPart(0) >> NumUnusedHighBits)
                                    : 0;
-  if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
+  නම් (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly &&
       semantics->nanEncoding == fltNanEncoding::AllOnes &&
       (semantics->precision > 1))
     significand[0] &= ~integerPart(1);
@@ -4123,7 +4123,7 @@ void IEEEFloat::makeLargest(bool Negative) {
 /// Make this number the smallest magnitude denormal number in the given
 /// semantics.
 void IEEEFloat::makeSmallest(bool Negative) {
-  if (Negative && !semantics->hasSignedRepr)
+  නම් (Negative && !semantics->hasSignedRepr)
     llvm_unreachable(
         "This floating point format does not support signed values");
   // We want (in interchange format):
@@ -4137,7 +4137,7 @@ void IEEEFloat::makeSmallest(bool Negative) {
 }
 
 void IEEEFloat::makeSmallestNormalized(bool Negative) {
-  if (Negative && !semantics->hasSignedRepr)
+  නම් (Negative && !semantics->hasSignedRepr)
     llvm_unreachable(
         "This floating point format does not support signed values");
   // We want (in interchange format):
@@ -4160,38 +4160,38 @@ IEEEFloat::IEEEFloat(float f) {
   initFromAPInt(&APFloatBase::semIEEEsingle, APInt::floatToBits(f));
 }
 
-IEEEFloat::IEEEFloat(double d) {
+IEEEFloat::IEEEFloat(dviguu_na d) {
   initFromAPInt(&APFloatBase::semIEEEdouble, APInt::doubleToBits(d));
 }
 
 namespace {
-  void append(SmallVectorImpl<char> &Buffer, StringRef Str) {
+  void append(SmallVectorImpl<var_na> &Buffer, StringRef Str) {
     Buffer.append(Str.begin(), Str.end());
   }
 
   /// Removes data from the given significand until it is no more
   /// precise than is required for the desired precision.
   void AdjustToPrecision(APInt &significand,
-                         int &exp, unsigned FormatPrecision) {
+                         පූර්ණ_සංඛ්‍යා &exp, unsigned FormatPrecision) {
     unsigned bits = significand.getActiveBits();
 
     // 196/59 is a very slight overestimate of lg_2(10).
     unsigned bitsRequired = (FormatPrecision * 196 + 58) / 59;
 
-    if (bits <= bitsRequired) return;
+    නම් (bits <= bitsRequired) ආපසු;
 
     unsigned tensRemovable = (bits - bitsRequired) * 59 / 196;
-    if (!tensRemovable) return;
+    නම් (!tensRemovable) ආපසු;
 
     exp += tensRemovable;
 
     APInt divisor(significand.getBitWidth(), 1);
     APInt powten(significand.getBitWidth(), 10);
-    while (true) {
-      if (tensRemovable & 1)
+    අතරතුර (true) {
+      නම් (tensRemovable & 1)
         divisor *= powten;
       tensRemovable >>= 1;
-      if (!tensRemovable) break;
+      නම් (!tensRemovable) bha_nga;
       powten *= powten;
     }
 
@@ -4202,10 +4202,10 @@ namespace {
   }
 
 
-  void AdjustToPrecision(SmallVectorImpl<char> &buffer,
-                         int &exp, unsigned FormatPrecision) {
+  void AdjustToPrecision(SmallVectorImpl<var_na> &buffer,
+                         පූර්ණ_සංඛ්‍යා &exp, unsigned FormatPrecision) {
     unsigned N = buffer.size();
-    if (N <= FormatPrecision) return;
+    නම් (N <= FormatPrecision) ආපසු;
 
     // The most significant figures are the last ones in the buffer.
     unsigned FirstSignificant = N - FormatPrecision;
@@ -4215,49 +4215,49 @@ namespace {
 
     // Rounding down is just a truncation, except we also want to drop
     // trailing zeros from the new result.
-    if (buffer[FirstSignificant - 1] < '5') {
-      while (FirstSignificant < N && buffer[FirstSignificant] == '0')
+    නම් (buffer[FirstSignificant - 1] < '5') {
+      අතරතුර (FirstSignificant < N && buffer[FirstSignificant] == '0')
         FirstSignificant++;
 
       exp += FirstSignificant;
       buffer.erase(&buffer[0], &buffer[FirstSignificant]);
-      return;
+      ආපසු;
     }
 
     // Rounding up requires a decimal add-with-carry.  If we continue
     // the carry, the newly-introduced zeros will just be truncated.
-    for (unsigned I = FirstSignificant; I != N; ++I) {
-      if (buffer[I] == '9') {
+    සඳහා (unsigned I = FirstSignificant; I != N; ++I) {
+      නම් (buffer[I] == '9') {
         FirstSignificant++;
-      } else {
+      } නැතහොත් {
         buffer[I]++;
-        break;
+        bha_nga;
       }
     }
 
     // If we carried through, we have exactly one digit of precision.
-    if (FirstSignificant == N) {
+    නම් (FirstSignificant == N) {
       exp += FirstSignificant;
       buffer.clear();
       buffer.push_back('1');
-      return;
+      ආපසු;
     }
 
     exp += FirstSignificant;
     buffer.erase(&buffer[0], &buffer[FirstSignificant]);
   }
 
-  void toStringImpl(SmallVectorImpl<char> &Str, const bool isNeg, int exp,
+  void toStringImpl(SmallVectorImpl<var_na> &Str, const bool isNeg, පූර්ණ_සංඛ්‍යා exp,
                     APInt significand, unsigned FormatPrecision,
                     unsigned FormatMaxPadding, bool TruncateZero) {
-    const int semanticsPrecision = significand.getBitWidth();
+    const පූර්ණ_සංඛ්‍යා semanticsPrecision = significand.getBitWidth();
 
-    if (isNeg)
+    නම් (isNeg)
       Str.push_back('-');
 
     // Set FormatPrecision if zero.  We want to do this before we
     // truncate trailing zeros, as those are part of the precision.
-    if (!FormatPrecision) {
+    නම් (!FormatPrecision) {
       // We use enough digits so the number can be round-tripped back to an
       // APFloat. The formula comes from "How to Print Floating-Point Numbers
       // Accurately" by Steele and White.
@@ -4269,20 +4269,20 @@ namespace {
     }
 
     // Ignore trailing binary zeros.
-    int trailingZeros = significand.countr_zero();
+    පූර්ණ_සංඛ්‍යා trailingZeros = significand.countr_zero();
     exp += trailingZeros;
     significand.lshrInPlace(trailingZeros);
 
     // Change the exponent from 2^e to 10^e.
-    if (exp == 0) {
+    නම් (exp == 0) {
       // Nothing to do.
-    } else if (exp > 0) {
+    } නැතහොත් නම් (exp > 0) {
       // Just shift left.
       significand = significand.zext(semanticsPrecision + exp);
       significand <<= exp;
       exp = 0;
-    } else { /* exp < 0 */
-      int texp = -exp;
+    } නැතහොත් { /* exp < 0 */
+      පූර්ණ_සංඛ්‍යා texp = -exp;
 
       // We transform this using the identity:
       //   (N)(2^-e) == (N)(5^e)(10^-e)
@@ -4299,24 +4299,24 @@ namespace {
       //   N * 5^0101 == N * 5^(1*1) * 5^(0*2) * 5^(1*4) * 5^(0*8)
       significand = significand.zext(precision);
       APInt five_to_the_i(precision, 5);
-      while (true) {
-        if (texp & 1)
+      අතරතුර (true) {
+        නම් (texp & 1)
           significand *= five_to_the_i;
 
         texp >>= 1;
-        if (!texp)
-          break;
+        නම් (!texp)
+          bha_nga;
         five_to_the_i *= five_to_the_i;
       }
     }
 
     AdjustToPrecision(significand, exp, FormatPrecision);
 
-    SmallVector<char, 256> buffer;
+    SmallVector<var_na, 256> buffer;
 
     // Fill the buffer.
     unsigned precision = significand.getBitWidth();
-    if (precision < 4) {
+    නම් (precision < 4) {
       // We need enough precision to store the value 10.
       precision = 4;
       significand = significand.zext(precision);
@@ -4325,7 +4325,7 @@ namespace {
     APInt digit(precision, 0);
 
     bool inTrail = true;
-    while (significand != 0) {
+    අතරතුර (significand != 0) {
       // digit <- significand % 10
       // significand <- significand / 10
       APInt::udivrem(significand, ten, significand, digit);
@@ -4333,10 +4333,10 @@ namespace {
       unsigned d = digit.getZExtValue();
 
       // Drop trailing zeros.
-      if (inTrail && !d)
+      නම් (inTrail && !d)
         exp++;
-      else {
-        buffer.push_back((char) ('0' + d));
+      නැතහොත් {
+        buffer.push_back((var_na) ('0' + d));
         inTrail = false;
       }
     }
@@ -4351,22 +4351,22 @@ namespace {
 
     // Check whether we should use scientific notation.
     bool FormatScientific;
-    if (!FormatMaxPadding) {
+    නම් (!FormatMaxPadding) {
       FormatScientific = true;
-    } else {
-      if (exp >= 0) {
+    } නැතහොත් {
+      නම් (exp >= 0) {
         // 765e3 --> 765000
         //              ^^^
         // But we shouldn't make the number look more precise than it is.
         FormatScientific = ((unsigned) exp > FormatMaxPadding ||
                             NDigits + (unsigned) exp > FormatPrecision);
-      } else {
+      } නැතහොත් {
         // Power of the most significant digit.
-        int MSD = exp + (int) (NDigits - 1);
-        if (MSD >= 0) {
+        පූර්ණ_සංඛ්‍යා MSD = exp + (පූර්ණ_සංඛ්‍යා) (NDigits - 1);
+        නම් (MSD >= 0) {
           // 765e-2 == 7.65
           FormatScientific = false;
-        } else {
+        } නැතහොත් {
           // 765e-5 == 0.00765
           //           ^ ^^
           FormatScientific = ((unsigned) -MSD) > FormatMaxPadding;
@@ -4375,107 +4375,107 @@ namespace {
     }
 
     // Scientific formatting is pretty straightforward.
-    if (FormatScientific) {
+    නම් (FormatScientific) {
       exp += (NDigits - 1);
 
       Str.push_back(buffer[NDigits-1]);
       Str.push_back('.');
-      if (NDigits == 1 && TruncateZero)
+      නම් (NDigits == 1 && TruncateZero)
         Str.push_back('0');
-      else
-        for (unsigned I = 1; I != NDigits; ++I)
+      නැතහොත්
+        සඳහා (unsigned I = 1; I != NDigits; ++I)
           Str.push_back(buffer[NDigits-1-I]);
       // Fill with zeros up to FormatPrecision.
-      if (!TruncateZero && FormatPrecision > NDigits - 1)
+      නම් (!TruncateZero && FormatPrecision > NDigits - 1)
         Str.append(FormatPrecision - NDigits + 1, '0');
       // For !TruncateZero we use lower 'e'.
       Str.push_back(TruncateZero ? 'E' : 'e');
 
       Str.push_back(exp >= 0 ? '+' : '-');
-      if (exp < 0)
+      නම් (exp < 0)
         exp = -exp;
-      SmallVector<char, 6> expbuf;
+      SmallVector<var_na, 6> expbuf;
       do {
-        expbuf.push_back((char) ('0' + (exp % 10)));
+        expbuf.push_back((var_na) ('0' + (exp % 10)));
         exp /= 10;
-      } while (exp);
+      } අතරතුර (exp);
       // Exponent always at least two digits if we do not truncate zeros.
-      if (!TruncateZero && expbuf.size() < 2)
+      නම් (!TruncateZero && expbuf.size() < 2)
         expbuf.push_back('0');
-      for (unsigned I = 0, E = expbuf.size(); I != E; ++I)
+      සඳහා (unsigned I = 0, E = expbuf.size(); I != E; ++I)
         Str.push_back(expbuf[E-1-I]);
-      return;
+      ආපසු;
     }
 
     // Non-scientific, positive exponents.
-    if (exp >= 0) {
-      for (unsigned I = 0; I != NDigits; ++I)
+    නම් (exp >= 0) {
+      සඳහා (unsigned I = 0; I != NDigits; ++I)
         Str.push_back(buffer[NDigits-1-I]);
-      for (unsigned I = 0; I != (unsigned) exp; ++I)
+      සඳහා (unsigned I = 0; I != (unsigned) exp; ++I)
         Str.push_back('0');
-      return;
+      ආපසු;
     }
 
     // Non-scientific, negative exponents.
 
     // The number of digits to the left of the decimal point.
-    int NWholeDigits = exp + (int) NDigits;
+    පූර්ණ_සංඛ්‍යා NWholeDigits = exp + (පූර්ණ_සංඛ්‍යා) NDigits;
 
     unsigned I = 0;
-    if (NWholeDigits > 0) {
-      for (; I != (unsigned) NWholeDigits; ++I)
+    නම් (NWholeDigits > 0) {
+      සඳහා (; I != (unsigned) NWholeDigits; ++I)
         Str.push_back(buffer[NDigits-I-1]);
       Str.push_back('.');
-    } else {
+    } නැතහොත් {
       unsigned NZeros = 1 + (unsigned) -NWholeDigits;
 
       Str.push_back('0');
       Str.push_back('.');
-      for (unsigned Z = 1; Z != NZeros; ++Z)
+      සඳහා (unsigned Z = 1; Z != NZeros; ++Z)
         Str.push_back('0');
     }
 
-    for (; I != NDigits; ++I)
+    සඳහා (; I != NDigits; ++I)
       Str.push_back(buffer[NDigits-I-1]);
 
   }
 } // namespace
 
-void IEEEFloat::toString(SmallVectorImpl<char> &Str, unsigned FormatPrecision,
+void IEEEFloat::toString(SmallVectorImpl<var_na> &Str, unsigned FormatPrecision,
                          unsigned FormatMaxPadding, bool TruncateZero) const {
   switch (category) {
-  case fcInfinity:
-    if (isNegative())
-      return append(Str, "-Inf");
-    else
-      return append(Str, "+Inf");
+  pak_sa fcInfinity:
+    නම් (isNegative())
+      ආපසු append(Str, "-Inf");
+    නැතහොත්
+      ආපසු append(Str, "+Inf");
 
-  case fcNaN: return append(Str, "NaN");
+  pak_sa fcNaN: ආපසු append(Str, "NaN");
 
-  case fcZero:
-    if (isNegative())
+  pak_sa fcZero:
+    නම් (isNegative())
       Str.push_back('-');
 
-    if (!FormatMaxPadding) {
-      if (TruncateZero)
+    නම් (!FormatMaxPadding) {
+      නම් (TruncateZero)
         append(Str, "0.0E+0");
-      else {
+      නැතහොත් {
         append(Str, "0.0");
-        if (FormatPrecision > 1)
+        නම් (FormatPrecision > 1)
           Str.append(FormatPrecision - 1, '0');
         append(Str, "e+00");
       }
-    } else {
+    } නැතහොත් {
       Str.push_back('0');
     }
-    return;
+    ආපසු;
 
-  case fcNormal:
-    break;
+  pak_sa fcNormal:
+    bha_nga;
   }
 
   // Decompose the number into an APInt and an exponent.
-  int exp = exponent - ((int) semantics->precision - 1);
+  පූර්ණ_සංඛ්‍යා exp = exponent - ((පූර්ණ_සංඛ්‍යා) semantics->precision - 1);
   APInt significand(
       semantics->precision,
       ArrayRef(significandParts(), partCountForBits(semantics->precision)));
@@ -4485,28 +4485,28 @@ void IEEEFloat::toString(SmallVectorImpl<char> &Str, unsigned FormatPrecision,
 
 }
 
-int IEEEFloat::getExactLog2Abs() const {
-  if (!isFinite() || isZero())
-    return INT_MIN;
+පූර්ණ_සංඛ්‍යා IEEEFloat::getExactLog2Abs() const {
+  නම් (!isFinite() || isZero())
+    ආපසු INT_MIN;
 
   const integerPart *Parts = significandParts();
-  const int PartCount = partCountForBits(semantics->precision);
+  const පූර්ණ_සංඛ්‍යා PartCount = partCountForBits(semantics->precision);
 
-  int PopCount = 0;
-  for (int i = 0; i < PartCount; ++i) {
+  පූර්ණ_සංඛ්‍යා PopCount = 0;
+  සඳහා (පූර්ණ_සංඛ්‍යා i = 0; i < PartCount; ++i) {
     PopCount += llvm::popcount(Parts[i]);
-    if (PopCount > 1)
-      return INT_MIN;
+    නම් (PopCount > 1)
+      ආපසු INT_MIN;
   }
 
-  if (exponent != semantics->minExponent)
-    return exponent;
+  නම් (exponent != semantics->minExponent)
+    ආපසු exponent;
 
-  int CountrParts = 0;
-  for (int i = 0; i < PartCount;
+  පූර්ණ_සංඛ්‍යා CountrParts = 0;
+  සඳහා (පූර්ණ_සංඛ්‍යා i = 0; i < PartCount;
        ++i, CountrParts += APInt::APINT_BITS_PER_WORD) {
-    if (Parts[i] != 0) {
-      return exponent - semantics->precision + CountrParts +
+    නම් (Parts[i] != 0) {
+      ආපසු exponent - semantics->precision + CountrParts +
              llvm::countr_zero(Parts[i]) + 1;
     }
   }
@@ -4515,15 +4515,15 @@ int IEEEFloat::getExactLog2Abs() const {
 }
 
 bool IEEEFloat::isSignaling() const {
-  if (!isNaN())
-    return false;
-  if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly ||
+  නම් (!isNaN())
+    ආපසු false;
+  නම් (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly ||
       semantics->nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
-    return false;
+    ආපසු false;
 
   // IEEE-754R 2008 6.2.1: A signaling NaN bit string should be encoded with the
   // first bit of the trailing significand being 0.
-  return !APInt::tcExtractBit(significandParts(), semantics->precision - 2);
+  ආපසු !APInt::tcExtractBit(significandParts(), semantics->precision - 2);
 }
 
 /// IEEE-754R 2008 5.3.1: nextUp/nextDown.
@@ -4532,7 +4532,7 @@ bool IEEEFloat::isSignaling() const {
 /// appropriate sign switching before/after the computation.
 APFloat::opStatus IEEEFloat::next(bool nextDown) {
   // If we are performing nextDown, swap sign so we have -x.
-  if (nextDown)
+  නම් (nextDown)
     changeSign();
 
   // Compute nextUp(x)
@@ -4540,60 +4540,60 @@ APFloat::opStatus IEEEFloat::next(bool nextDown) {
 
   // Handle each float category separately.
   switch (category) {
-  case fcInfinity:
+  pak_sa fcInfinity:
     // nextUp(+inf) = +inf
-    if (!isNegative())
-      break;
+    නම් (!isNegative())
+      bha_nga;
     // nextUp(-inf) = -getLargest()
     makeLargest(true);
-    break;
-  case fcNaN:
+    bha_nga;
+  pak_sa fcNaN:
     // IEEE-754R 2008 6.2 Par 2: nextUp(sNaN) = qNaN. Set Invalid flag.
     // IEEE-754R 2008 6.2: nextUp(qNaN) = qNaN. Must be identity so we do not
     //                     change the payload.
-    if (isSignaling()) {
+    නම් (isSignaling()) {
       result = opInvalidOp;
       // For consistency, propagate the sign of the sNaN to the qNaN.
       makeNaN(false, isNegative(), nullptr);
     }
-    break;
-  case fcZero:
+    bha_nga;
+  pak_sa fcZero:
     // nextUp(pm 0) = +getSmallest()
     makeSmallest(false);
-    break;
-  case fcNormal:
+    bha_nga;
+  pak_sa fcNormal:
     // nextUp(-getSmallest()) = -0
-    if (isSmallest() && isNegative()) {
+    නම් (isSmallest() && isNegative()) {
       APInt::tcSet(significandParts(), 0, partCount());
       category = fcZero;
       exponent = 0;
-      if (semantics->nanEncoding == fltNanEncoding::NegativeZero)
+      නම් (semantics->nanEncoding == fltNanEncoding::NegativeZero)
         sign = false;
-      if (!semantics->hasZero)
+      නම් (!semantics->hasZero)
         makeSmallestNormalized(false);
-      break;
+      bha_nga;
     }
 
-    if (isLargest() && !isNegative()) {
-      if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
+    නම් (isLargest() && !isNegative()) {
+      නම් (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
         // nextUp(getLargest()) == NAN
         makeNaN();
-        break;
-      } else if (semantics->nonFiniteBehavior ==
+        bha_nga;
+      } නැතහොත් නම් (semantics->nonFiniteBehavior ==
                  fltNonfiniteBehavior::FiniteOnly) {
         // nextUp(getLargest()) == getLargest()
-        break;
-      } else {
+        bha_nga;
+      } නැතහොත් {
         // nextUp(getLargest()) == INFINITY
         APInt::tcSet(significandParts(), 0, partCount());
         category = fcInfinity;
         exponent = semantics->maxExponent + 1;
-        break;
+        bha_nga;
       }
     }
 
     // nextUp(normal) == normal + inc.
-    if (isNegative()) {
+    නම් (isNegative()) {
       // If we are negative, we need to decrement the significand.
 
       // We only cross a binade boundary that requires adjusting the exponent
@@ -4620,14 +4620,14 @@ APFloat::opStatus IEEEFloat::next(bool nextDown) {
       integerPart *Parts = significandParts();
       APInt::tcDecrement(Parts, partCount());
 
-      if (WillCrossBinadeBoundary) {
+      නම් (WillCrossBinadeBoundary) {
         // Our result is a normal number. Do the following:
         // 1. Set the integral bit to 1.
         // 2. Decrement the exponent.
         APInt::tcSetBit(Parts, semantics->precision - 1);
         exponent--;
       }
-    } else {
+    } නැතහොත් {
       // If we are positive, we need to increment the significand.
 
       // We only cross a binade boundary that requires adjusting the exponent if
@@ -4641,7 +4641,7 @@ APFloat::opStatus IEEEFloat::next(bool nextDown) {
       bool WillCrossBinadeBoundary = !APFloat::hasSignificand(*semantics) ||
                                      (!isDenormal() && isSignificandAllOnes());
 
-      if (WillCrossBinadeBoundary) {
+      නම් (WillCrossBinadeBoundary) {
         integerPart *Parts = significandParts();
         APInt::tcSet(Parts, 0, partCount());
         APInt::tcSetBit(Parts, semantics->precision - 1);
@@ -4649,47 +4649,47 @@ APFloat::opStatus IEEEFloat::next(bool nextDown) {
                "We can not increment an exponent beyond the maxExponent allowed"
                " by the given floating point semantics.");
         exponent++;
-      } else {
+      } නැතහොත් {
         incrementSignificand();
       }
     }
-    break;
+    bha_nga;
   }
 
   // If we are performing nextDown, swap sign so we have -nextUp(-x)
-  if (nextDown)
+  නම් (nextDown)
     changeSign();
 
-  return result;
+  ආපසු result;
 }
 
 APInt IEEEFloat::getNaNPayload() const {
   assert(isNaN() && "Can only be called on NaN values");
   // Number of bits in the payload, excluding the (maybe implied) integer bit.
   unsigned Bits = semantics->precision - 1;
-  return APInt(Bits, ArrayRef(significandParts(), partCountForBits(Bits)));
+  ආපසු APInt(Bits, ArrayRef(significandParts(), partCountForBits(Bits)));
 }
 
 APFloatBase::ExponentType IEEEFloat::exponentNaN() const {
-  return ::exponentNaN(*semantics);
+  ආපසු ::exponentNaN(*semantics);
 }
 
 APFloatBase::ExponentType IEEEFloat::exponentInf() const {
-  return ::exponentInf(*semantics);
+  ආපසු ::exponentInf(*semantics);
 }
 
 APFloatBase::ExponentType IEEEFloat::exponentZero() const {
-  return ::exponentZero(*semantics);
+  ආපසු ::exponentZero(*semantics);
 }
 
 void IEEEFloat::makeInf(bool Negative) {
-  if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
+  නම් (semantics->nonFiniteBehavior == fltNonfiniteBehavior::FiniteOnly)
     llvm_unreachable("This floating point format does not support Inf");
 
-  if (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
+  නම් (semantics->nonFiniteBehavior == fltNonfiniteBehavior::NanOnly) {
     // There is no Inf, so make NaN instead.
     makeNaN(false, Negative);
-    return;
+    ආපසු;
   }
   category = fcInfinity;
   sign = Negative;
@@ -4698,12 +4698,12 @@ void IEEEFloat::makeInf(bool Negative) {
 }
 
 void IEEEFloat::makeZero(bool Negative) {
-  if (!semantics->hasZero)
+  නම් (!semantics->hasZero)
     llvm_unreachable("This floating point format does not support Zero");
 
   category = fcZero;
   sign = Negative;
-  if (semantics->nanEncoding == fltNanEncoding::NegativeZero) {
+  නම් (semantics->nanEncoding == fltNanEncoding::NegativeZero) {
     // Merge negative zero to positive because 0b10000...000 is used for NaN
     sign = false;
   }
@@ -4713,29 +4713,29 @@ void IEEEFloat::makeZero(bool Negative) {
 
 void IEEEFloat::makeQuiet() {
   assert(isNaN());
-  if (semantics->nonFiniteBehavior != fltNonfiniteBehavior::NanOnly)
+  නම් (semantics->nonFiniteBehavior != fltNonfiniteBehavior::NanOnly)
     APInt::tcSetBit(significandParts(), semantics->precision - 2);
 }
 
-int ilogb(const IEEEFloat &Arg) {
-  if (Arg.isNaN())
-    return APFloat::IEK_NaN;
-  if (Arg.isZero())
-    return APFloat::IEK_Zero;
-  if (Arg.isInfinity())
-    return APFloat::IEK_Inf;
-  if (!Arg.isDenormal())
-    return Arg.exponent;
+පූර්ණ_සංඛ්‍යා ilogb(const IEEEFloat &Arg) {
+  නම් (Arg.isNaN())
+    ආපසු APFloat::IEK_NaN;
+  නම් (Arg.isZero())
+    ආපසු APFloat::IEK_Zero;
+  නම් (Arg.isInfinity())
+    ආපසු APFloat::IEK_Inf;
+  නම් (!Arg.isDenormal())
+    ආපසු Arg.exponent;
 
   IEEEFloat Normalized(Arg);
-  int SignificandBits = Arg.getSemantics().precision - 1;
+  පූර්ණ_සංඛ්‍යා SignificandBits = Arg.getSemantics().precision - 1;
 
   Normalized.exponent += SignificandBits;
   Normalized.normalize(APFloat::rmNearestTiesToEven, lfExactlyZero);
-  return Normalized.exponent - SignificandBits;
+  ආපසු Normalized.exponent - SignificandBits;
 }
 
-IEEEFloat scalbn(IEEEFloat X, int Exp, roundingMode RoundingMode) {
+IEEEFloat scalbn(IEEEFloat X, පූර්ණ_සංඛ්‍යා Exp, roundingMode RoundingMode) {
   auto MaxExp = X.getSemantics().maxExponent;
   auto MinExp = X.getSemantics().minExponent;
 
@@ -4745,34 +4745,34 @@ IEEEFloat scalbn(IEEEFloat X, int Exp, roundingMode RoundingMode) {
   // need to support is the difference between the largest possible exponent and
   // the normalized exponent of half the smallest denormal.
 
-  int SignificandBits = X.getSemantics().precision - 1;
-  int MaxIncrement = MaxExp - (MinExp - SignificandBits) + 1;
+  පූර්ණ_සංඛ්‍යා SignificandBits = X.getSemantics().precision - 1;
+  පූර්ණ_සංඛ්‍යා MaxIncrement = MaxExp - (MinExp - SignificandBits) + 1;
 
   // Clamp to one past the range ends to let normalize handle overlflow.
   X.exponent += std::clamp(Exp, -MaxIncrement - 1, MaxIncrement);
   X.normalize(RoundingMode, lfExactlyZero);
-  if (X.isNaN())
+  නම් (X.isNaN())
     X.makeQuiet();
-  return X;
+  ආපසු X;
 }
 
-IEEEFloat frexp(const IEEEFloat &Val, int &Exp, roundingMode RM) {
+IEEEFloat frexp(const IEEEFloat &Val, පූර්ණ_සංඛ්‍යා &Exp, roundingMode RM) {
   Exp = ilogb(Val);
 
   // Quiet signalling nans.
-  if (Exp == APFloat::IEK_NaN) {
+  නම් (Exp == APFloat::IEK_NaN) {
     IEEEFloat Quiet(Val);
     Quiet.makeQuiet();
-    return Quiet;
+    ආපසු Quiet;
   }
 
-  if (Exp == APFloat::IEK_Inf)
-    return Val;
+  නම් (Exp == APFloat::IEK_Inf)
+    ආපසු Val;
 
   // 1 is added because frexp is defined to return a normalized fraction in
   // +/-[0.5, 1.0), rather than the usual +/-[1.0, 2.0).
   Exp = Exp == APFloat::IEK_Zero ? 0 : Exp + 1;
-  return scalbn(Val, -Exp, RM);
+  ආපසු scalbn(Val, -Exp, RM);
 }
 
 DoubleAPFloat::DoubleAPFloat(const fltSemantics &S)
@@ -4829,14 +4829,14 @@ DoubleAPFloat::DoubleAPFloat(DoubleAPFloat &&RHS)
 }
 
 DoubleAPFloat &DoubleAPFloat::operator=(const DoubleAPFloat &RHS) {
-  if (Semantics == RHS.Semantics && RHS.Floats) {
+  නම් (Semantics == RHS.Semantics && RHS.Floats) {
     Floats[0] = RHS.Floats[0];
     Floats[1] = RHS.Floats[1];
-  } else if (this != &RHS) {
+  } නැතහොත් නම් (this != &RHS) {
     this->~DoubleAPFloat();
     new (this) DoubleAPFloat(RHS);
   }
-  return *this;
+  ආපසු *this;
 }
 
 // Returns a result such that:
@@ -4846,12 +4846,12 @@ DoubleAPFloat &DoubleAPFloat::operator=(const DoubleAPFloat &RHS) {
 //
 // Requires that log2(X) >= log2(Y).
 static std::pair<APFloat, APFloat> fastTwoSum(APFloat X, APFloat Y) {
-  if (!X.isFinite())
-    return {X, APFloat::getZero(X.getSemantics(), /*Negative=*/false)};
+  නම් (!X.isFinite())
+    ආපසු {X, APFloat::getZero(X.getSemantics(), /*Negative=*/false)};
   APFloat Hi = X + Y;
   APFloat Delta = Hi - X;
   APFloat Lo = Y - Delta;
-  return {Hi, Lo};
+  ආපසු {Hi, Lo};
 }
 
 // Implement addition, subtraction, multiplication and division based on:
@@ -4860,50 +4860,50 @@ static std::pair<APFloat, APFloat> fastTwoSum(APFloat X, APFloat Y) {
 APFloat::opStatus DoubleAPFloat::addImpl(const APFloat &a, const APFloat &aa,
                                          const APFloat &c, const APFloat &cc,
                                          roundingMode RM) {
-  int Status = opOK;
+  පූර්ණ_සංඛ්‍යා Status = opOK;
   APFloat z = a;
   Status |= z.add(c, RM);
-  if (!z.isFinite()) {
-    if (!z.isInfinity()) {
+  නම් (!z.isFinite()) {
+    නම් (!z.isInfinity()) {
       Floats[0] = std::move(z);
       Floats[1].makeZero(/* Neg = */ false);
-      return (opStatus)Status;
+      ආපසු (opStatus)Status;
     }
     Status = opOK;
     auto AComparedToC = a.compareAbsoluteValue(c);
     z = cc;
     Status |= z.add(aa, RM);
-    if (AComparedToC == APFloat::cmpGreaterThan) {
+    නම් (AComparedToC == APFloat::cmpGreaterThan) {
       // z = cc + aa + c + a;
       Status |= z.add(c, RM);
       Status |= z.add(a, RM);
-    } else {
+    } නැතහොත් {
       // z = cc + aa + a + c;
       Status |= z.add(a, RM);
       Status |= z.add(c, RM);
     }
-    if (!z.isFinite()) {
+    නම් (!z.isFinite()) {
       Floats[0] = std::move(z);
       Floats[1].makeZero(/* Neg = */ false);
-      return (opStatus)Status;
+      ආපසු (opStatus)Status;
     }
     Floats[0] = z;
     APFloat zz = aa;
     Status |= zz.add(cc, RM);
-    if (AComparedToC == APFloat::cmpGreaterThan) {
+    නම් (AComparedToC == APFloat::cmpGreaterThan) {
       // Floats[1] = a - z + c + zz;
       Floats[1] = a;
       Status |= Floats[1].subtract(z, RM);
       Status |= Floats[1].add(c, RM);
       Status |= Floats[1].add(zz, RM);
-    } else {
+    } නැතහොත් {
       // Floats[1] = c - z + a + zz;
       Floats[1] = c;
       Status |= Floats[1].subtract(z, RM);
       Status |= Floats[1].add(a, RM);
       Status |= Floats[1].add(zz, RM);
     }
-  } else {
+  } නැතහොත් {
     // q = a - z;
     APFloat q = a;
     Status |= q.subtract(z, RM);
@@ -4918,56 +4918,56 @@ APFloat::opStatus DoubleAPFloat::addImpl(const APFloat &a, const APFloat &aa,
     Status |= zz.add(q, RM);
     Status |= zz.add(aa, RM);
     Status |= zz.add(cc, RM);
-    if (zz.isZero() && !zz.isNegative()) {
+    නම් (zz.isZero() && !zz.isNegative()) {
       Floats[0] = std::move(z);
       Floats[1].makeZero(/* Neg = */ false);
-      return opOK;
+      ආපසු opOK;
     }
     Floats[0] = z;
     Status |= Floats[0].add(zz, RM);
-    if (!Floats[0].isFinite()) {
+    නම් (!Floats[0].isFinite()) {
       Floats[1].makeZero(/* Neg = */ false);
-      return (opStatus)Status;
+      ආපසු (opStatus)Status;
     }
     Floats[1] = std::move(z);
     Status |= Floats[1].subtract(Floats[0], RM);
     Status |= Floats[1].add(zz, RM);
   }
-  return (opStatus)Status;
+  ආපසු (opStatus)Status;
 }
 
 APFloat::opStatus DoubleAPFloat::addWithSpecial(const DoubleAPFloat &LHS,
                                                 const DoubleAPFloat &RHS,
                                                 DoubleAPFloat &Out,
                                                 roundingMode RM) {
-  if (LHS.getCategory() == fcNaN) {
+  නම් (LHS.getCategory() == fcNaN) {
     Out = LHS;
-    return opOK;
+    ආපසු opOK;
   }
-  if (RHS.getCategory() == fcNaN) {
+  නම් (RHS.getCategory() == fcNaN) {
     Out = RHS;
-    return opOK;
+    ආපසු opOK;
   }
-  if (LHS.getCategory() == fcZero) {
+  නම් (LHS.getCategory() == fcZero) {
     Out = RHS;
-    return opOK;
+    ආපසු opOK;
   }
-  if (RHS.getCategory() == fcZero) {
+  නම් (RHS.getCategory() == fcZero) {
     Out = LHS;
-    return opOK;
+    ආපසු opOK;
   }
-  if (LHS.getCategory() == fcInfinity && RHS.getCategory() == fcInfinity &&
+  නම් (LHS.getCategory() == fcInfinity && RHS.getCategory() == fcInfinity &&
       LHS.isNegative() != RHS.isNegative()) {
     Out.makeNaN(false, Out.isNegative(), nullptr);
-    return opInvalidOp;
+    ආපසු opInvalidOp;
   }
-  if (LHS.getCategory() == fcInfinity) {
+  නම් (LHS.getCategory() == fcInfinity) {
     Out = LHS;
-    return opOK;
+    ආපසු opOK;
   }
-  if (RHS.getCategory() == fcInfinity) {
+  නම් (RHS.getCategory() == fcInfinity) {
     Out = RHS;
-    return opOK;
+    ආපසු opOK;
   }
   assert(LHS.getCategory() == fcNormal && RHS.getCategory() == fcNormal);
 
@@ -4979,12 +4979,12 @@ APFloat::opStatus DoubleAPFloat::addWithSpecial(const DoubleAPFloat &LHS,
   assert(&CC.getSemantics() == &APFloatBase::semIEEEdouble);
   assert(&Out.Floats[0].getSemantics() == &APFloatBase::semIEEEdouble);
   assert(&Out.Floats[1].getSemantics() == &APFloatBase::semIEEEdouble);
-  return Out.addImpl(A, AA, C, CC, RM);
+  ආපසු Out.addImpl(A, AA, C, CC, RM);
 }
 
 APFloat::opStatus DoubleAPFloat::add(const DoubleAPFloat &RHS,
                                      roundingMode RM) {
-  return addWithSpecial(*this, RHS, *this, RM);
+  ආපසු addWithSpecial(*this, RHS, *this, RM);
 }
 
 APFloat::opStatus DoubleAPFloat::subtract(const DoubleAPFloat &RHS,
@@ -4992,7 +4992,7 @@ APFloat::opStatus DoubleAPFloat::subtract(const DoubleAPFloat &RHS,
   changeSign();
   auto Ret = add(RHS, RM);
   changeSign();
-  return Ret;
+  ආපසු Ret;
 }
 
 APFloat::opStatus DoubleAPFloat::multiply(const DoubleAPFloat &RHS,
@@ -5014,39 +5014,39 @@ APFloat::opStatus DoubleAPFloat::multiply(const DoubleAPFloat &RHS,
           Normal * Zero = Zero
           Normal * Inf = Inf
   */
-  if (LHS.getCategory() == fcNaN) {
+  නම් (LHS.getCategory() == fcNaN) {
     Out = LHS;
-    return opOK;
+    ආපසු opOK;
   }
-  if (RHS.getCategory() == fcNaN) {
+  නම් (RHS.getCategory() == fcNaN) {
     Out = RHS;
-    return opOK;
+    ආපසු opOK;
   }
-  if ((LHS.getCategory() == fcZero && RHS.getCategory() == fcInfinity) ||
+  නම් ((LHS.getCategory() == fcZero && RHS.getCategory() == fcInfinity) ||
       (LHS.getCategory() == fcInfinity && RHS.getCategory() == fcZero)) {
     Out.makeNaN(false, false, nullptr);
-    return opOK;
+    ආපසු opOK;
   }
-  if (LHS.getCategory() == fcZero || LHS.getCategory() == fcInfinity) {
+  නම් (LHS.getCategory() == fcZero || LHS.getCategory() == fcInfinity) {
     Out = LHS;
-    return opOK;
+    ආපසු opOK;
   }
-  if (RHS.getCategory() == fcZero || RHS.getCategory() == fcInfinity) {
+  නම් (RHS.getCategory() == fcZero || RHS.getCategory() == fcInfinity) {
     Out = RHS;
-    return opOK;
+    ආපසු opOK;
   }
   assert(LHS.getCategory() == fcNormal && RHS.getCategory() == fcNormal &&
          "Special cases not handled exhaustively");
 
-  int Status = opOK;
+  පූර්ණ_සංඛ්‍යා Status = opOK;
   APFloat A = Floats[0], B = Floats[1], C = RHS.Floats[0], D = RHS.Floats[1];
   // t = a * c
   APFloat T = A;
   Status |= T.multiply(C, RM);
-  if (!T.isFiniteNonZero()) {
+  නම් (!T.isFiniteNonZero()) {
     Floats[0] = std::move(T);
     Floats[1].makeZero(/* Neg = */ false);
-    return (opStatus)Status;
+    ආපසු (opStatus)Status;
   }
 
   // tau = fmsub(a, c, t), that is -fmadd(-a, c, t).
@@ -5070,15 +5070,15 @@ APFloat::opStatus DoubleAPFloat::multiply(const DoubleAPFloat &RHS,
   Status |= U.add(Tau, RM);
 
   Floats[0] = U;
-  if (!U.isFinite()) {
+  නම් (!U.isFinite()) {
     Floats[1].makeZero(/* Neg = */ false);
-  } else {
+  } නැතහොත් {
     // Floats[1] = (t - u) + tau
     Status |= T.subtract(U, RM);
     Status |= T.add(Tau, RM);
     Floats[1] = std::move(T);
   }
-  return (opStatus)Status;
+  ආපසු (opStatus)Status;
 }
 
 APFloat::opStatus DoubleAPFloat::divide(const DoubleAPFloat &RHS,
@@ -5089,7 +5089,7 @@ APFloat::opStatus DoubleAPFloat::divide(const DoubleAPFloat &RHS,
   auto Ret = Tmp.divide(
       APFloat(APFloatBase::semPPCDoubleDoubleLegacy, RHS.bitcastToAPInt()), RM);
   *this = DoubleAPFloat(APFloatBase::semPPCDoubleDouble, Tmp.bitcastToAPInt());
-  return Ret;
+  ආපසු Ret;
 }
 
 APFloat::opStatus DoubleAPFloat::remainder(const DoubleAPFloat &RHS) {
@@ -5099,7 +5099,7 @@ APFloat::opStatus DoubleAPFloat::remainder(const DoubleAPFloat &RHS) {
   auto Ret = Tmp.remainder(
       APFloat(APFloatBase::semPPCDoubleDoubleLegacy, RHS.bitcastToAPInt()));
   *this = DoubleAPFloat(APFloatBase::semPPCDoubleDouble, Tmp.bitcastToAPInt());
-  return Ret;
+  ආපසු Ret;
 }
 
 APFloat::opStatus DoubleAPFloat::mod(const DoubleAPFloat &RHS) {
@@ -5109,7 +5109,7 @@ APFloat::opStatus DoubleAPFloat::mod(const DoubleAPFloat &RHS) {
   auto Ret = Tmp.mod(
       APFloat(APFloatBase::semPPCDoubleDoubleLegacy, RHS.bitcastToAPInt()));
   *this = DoubleAPFloat(APFloatBase::semPPCDoubleDouble, Tmp.bitcastToAPInt());
-  return Ret;
+  ආපසු Ret;
 }
 
 APFloat::opStatus
@@ -5125,7 +5125,7 @@ DoubleAPFloat::fusedMultiplyAdd(const DoubleAPFloat &Multiplicand,
       APFloat(APFloatBase::semPPCDoubleDoubleLegacy, Addend.bitcastToAPInt()),
       RM);
   *this = DoubleAPFloat(APFloatBase::semPPCDoubleDouble, Tmp.bitcastToAPInt());
-  return Ret;
+  ආපසු Ret;
 }
 
 APFloat::opStatus DoubleAPFloat::roundToIntegral(APFloat::roundingMode RM) {
@@ -5140,10 +5140,10 @@ APFloat::opStatus DoubleAPFloat::roundToIntegral(APFloat::roundingMode RM) {
   // We can reduce the problem to just the high part if the input:
   // 1. Represents a non-finite value.
   // 2. Has a component which is zero.
-  if (!Hi.isFiniteNonZero() || Lo.isZero()) {
+  නම් (!Hi.isFiniteNonZero() || Lo.isZero()) {
     Floats[0] = std::move(RoundedHi);
     Floats[1].makeZero(/*Neg=*/false);
-    return HiStatus;
+    ආපසු HiStatus;
   }
 
   // Adjust `Rounded` in the direction of `TieBreaker` if `ToRound` was at a
@@ -5155,43 +5155,43 @@ APFloat::opStatus DoubleAPFloat::roundToIntegral(APFloat::roundingMode RM) {
     //   - RoundingError < 0: we rounded down.
     // Sterbenz' lemma ensures that RoundingError is exact.
     const APFloat RoundingError = Rounded - ToRound;
-    if (TieBreaker.isNonZero() &&
+    නම් (TieBreaker.isNonZero() &&
         TieBreaker.isNegative() != RoundingError.isNegative() &&
         abs(RoundingError).isExactlyValue(0.5))
       Rounded.add(
           APFloat::getOne(Rounded.getSemantics(), TieBreaker.isNegative()),
           rmNearestTiesToEven);
-    return Rounded;
+    ආපසු Rounded;
   };
 
   // Case 1: Hi is not an integer.
   // Special cases are for rounding modes that are sensitive to ties.
-  if (RoundedHi != Hi) {
+  නම් (RoundedHi != Hi) {
     // We need to consider the case where Hi was between two integers and the
     // rounding mode broke the tie when, in fact, Lo may have had a different
     // sign than Hi.
-    if (RM == rmNearestTiesToAway || RM == rmNearestTiesToEven)
+    නම් (RM == rmNearestTiesToAway || RM == rmNearestTiesToEven)
       RoundedHi = RoundToNearestHelper(Hi, RoundedHi, Lo);
 
     Floats[0] = std::move(RoundedHi);
     Floats[1].makeZero(/*Neg=*/false);
-    return HiStatus;
+    ආපසු HiStatus;
   }
 
   // Case 2: Hi is an integer.
   // Special cases are for rounding modes which are rounding towards or away from zero.
   RoundingMode LoRoundingMode;
-  if (RM == rmTowardZero)
+  නම් (RM == rmTowardZero)
     // When our input is positive, we want the Lo component rounded toward
     // negative infinity to get the smallest result magnitude. Likewise,
     // negative inputs want the Lo component rounded toward positive infinity.
     LoRoundingMode = isNegative() ? rmTowardPositive : rmTowardNegative;
-  else
+  නැතහොත්
     LoRoundingMode = RM;
 
   APFloat RoundedLo = Lo;
   const opStatus LoStatus = RoundedLo.roundToIntegral(LoRoundingMode);
-  if (LoRoundingMode == rmNearestTiesToAway)
+  නම් (LoRoundingMode == rmNearestTiesToAway)
     // We need to consider the case where Lo was between two integers and the
     // rounding mode broke the tie when, in fact, Hi may have had a different
     // sign than Lo.
@@ -5202,7 +5202,7 @@ APFloat::opStatus DoubleAPFloat::roundToIntegral(APFloat::roundingMode RM) {
 
   Floats[0] = std::move(RoundedHi);
   Floats[1] = std::move(RoundedLo);
-  return LoStatus;
+  ආපසු LoStatus;
 }
 
 void DoubleAPFloat::changeSign() {
@@ -5214,12 +5214,12 @@ APFloat::cmpResult
 DoubleAPFloat::compareAbsoluteValue(const DoubleAPFloat &RHS) const {
   // Compare absolute values of the high parts.
   const cmpResult HiPartCmp = Floats[0].compareAbsoluteValue(RHS.Floats[0]);
-  if (HiPartCmp != cmpEqual)
-    return HiPartCmp;
+  නම් (HiPartCmp != cmpEqual)
+    ආපසු HiPartCmp;
 
   // Zero, regardless of sign, is equal.
-  if (Floats[1].isZero() && RHS.Floats[1].isZero())
-    return cmpEqual;
+  නම් (Floats[1].isZero() && RHS.Floats[1].isZero())
+    ආපසු cmpEqual;
 
   // At this point, |this->Hi| == |RHS.Hi|.
   // The magnitude is |Hi+Lo| which is Hi+|Lo| if signs of Hi and Lo are the
@@ -5230,45 +5230,45 @@ DoubleAPFloat::compareAbsoluteValue(const DoubleAPFloat &RHS) const {
       RHS.Floats[0].isNegative() != RHS.Floats[1].isNegative();
 
   // Case 1: The low part of 'this' is zero.
-  if (Floats[1].isZero())
+  නම් (Floats[1].isZero())
     // We are comparing |Hi| vs. |Hi| ± |RHS.Lo|.
     // If RHS is subtractive, its magnitude is smaller.
     // If RHS is additive, its magnitude is larger.
-    return RHSIsSubtractive ? cmpGreaterThan : cmpLessThan;
+    ආපසු RHSIsSubtractive ? cmpGreaterThan : cmpLessThan;
 
   // Case 2: The low part of 'RHS' is zero (and we know 'this' is not).
-  if (RHS.Floats[1].isZero())
+  නම් (RHS.Floats[1].isZero())
     // We are comparing |Hi| ± |This.Lo| vs. |Hi|.
     // If 'this' is subtractive, its magnitude is smaller.
     // If 'this' is additive, its magnitude is larger.
-    return ThisIsSubtractive ? cmpLessThan : cmpGreaterThan;
+    ආපසු ThisIsSubtractive ? cmpLessThan : cmpGreaterThan;
 
   // If their natures differ, the additive one is larger.
-  if (ThisIsSubtractive != RHSIsSubtractive)
-    return ThisIsSubtractive ? cmpLessThan : cmpGreaterThan;
+  නම් (ThisIsSubtractive != RHSIsSubtractive)
+    ආපසු ThisIsSubtractive ? cmpLessThan : cmpGreaterThan;
 
   // Case 3: Both are additive (Hi+|Lo|) or both are subtractive (Hi-|Lo|).
   // The comparison now depends on the magnitude of the low parts.
   const cmpResult LoPartCmp = Floats[1].compareAbsoluteValue(RHS.Floats[1]);
 
-  if (ThisIsSubtractive) {
+  නම් (ThisIsSubtractive) {
     // Both are subtractive (Hi-|Lo|), so the comparison of |Lo| is inverted.
-    if (LoPartCmp == cmpLessThan)
-      return cmpGreaterThan;
-    if (LoPartCmp == cmpGreaterThan)
-      return cmpLessThan;
+    නම් (LoPartCmp == cmpLessThan)
+      ආපසු cmpGreaterThan;
+    නම් (LoPartCmp == cmpGreaterThan)
+      ආපසු cmpLessThan;
   }
 
   // If additive, the comparison of |Lo| is direct.
   // If equal, they are equal.
-  return LoPartCmp;
+  ආපසු LoPartCmp;
 }
 
 APFloat::fltCategory DoubleAPFloat::getCategory() const {
-  return Floats[0].getCategory();
+  ආපසු Floats[0].getCategory();
 }
 
-bool DoubleAPFloat::isNegative() const { return Floats[0].isNegative(); }
+bool DoubleAPFloat::isNegative() const { ආපසු Floats[0].isNegative(); }
 
 void DoubleAPFloat::makeInf(bool Neg) {
   Floats[0].makeInf(Neg);
@@ -5287,7 +5287,7 @@ void DoubleAPFloat::makeLargest(bool Neg) {
       APFloat(APFloatBase::semIEEEdouble, APInt(64, 0x7fefffffffffffffull));
   Floats[1] =
       APFloat(APFloatBase::semIEEEdouble, APInt(64, 0x7c8ffffffffffffeull));
-  if (Neg)
+  නම් (Neg)
     changeSign();
 }
 
@@ -5303,7 +5303,7 @@ void DoubleAPFloat::makeSmallestNormalized(bool Neg) {
          "Unexpected Semantics");
   Floats[0] =
       APFloat(APFloatBase::semIEEEdouble, APInt(64, 0x0360000000000000ull));
-  if (Neg)
+  නම් (Neg)
     Floats[0].changeSign();
   Floats[1].makeZero(/* Neg = */ false);
 }
@@ -5316,20 +5316,20 @@ void DoubleAPFloat::makeNaN(bool SNaN, bool Neg, const APInt *fill) {
 APFloat::cmpResult DoubleAPFloat::compare(const DoubleAPFloat &RHS) const {
   auto Result = Floats[0].compare(RHS.Floats[0]);
   // |Float[0]| > |Float[1]|
-  if (Result == APFloat::cmpEqual)
-    return Floats[1].compare(RHS.Floats[1]);
-  return Result;
+  නම් (Result == APFloat::cmpEqual)
+    ආපසු Floats[1].compare(RHS.Floats[1]);
+  ආපසු Result;
 }
 
 bool DoubleAPFloat::bitwiseIsEqual(const DoubleAPFloat &RHS) const {
-  return Floats[0].bitwiseIsEqual(RHS.Floats[0]) &&
+  ආපසු Floats[0].bitwiseIsEqual(RHS.Floats[0]) &&
          Floats[1].bitwiseIsEqual(RHS.Floats[1]);
 }
 
 hash_code hash_value(const DoubleAPFloat &Arg) {
-  if (Arg.Floats)
-    return hash_combine(hash_value(Arg.Floats[0]), hash_value(Arg.Floats[1]));
-  return hash_combine(Arg.Semantics);
+  නම් (Arg.Floats)
+    ආපසු hash_combine(hash_value(Arg.Floats[0]), hash_value(Arg.Floats[1]));
+  ආපසු hash_combine(Arg.Semantics);
 }
 
 APInt DoubleAPFloat::bitcastToAPInt() const {
@@ -5339,7 +5339,7 @@ APInt DoubleAPFloat::bitcastToAPInt() const {
       Floats[0].bitcastToAPInt().getRawData()[0],
       Floats[1].bitcastToAPInt().getRawData()[0],
   };
-  return APInt(128, Data);
+  ආපසු APInt(128, Data);
 }
 
 Expected<APFloat::opStatus> DoubleAPFloat::convertFromString(StringRef S,
@@ -5349,7 +5349,7 @@ Expected<APFloat::opStatus> DoubleAPFloat::convertFromString(StringRef S,
   APFloat Tmp(APFloatBase::semPPCDoubleDoubleLegacy);
   auto Ret = Tmp.convertFromString(S, RM);
   *this = DoubleAPFloat(APFloatBase::semPPCDoubleDouble, Tmp.bitcastToAPInt());
-  return Ret;
+  ආපසු Ret;
 }
 
 // The double-double lattice of values corresponds to numbers which obey:
@@ -5362,38 +5362,38 @@ APFloat::opStatus DoubleAPFloat::next(bool nextDown) {
   assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
          "Unexpected Semantics");
   // nextDown(x) = -nextUp(-x)
-  if (nextDown) {
+  නම් (nextDown) {
     changeSign();
     APFloat::opStatus Result = next(/*nextDown=*/false);
     changeSign();
-    return Result;
+    ආපසු Result;
   }
   switch (getCategory()) {
-  case fcInfinity:
+  pak_sa fcInfinity:
     // nextUp(+inf) = +inf
     // nextUp(-inf) = -getLargest()
-    if (isNegative())
+    නම් (isNegative())
       makeLargest(true);
-    return opOK;
+    ආපසු opOK;
 
-  case fcNaN:
+  pak_sa fcNaN:
     // IEEE-754R 2008 6.2 Par 2: nextUp(sNaN) = qNaN. Set Invalid flag.
     // IEEE-754R 2008 6.2: nextUp(qNaN) = qNaN. Must be identity so we do not
     //                     change the payload.
-    if (getFirst().isSignaling()) {
+    නම් (getFirst().isSignaling()) {
       // For consistency, propagate the sign of the sNaN to the qNaN.
       makeNaN(false, isNegative(), nullptr);
-      return opInvalidOp;
+      ආපසු opInvalidOp;
     }
-    return opOK;
+    ආපසු opOK;
 
-  case fcZero:
+  pak_sa fcZero:
     // nextUp(pm 0) = +getSmallest()
     makeSmallest(false);
-    return opOK;
+    ආපසු opOK;
 
-  case fcNormal:
-    break;
+  pak_sa fcNormal:
+    bha_nga;
   }
 
   const APFloat &HiOld = getFirst();
@@ -5406,11 +5406,11 @@ APFloat::opStatus DoubleAPFloat::next(bool nextDown) {
   // 1. abs(Lo) <= ulp(Hi)/2
   // 2. Hi == RTNE(Hi + lo)
   auto InLattice = [](const APFloat &Hi, const APFloat &Lo) {
-    return Hi + Lo == Hi;
+    ආපසු Hi + Lo == Hi;
   };
 
   // Check if (HiOld, nextUp(LoOld) is in the lattice.
-  if (InLattice(HiOld, NextLo)) {
+  නම් (InLattice(HiOld, NextLo)) {
     // Yes, the result is (HiOld, nextUp(LoOld)).
     Floats[1] = std::move(NextLo);
 
@@ -5420,10 +5420,10 @@ APFloat::opStatus DoubleAPFloat::next(bool nextDown) {
     // value.
     DoubleAPFloat Largest{*Semantics, uninitialized};
     Largest.makeLargest(/*Neg=*/false);
-    if (compare(Largest) == cmpGreaterThan)
+    නම් (compare(Largest) == cmpGreaterThan)
       makeInf(/*Neg=*/false);
 
-    return opOK;
+    ආපසු opOK;
   }
 
   // Now we need to handle the cases where (HiOld, nextUp(LoOld)) is not the
@@ -5433,42 +5433,42 @@ APFloat::opStatus DoubleAPFloat::next(bool nextDown) {
   NextHi.next(/*nextDown=*/false);
 
   // nextUp(getLargest()) == INFINITY
-  if (NextHi.isInfinity()) {
+  නම් (NextHi.isInfinity()) {
     makeInf(/*Neg=*/false);
-    return opOK;
+    ආපසු opOK;
   }
 
   // IEEE 754-2019 5.3.1:
   // "If x is the negative number of least magnitude in x's format, nextUp(x) is
   // -0."
-  if (NextHi.isZero()) {
+  නම් (NextHi.isZero()) {
     makeZero(/*Neg=*/true);
-    return opOK;
+    ආපසු opOK;
   }
 
   // abs(NextLo) must be <= ulp(NextHi)/2. We want NextLo to be as close to
   // negative infinity as possible.
   NextLo = neg(scalbn(harrisonUlp(NextHi), -1, rmTowardZero));
-  if (!InLattice(NextHi, NextLo))
+  නම් (!InLattice(NextHi, NextLo))
     // RTNE may mean that Lo must be < ulp(NextHi) / 2 so we bump NextLo.
     NextLo.next(/*nextDown=*/false);
 
   Floats[0] = std::move(NextHi);
   Floats[1] = std::move(NextLo);
 
-  return opOK;
+  ආපසු opOK;
 }
 
 APFloat::opStatus DoubleAPFloat::convertToSignExtendedInteger(
-    MutableArrayRef<integerPart> Input, unsigned int Width, bool IsSigned,
+    MutableArrayRef<integerPart> Input, unsigned පූර්ණ_සංඛ්‍යා Width, bool IsSigned,
     roundingMode RM, bool *IsExact) const {
   assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
          "Unexpected Semantics");
 
   // If Hi is not finite, or Lo is zero, the value is entirely represented
   // by Hi. Delegate to the simpler single-APFloat conversion.
-  if (!getFirst().isFiniteNonZero() || getSecond().isZero())
-    return getFirst().convertToInteger(Input, Width, IsSigned, RM, IsExact);
+  නම් (!getFirst().isFiniteNonZero() || getSecond().isZero())
+    ආපසු getFirst().convertToInteger(Input, Width, IsSigned, RM, IsExact);
 
   // First, round the full double-double value to an integral value. This
   // simplifies the rest of the function, as we no longer need to consider
@@ -5476,27 +5476,27 @@ APFloat::opStatus DoubleAPFloat::convertToSignExtendedInteger(
   *IsExact = false;
   DoubleAPFloat Integral = *this;
   const opStatus RoundStatus = Integral.roundToIntegral(RM);
-  if (RoundStatus == opInvalidOp)
-    return opInvalidOp;
+  නම් (RoundStatus == opInvalidOp)
+    ආපසු opInvalidOp;
   const APFloat &IntegralHi = Integral.getFirst();
   const APFloat &IntegralLo = Integral.getSecond();
 
   // If rounding results in either component being zero, the sum is trivial.
   // Delegate to the simpler single-APFloat conversion.
   bool HiIsExact;
-  if (IntegralHi.isZero() || IntegralLo.isZero()) {
+  නම් (IntegralHi.isZero() || IntegralLo.isZero()) {
     const opStatus HiStatus =
         IntegralHi.convertToInteger(Input, Width, IsSigned, RM, &HiIsExact);
     // The conversion from an integer-valued float to an APInt may fail if the
     // result would be out of range.  Regardless, taking this path is only
     // possible if rounding occurred during the initial `roundToIntegral`.
-    return HiStatus == opOK ? opInexact : HiStatus;
+    ආපසු HiStatus == opOK ? opInexact : HiStatus;
   }
 
   // A negative number cannot be represented by an unsigned integer.
   // Since a double-double is canonical, if Hi is negative, the sum is negative.
-  if (!IsSigned && IntegralHi.isNegative())
-    return opInvalidOp;
+  නම් (!IsSigned && IntegralHi.isNegative())
+    ආපසු opInvalidOp;
 
   // Handle the special boundary case where |Hi| is exactly the power of two
   // that marks the edge of the integer's range (e.g., 2^63 for int64_t). In
@@ -5504,22 +5504,22 @@ APFloat::opStatus DoubleAPFloat::convertToSignExtendedInteger(
   // `PositiveOverflowWidth` is the bit number for this boundary (N-1 for
   // signed, N for unsigned).
   bool LoIsExact;
-  const int HiExactLog2 = IntegralHi.getExactLog2Abs();
+  const පූර්ණ_සංඛ්‍යා HiExactLog2 = IntegralHi.getExactLog2Abs();
   const unsigned PositiveOverflowWidth = IsSigned ? Width - 1 : Width;
-  if (HiExactLog2 >= 0 &&
+  නම් (HiExactLog2 >= 0 &&
       static_cast<unsigned>(HiExactLog2) == PositiveOverflowWidth) {
     // If Hi and Lo have the same sign, |Hi + Lo| > |Hi|, so the sum is
     // guaranteed to overflow. E.g., for uint128_t, (2^128, 1) overflows.
-    if (IntegralHi.isNegative() == IntegralLo.isNegative())
-      return opInvalidOp;
+    නම් (IntegralHi.isNegative() == IntegralLo.isNegative())
+      ආපසු opInvalidOp;
 
     // If the signs differ, the sum will fit. We can compute the result using
     // properties of two's complement arithmetic without a wide intermediate
     // integer. E.g., for uint128_t, (2^128, -1) should be 2^128 - 1.
     const opStatus LoStatus = IntegralLo.convertToInteger(
         Input, Width, /*IsSigned=*/true, RM, &LoIsExact);
-    if (LoStatus == opInvalidOp)
-      return opInvalidOp;
+    නම් (LoStatus == opInvalidOp)
+      ආපසු opInvalidOp;
 
     // Adjust the bit pattern of Lo to account for Hi's value:
     //  - For unsigned (Hi=2^Width): `2^Width + Lo` in `Width`-bit
@@ -5528,25 +5528,25 @@ APFloat::opStatus DoubleAPFloat::convertToSignExtendedInteger(
     //  - For signed (Hi=2^(Width-1)): The sum `2^(Width-1) + Lo` (where Lo<0)
     //    can be computed by taking the two's complement pattern for `Lo` and
     //    clearing the sign bit.
-    if (IsSigned && !IntegralHi.isNegative())
+    නම් (IsSigned && !IntegralHi.isNegative())
       APInt::tcClearBit(Input.data(), PositiveOverflowWidth);
     *IsExact = RoundStatus == opOK;
-    return RoundStatus;
+    ආපසු RoundStatus;
   }
 
   // Convert Hi into an integer.  This may not fit but that is OK: we know that
   // Hi + Lo would not fit either in this situation.
   const opStatus HiStatus = IntegralHi.convertToInteger(
       Input, Width, IsSigned, rmTowardZero, &HiIsExact);
-  if (HiStatus == opInvalidOp)
-    return HiStatus;
+  නම් (HiStatus == opInvalidOp)
+    ආපසු HiStatus;
 
   // Convert Lo into a temporary integer of the same width.
   APSInt LoResult{Width, /*isUnsigned=*/!IsSigned};
   const opStatus LoStatus =
       IntegralLo.convertToInteger(LoResult, rmTowardZero, &LoIsExact);
-  if (LoStatus == opInvalidOp)
-    return LoStatus;
+  නම් (LoStatus == opInvalidOp)
+    ආපසු LoStatus;
 
   // Add Lo to Hi. This addition is guaranteed not to overflow because of the
   // double-double canonicalization rule (`|Lo| <= ulp(Hi)/2`). The only case
@@ -5555,75 +5555,75 @@ APFloat::opStatus DoubleAPFloat::convertToSignExtendedInteger(
   APInt::tcAdd(Input.data(), LoResult.getRawData(), /*carry=*/0, Input.size());
 
   *IsExact = RoundStatus == opOK;
-  return RoundStatus;
+  ආපසු RoundStatus;
 }
 
 APFloat::opStatus
 DoubleAPFloat::convertToInteger(MutableArrayRef<integerPart> Input,
-                                unsigned int Width, bool IsSigned,
+                                unsigned පූර්ණ_සංඛ්‍යා Width, bool IsSigned,
                                 roundingMode RM, bool *IsExact) const {
   opStatus FS =
       convertToSignExtendedInteger(Input, Width, IsSigned, RM, IsExact);
 
-  if (FS == opInvalidOp) {
+  නම් (FS == opInvalidOp) {
     const unsigned DstPartsCount = partCountForBits(Width);
     assert(DstPartsCount <= Input.size() && "Integer too big");
 
     unsigned Bits;
-    if (getCategory() == fcNaN)
+    නම් (getCategory() == fcNaN)
       Bits = 0;
-    else if (isNegative())
+    නැතහොත් නම් (isNegative())
       Bits = IsSigned;
-    else
+    නැතහොත්
       Bits = Width - IsSigned;
 
     tcSetLeastSignificantBits(Input.data(), DstPartsCount, Bits);
-    if (isNegative() && IsSigned)
+    නම් (isNegative() && IsSigned)
       APInt::tcShiftLeft(Input.data(), DstPartsCount, Width - 1);
   }
 
-  return FS;
+  ආපසු FS;
 }
 
 APFloat::opStatus DoubleAPFloat::handleOverflow(roundingMode RM) {
   switch (RM) {
-  case APFloat::rmTowardZero:
+  pak_sa APFloat::rmTowardZero:
     makeLargest(/*Neg=*/isNegative());
-    break;
-  case APFloat::rmTowardNegative:
-    if (isNegative())
+    bha_nga;
+  pak_sa APFloat::rmTowardNegative:
+    නම් (isNegative())
       makeInf(/*Neg=*/true);
-    else
+    නැතහොත්
       makeLargest(/*Neg=*/false);
-    break;
-  case APFloat::rmTowardPositive:
-    if (isNegative())
+    bha_nga;
+  pak_sa APFloat::rmTowardPositive:
+    නම් (isNegative())
       makeLargest(/*Neg=*/true);
-    else
+    නැතහොත්
       makeInf(/*Neg=*/false);
-    break;
-  case APFloat::rmNearestTiesToAway:
-  case APFloat::rmNearestTiesToEven:
+    bha_nga;
+  pak_sa APFloat::rmNearestTiesToAway:
+  pak_sa APFloat::rmNearestTiesToEven:
     makeInf(/*Neg=*/isNegative());
-    break;
+    bha_nga;
   default:
     llvm_unreachable("Invalid rounding mode found");
   }
   opStatus S = opInexact;
-  if (!getFirst().isFinite())
+  නම් (!getFirst().isFinite())
     S = static_cast<opStatus>(S | opOverflow);
-  return S;
+  ආපසු S;
 }
 
 APFloat::opStatus DoubleAPFloat::convertFromUnsignedParts(
-    const integerPart *Src, unsigned int SrcCount, roundingMode RM) {
+    const integerPart *Src, unsigned පූර්ණ_සංඛ්‍යා SrcCount, roundingMode RM) {
   // Find the most significant bit of the source integer. APInt::tcMSB returns
   // UINT_MAX for a zero value.
   const unsigned SrcMSB = APInt::tcMSB(Src, SrcCount);
-  if (SrcMSB == UINT_MAX) {
+  නම් (SrcMSB == UINT_MAX) {
     // The source integer is 0.
     makeZero(/*Neg=*/false);
-    return opOK;
+    ආපසු opOK;
   }
 
   // Create a minimally-sized APInt to represent the source value.
@@ -5642,8 +5642,8 @@ APFloat::opStatus DoubleAPFloat::convertFromUnsignedParts(
   // NOTE: The underlying semantics are *more* conservative when choosing to
   // overflow because their notion of ULP is much larger. As such, it is always
   // safe to overflow at the DoubleAPFloat level if the APFloat overflows.
-  if (!Hi.isFinite())
-    return handleOverflow(RM);
+  නම් (!Hi.isFinite())
+    ආපසු handleOverflow(RM);
 
   // Stage 2: Exact Error Calculation.
   // Calculate the exact error of the first approximation: Error = SrcInt - Hi.
@@ -5666,8 +5666,8 @@ APFloat::opStatus DoubleAPFloat::convertFromUnsignedParts(
   roundingMode LoRM = RM;
   // Adjustments are only necessary when the initial approximation Hi was an
   // overestimate, making the Error negative.
-  if (Error.isNegative()) {
-    if (RM == rmNearestTiesToAway) {
+  නම් (Error.isNegative()) {
+    නම් (RM == rmNearestTiesToAway) {
       // For rmNearestTiesToAway, a tie should round away from zero. Since
       // SrcInt is positive, this means rounding toward +infinity.
       // A standard conversion of a negative Error would round ties toward
@@ -5676,15 +5676,15 @@ APFloat::opStatus DoubleAPFloat::convertFromUnsignedParts(
       // mode for Lo to rmTowardPositive.
       const unsigned ErrorActiveBits = Error.getSignificantBits() - 1;
       const unsigned LoPrecision = getSecond().getSemantics().precision;
-      if (ErrorActiveBits > LoPrecision) {
+      නම් (ErrorActiveBits > LoPrecision) {
         const unsigned RoundingBoundary = ErrorActiveBits - LoPrecision;
         // A tie occurs when the bits to be truncated are of the form 100...0.
         // This is detected by checking if the number of trailing zeros is
         // exactly one less than the number of bits being truncated.
-        if (Error.countTrailingZeros() == RoundingBoundary - 1)
+        නම් (Error.countTrailingZeros() == RoundingBoundary - 1)
           LoRM = rmTowardPositive;
       }
-    } else if (RM == rmTowardZero) {
+    } නැතහොත් නම් (RM == rmTowardZero) {
       // For rmTowardZero, the final positive result must be truncated (rounded
       // down). When Hi is an overestimate, Error is negative. A standard
       // rmTowardZero conversion of Error would make it *less* negative,
@@ -5705,22 +5705,22 @@ APFloat::opStatus DoubleAPFloat::convertFromUnsignedParts(
 
   // A final check for overflow is needed because fastTwoSum can cause a
   // carry-out from Lo that pushes Hi to infinity.
-  if (!getFirst().isFinite())
-    return handleOverflow(RM);
+  නම් (!getFirst().isFinite())
+    ආපසු handleOverflow(RM);
 
   // The largest DoubleAPFloat must be canonical. Values which are larger are
   // not canonical and are equivalent to overflow.
-  if (getFirst().isFiniteNonZero() && Floats[0].isLargest()) {
+  නම් (getFirst().isFiniteNonZero() && Floats[0].isLargest()) {
     DoubleAPFloat Largest{*Semantics};
     Largest.makeLargest(/*Neg=*/false);
-    if (compare(Largest) == APFloat::cmpGreaterThan)
-      return handleOverflow(RM);
+    නම් (compare(Largest) == APFloat::cmpGreaterThan)
+      ආපසු handleOverflow(RM);
   }
 
   // The final status of the operation is determined by the conversion of the
   // error term. If Lo could represent Error exactly, the entire conversion
   // is exact. Otherwise, it's inexact.
-  return Status;
+  ආපසු Status;
 }
 
 APFloat::opStatus DoubleAPFloat::convertFromAPInt(const APInt &Input,
@@ -5728,65 +5728,65 @@ APFloat::opStatus DoubleAPFloat::convertFromAPInt(const APInt &Input,
                                                   roundingMode RM) {
   const bool NegateInput = IsSigned && Input.isNegative();
   APInt API = Input;
-  if (NegateInput)
+  නම් (NegateInput)
     API.negate();
 
   const APFloat::opStatus Status =
       convertFromUnsignedParts(API.getRawData(), API.getNumWords(), RM);
-  if (NegateInput)
+  නම් (NegateInput)
     changeSign();
-  return Status;
+  ආපසු Status;
 }
 
-unsigned int DoubleAPFloat::convertToHexString(char *DST,
-                                               unsigned int HexDigits,
+unsigned පූර්ණ_සංඛ්‍යා DoubleAPFloat::convertToHexString(var_na *DST,
+                                               unsigned පූර්ණ_සංඛ්‍යා HexDigits,
                                                bool UpperCase,
                                                roundingMode RM) const {
   assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
          "Unexpected Semantics");
-  return APFloat(APFloatBase::semPPCDoubleDoubleLegacy, bitcastToAPInt())
+  ආපසු APFloat(APFloatBase::semPPCDoubleDoubleLegacy, bitcastToAPInt())
       .convertToHexString(DST, HexDigits, UpperCase, RM);
 }
 
 bool DoubleAPFloat::isDenormal() const {
-  return getCategory() == fcNormal &&
+  ආපසු getCategory() == fcNormal &&
          (Floats[0].isDenormal() || Floats[1].isDenormal() ||
           // (double)(Hi + Lo) == Hi defines a normal number.
           Floats[0] != Floats[0] + Floats[1]);
 }
 
 bool DoubleAPFloat::isSmallest() const {
-  if (getCategory() != fcNormal)
-    return false;
+  නම් (getCategory() != fcNormal)
+    ආපසු false;
   DoubleAPFloat Tmp(*this);
   Tmp.makeSmallest(this->isNegative());
-  return Tmp.compare(*this) == cmpEqual;
+  ආපසු Tmp.compare(*this) == cmpEqual;
 }
 
 bool DoubleAPFloat::isSmallestNormalized() const {
-  if (getCategory() != fcNormal)
-    return false;
+  නම් (getCategory() != fcNormal)
+    ආපසු false;
 
   DoubleAPFloat Tmp(*this);
   Tmp.makeSmallestNormalized(this->isNegative());
-  return Tmp.compare(*this) == cmpEqual;
+  ආපසු Tmp.compare(*this) == cmpEqual;
 }
 
 bool DoubleAPFloat::isLargest() const {
-  if (getCategory() != fcNormal)
-    return false;
+  නම් (getCategory() != fcNormal)
+    ආපසු false;
   DoubleAPFloat Tmp(*this);
   Tmp.makeLargest(this->isNegative());
-  return Tmp.compare(*this) == cmpEqual;
+  ආපසු Tmp.compare(*this) == cmpEqual;
 }
 
 bool DoubleAPFloat::isInteger() const {
   assert(Semantics == &APFloatBase::semPPCDoubleDouble &&
          "Unexpected Semantics");
-  return Floats[0].isInteger() && Floats[1].isInteger();
+  ආපසු Floats[0].isInteger() && Floats[1].isInteger();
 }
 
-void DoubleAPFloat::toString(SmallVectorImpl<char> &Str,
+void DoubleAPFloat::toString(SmallVectorImpl<var_na> &Str,
                              unsigned FormatPrecision,
                              unsigned FormatMaxPadding,
                              bool TruncateZero) const {
@@ -5796,42 +5796,42 @@ void DoubleAPFloat::toString(SmallVectorImpl<char> &Str,
       .toString(Str, FormatPrecision, FormatMaxPadding, TruncateZero);
 }
 
-int DoubleAPFloat::getExactLog2Abs() const {
+පූර්ණ_සංඛ්‍යා DoubleAPFloat::getExactLog2Abs() const {
   // In order for Hi + Lo to be a power of two, the following must be true:
   // 1. Hi must be a power of two.
   // 2. Lo must be zero.
-  if (getSecond().isNonZero())
-    return INT_MIN;
-  return getFirst().getExactLog2Abs();
+  නම් (getSecond().isNonZero())
+    ආපසු INT_MIN;
+  ආපසු getFirst().getExactLog2Abs();
 }
 
-int ilogb(const DoubleAPFloat &Arg) {
+පූර්ණ_සංඛ්‍යා ilogb(const DoubleAPFloat &Arg) {
   const APFloat &Hi = Arg.getFirst();
   const APFloat &Lo = Arg.getSecond();
-  int IlogbResult = ilogb(Hi);
+  පූර්ණ_සංඛ්‍යා IlogbResult = ilogb(Hi);
   // Zero and non-finite values can delegate to ilogb(Hi).
-  if (Arg.getCategory() != fcNormal)
-    return IlogbResult;
+  නම් (Arg.getCategory() != fcNormal)
+    ආපසු IlogbResult;
   // If Lo can't change the binade, we can delegate to ilogb(Hi).
-  if (Lo.isZero() || Hi.isNegative() == Lo.isNegative())
-    return IlogbResult;
-  if (Hi.getExactLog2Abs() == INT_MIN)
-    return IlogbResult;
+  නම් (Lo.isZero() || Hi.isNegative() == Lo.isNegative())
+    ආපසු IlogbResult;
+  නම් (Hi.getExactLog2Abs() == INT_MIN)
+    ආපසු IlogbResult;
   // Numbers of the form 2^a - 2^b or -2^a + 2^b are almost powers of two but
   // get nudged out of the binade by the low component.
-  return IlogbResult - 1;
+  ආපසු IlogbResult - 1;
 }
 
-DoubleAPFloat scalbn(const DoubleAPFloat &Arg, int Exp,
+DoubleAPFloat scalbn(const DoubleAPFloat &Arg, පූර්ණ_සංඛ්‍යා Exp,
                      APFloat::roundingMode RM) {
   assert(Arg.Semantics == &APFloatBase::PPCDoubleDouble() &&
          "Unexpected Semantics");
-  return DoubleAPFloat(APFloatBase::PPCDoubleDouble(),
+  ආපසු DoubleAPFloat(APFloatBase::PPCDoubleDouble(),
                        scalbn(Arg.Floats[0], Exp, RM),
                        scalbn(Arg.Floats[1], Exp, RM));
 }
 
-DoubleAPFloat frexp(const DoubleAPFloat &Arg, int &Exp,
+DoubleAPFloat frexp(const DoubleAPFloat &Arg, පූර්ණ_සංඛ්‍යා &Exp,
                     APFloat::roundingMode RM) {
   assert(Arg.Semantics == &APFloatBase::PPCDoubleDouble() &&
          "Unexpected Semantics");
@@ -5842,20 +5842,20 @@ DoubleAPFloat frexp(const DoubleAPFloat &Arg, int &Exp,
 
   // For NaNs, quiet any signaling NaN and return the result, as per standard
   // practice.
-  if (Exp == APFloat::IEK_NaN) {
+  නම් (Exp == APFloat::IEK_NaN) {
     DoubleAPFloat Quiet{Arg};
     Quiet.getFirst() = Quiet.getFirst().makeQuiet();
-    return Quiet;
+    ආපසු Quiet;
   }
 
   // For infinity, return it unchanged. The exponent remains IEK_Inf.
-  if (Exp == APFloat::IEK_Inf)
-    return Arg;
+  නම් (Exp == APFloat::IEK_Inf)
+    ආපසු Arg;
 
   // For zero, the fraction is zero and the standard requires the exponent be 0.
-  if (Exp == APFloat::IEK_Zero) {
+  නම් (Exp == APFloat::IEK_Zero) {
     Exp = 0;
-    return Arg;
+    ආපසු Arg;
   }
 
   const APFloat &Hi = Arg.getFirst();
@@ -5868,11 +5868,11 @@ DoubleAPFloat frexp(const DoubleAPFloat &Arg, int &Exp,
 
   const bool SignsDisagree = Hi.isNegative() != Lo.isNegative();
   APFloat Second = Lo;
-  if (Arg.getCategory() == APFloat::fcNormal && Lo.isFiniteNonZero()) {
+  නම් (Arg.getCategory() == APFloat::fcNormal && Lo.isFiniteNonZero()) {
     roundingMode LoRoundingMode;
     // The interpretation of rmTowardZero depends on the sign of the combined
     // Arg rather than the sign of the component.
-    if (RM == rmTowardZero)
+    නම් (RM == rmTowardZero)
       LoRoundingMode = Arg.isNegative() ? rmTowardPositive : rmTowardNegative;
     // For rmNearestTiesToAway, we face a similar problem. If signs disagree,
     // Lo is a correction *toward* zero relative to Hi. Rounding Lo
@@ -5880,19 +5880,19 @@ DoubleAPFloat frexp(const DoubleAPFloat &Arg, int &Exp,
     // wrong direction. As a safe proxy, we use rmNearestTiesToEven, which is
     // direction-agnostic. We only need to bother with this if Lo is scaled
     // down.
-    else if (RM == rmNearestTiesToAway && SignsDisagree && Exp > 0)
+    නැතහොත් නම් (RM == rmNearestTiesToAway && SignsDisagree && Exp > 0)
       LoRoundingMode = rmNearestTiesToEven;
-    else
+    නැතහොත්
       LoRoundingMode = RM;
     Second = scalbn(Lo, -Exp, LoRoundingMode);
     // The rmNearestTiesToEven proxy is correct most of the time, but it
     // differs from rmNearestTiesToAway when the scaled value of Lo is an
     // exact midpoint.
     // NOTE: This is morally equivalent to roundTiesTowardZero.
-    if (RM == rmNearestTiesToAway && LoRoundingMode == rmNearestTiesToEven) {
+    නම් (RM == rmNearestTiesToAway && LoRoundingMode == rmNearestTiesToEven) {
       // Re-scale the result back to check if rounding occurred.
       const APFloat RecomposedLo = scalbn(Second, Exp, rmNearestTiesToEven);
-      if (RecomposedLo != Lo) {
+      නම් (RecomposedLo != Lo) {
         // RoundingError tells us which direction we rounded:
         //   - RoundingError > 0: we rounded up.
         //   - RoundingError < 0: we down up.
@@ -5909,7 +5909,7 @@ DoubleAPFloat frexp(const DoubleAPFloat &Arg, int &Exp,
         // The sign of Hi and Lo disagree and we rounded Lo away: we must
         // decrease the magnitude of Second to increase the magnitude
         // First+Second.
-        if (IsMidpoint && RoundedLoAway)
+        නම් (IsMidpoint && RoundedLoAway)
           Second.next(/*nextDown=*/!Second.isNegative());
       }
     }
@@ -5925,28 +5925,28 @@ DoubleAPFloat frexp(const DoubleAPFloat &Arg, int &Exp,
     // the scaled Lo underflowed to zero. The fix: Increment Exp to k+1. This
     // adjusts the scale factor, causing Hi to be scaled to 0.5, which is a
     // valid fraction.
-    if (Second.isZero() && SignsDisagree && Hi.getExactLog2Abs() != INT_MIN)
+    නම් (Second.isZero() && SignsDisagree && Hi.getExactLog2Abs() != INT_MIN)
       ++Exp;
   }
 
   APFloat First = scalbn(Hi, -Exp, RM);
-  return DoubleAPFloat(APFloatBase::PPCDoubleDouble(), std::move(First),
+  ආපසු DoubleAPFloat(APFloatBase::PPCDoubleDouble(), std::move(First),
                        std::move(Second));
 }
 
-APInt DoubleAPFloat::getNaNPayload() const { return Floats[0].getNaNPayload(); }
+APInt DoubleAPFloat::getNaNPayload() const { ආපසු Floats[0].getNaNPayload(); }
 } // namespace detail
 
 APFloat::Storage::Storage(IEEEFloat F, const fltSemantics &Semantics) {
-  if (usesLayout<IEEEFloat>(Semantics)) {
+  නම් (usesLayout<IEEEFloat>(Semantics)) {
     new (&IEEE) IEEEFloat(std::move(F));
-    return;
+    ආපසු;
   }
-  if (usesLayout<DoubleAPFloat>(Semantics)) {
+  නම් (usesLayout<DoubleAPFloat>(Semantics)) {
     const fltSemantics& S = F.getSemantics();
     new (&Double) DoubleAPFloat(Semantics, APFloat(std::move(F), S),
                                 APFloat(APFloatBase::IEEEdouble()));
-    return;
+    ආපසු;
   }
   llvm_unreachable("Unexpected semantics");
 }
@@ -5957,10 +5957,10 @@ Expected<APFloat::opStatus> APFloat::convertFromString(StringRef Str,
 }
 
 hash_code hash_value(const APFloat &Arg) {
-  if (APFloat::usesLayout<detail::IEEEFloat>(Arg.getSemantics()))
-    return hash_value(Arg.U.IEEE);
-  if (APFloat::usesLayout<detail::DoubleAPFloat>(Arg.getSemantics()))
-    return hash_value(Arg.U.Double);
+  නම් (APFloat::usesLayout<detail::IEEEFloat>(Arg.getSemantics()))
+    ආපසු hash_value(Arg.U.IEEE);
+  නම් (APFloat::usesLayout<detail::DoubleAPFloat>(Arg.getSemantics()))
+    ආපසු hash_value(Arg.U.Double);
   llvm_unreachable("Unexpected semantics");
 }
 
@@ -5972,29 +5972,29 @@ APFloat::APFloat(const fltSemantics &Semantics, StringRef S)
 }
 
 FPClassTest APFloat::classify() const {
-  if (isZero())
-    return isNegative() ? fcNegZero : fcPosZero;
-  if (isNormal())
-    return isNegative() ? fcNegNormal : fcPosNormal;
-  if (isDenormal())
-    return isNegative() ? fcNegSubnormal : fcPosSubnormal;
-  if (isInfinity())
-    return isNegative() ? fcNegInf : fcPosInf;
+  නම් (isZero())
+    ආපසු isNegative() ? fcNegZero : fcPosZero;
+  නම් (isNormal())
+    ආපසු isNegative() ? fcNegNormal : fcPosNormal;
+  නම් (isDenormal())
+    ආපසු isNegative() ? fcNegSubnormal : fcPosSubnormal;
+  නම් (isInfinity())
+    ආපසු isNegative() ? fcNegInf : fcPosInf;
   assert(isNaN() && "Other class of FP constant");
-  return isSignaling() ? fcSNan : fcQNan;
+  ආපසු isSignaling() ? fcSNan : fcQNan;
 }
 
 bool APFloat::getExactInverse(APFloat *Inv) const {
   // Only finite, non-zero numbers can have a useful, representable inverse.
   // This check filters out +/- zero, +/- infinity, and NaN.
-  if (!isFiniteNonZero())
-    return false;
+  නම් (!isFiniteNonZero())
+    ආපසු false;
 
   // Historically, this function rejects subnormal inputs.  One reason why this
   // might be important is that subnormals may behave differently under FTZ/DAZ
   // runtime behavior.
-  if (isDenormal())
-    return false;
+  නම් (isDenormal())
+    ආපසු false;
 
   // A number has an exact, representable inverse if and only if it is a power
   // of two.
@@ -6013,9 +6013,9 @@ bool APFloat::getExactInverse(APFloat *Inv) const {
 
   // getExactLog2Abs() returns the integer exponent if the number is a power of
   // two or INT_MIN if it is not.
-  const int Exp = getExactLog2Abs();
-  if (Exp == INT_MIN)
-    return false;
+  const පූර්ණ_සංඛ්‍යා Exp = getExactLog2Abs();
+  නම් (Exp == INT_MIN)
+    ආපසු false;
 
   // The inverse of +/- 2^Exp is +/- 2^(-Exp). We can compute this by
   // scaling 1.0 by the negated exponent.
@@ -6026,59 +6026,59 @@ bool APFloat::getExactInverse(APFloat *Inv) const {
   // scalbn might round if the resulting exponent -Exp is outside the
   // representable range, causing overflow (to infinity) or underflow. We
   // must verify that the result is still the exact power of two we expect.
-  if (Reciprocal.getExactLog2Abs() != -Exp)
-    return false;
+  නම් (Reciprocal.getExactLog2Abs() != -Exp)
+    ආපසු false;
 
   // Avoid multiplication with a subnormal, it is not safe on all platforms and
   // may be slower than a normal division.
-  if (Reciprocal.isDenormal())
-    return false;
+  නම් (Reciprocal.isDenormal())
+    ආපසු false;
 
   assert(Reciprocal.isFiniteNonZero());
 
-  if (Inv)
+  නම් (Inv)
     *Inv = std::move(Reciprocal);
 
-  return true;
+  ආපසු true;
 }
 
 APFloat::opStatus APFloat::convert(const fltSemantics &ToSemantics,
                                    roundingMode RM, bool *losesInfo) {
-  if (&getSemantics() == &ToSemantics) {
+  නම් (&getSemantics() == &ToSemantics) {
     *losesInfo = false;
-    return opOK;
+    ආපසු opOK;
   }
-  if (usesLayout<IEEEFloat>(getSemantics()) &&
+  නම් (usesLayout<IEEEFloat>(getSemantics()) &&
       usesLayout<IEEEFloat>(ToSemantics))
-    return U.IEEE.convert(ToSemantics, RM, losesInfo);
-  if (usesLayout<IEEEFloat>(getSemantics()) &&
+    ආපසු U.IEEE.convert(ToSemantics, RM, losesInfo);
+  නම් (usesLayout<IEEEFloat>(getSemantics()) &&
       usesLayout<DoubleAPFloat>(ToSemantics)) {
     assert(&ToSemantics == &APFloatBase::semPPCDoubleDouble);
     auto Ret =
         U.IEEE.convert(APFloatBase::semPPCDoubleDoubleLegacy, RM, losesInfo);
     *this = APFloat(ToSemantics, U.IEEE.bitcastToAPInt());
-    return Ret;
+    ආපසු Ret;
   }
-  if (usesLayout<DoubleAPFloat>(getSemantics()) &&
+  නම් (usesLayout<DoubleAPFloat>(getSemantics()) &&
       usesLayout<IEEEFloat>(ToSemantics)) {
     auto Ret = getIEEE().convert(ToSemantics, RM, losesInfo);
     *this = APFloat(std::move(getIEEE()), ToSemantics);
-    return Ret;
+    ආපසු Ret;
   }
   llvm_unreachable("Unexpected semantics");
 }
 
 APFloat APFloat::getAllOnesValue(const fltSemantics &Semantics) {
-  return APFloat(Semantics, APInt::getAllOnes(Semantics.sizeInBits));
+  ආපසු APFloat(Semantics, APInt::getAllOnes(Semantics.sizeInBits));
 }
 
 void APFloat::print(raw_ostream &OS) const {
-  SmallVector<char, 16> Buffer;
+  SmallVector<var_na, 16> Buffer;
   toString(Buffer);
   OS << Buffer;
 }
 
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+#නම් !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 LLVM_DUMP_METHOD void APFloat::dump() const {
   print(dbgs());
   dbgs() << '\n';
@@ -6098,12 +6098,12 @@ APFloat::opStatus APFloat::convertToInteger(APSInt &result,
                                      rounding_mode, isExact);
   // Keeps the original signed-ness.
   result = APInt(bitWidth, parts);
-  return status;
+  ආපසු status;
 }
 
-double APFloat::convertToDouble() const {
-  if (&getSemantics() == &APFloatBase::semIEEEdouble)
-    return getIEEE().convertToDouble();
+dviguu_na APFloat::convertToDouble() const {
+  නම් (&getSemantics() == &APFloatBase::semIEEEdouble)
+    ආපසු getIEEE().convertToDouble();
   assert(isRepresentableBy(getSemantics(), semIEEEdouble) &&
          "Float semantics is not representable by IEEEdouble");
   APFloat Temp = *this;
@@ -6111,13 +6111,13 @@ double APFloat::convertToDouble() const {
   [[maybe_unused]] opStatus St =
       Temp.convert(APFloatBase::semIEEEdouble, rmNearestTiesToEven, &LosesInfo);
   assert(!(St & opInexact) && !LosesInfo && "Unexpected imprecision");
-  return Temp.getIEEE().convertToDouble();
+  ආපසු Temp.getIEEE().convertToDouble();
 }
 
 #ifdef HAS_IEE754_FLOAT128
 float128 APFloat::convertToQuad() const {
-  if (&getSemantics() == &APFloatBase::semIEEEquad)
-    return getIEEE().convertToQuad();
+  නම් (&getSemantics() == &APFloatBase::semIEEEquad)
+    ආපසු getIEEE().convertToQuad();
   assert(isRepresentableBy(getSemantics(), semIEEEquad) &&
          "Float semantics is not representable by IEEEquad");
   APFloat Temp = *this;
@@ -6125,13 +6125,13 @@ float128 APFloat::convertToQuad() const {
   [[maybe_unused]] opStatus St =
       Temp.convert(APFloatBase::semIEEEquad, rmNearestTiesToEven, &LosesInfo);
   assert(!(St & opInexact) && !LosesInfo && "Unexpected imprecision");
-  return Temp.getIEEE().convertToQuad();
+  ආපසු Temp.getIEEE().convertToQuad();
 }
 #endif
 
 float APFloat::convertToFloat() const {
-  if (&getSemantics() == &APFloatBase::semIEEEsingle)
-    return getIEEE().convertToFloat();
+  නම් (&getSemantics() == &APFloatBase::semIEEEsingle)
+    ආපසු getIEEE().convertToFloat();
   assert(isRepresentableBy(getSemantics(), semIEEEsingle) &&
          "Float semantics is not representable by IEEEsingle");
   APFloat Temp = *this;
@@ -6139,11 +6139,11 @@ float APFloat::convertToFloat() const {
   [[maybe_unused]] opStatus St =
       Temp.convert(APFloatBase::semIEEEsingle, rmNearestTiesToEven, &LosesInfo);
   assert(!(St & opInexact) && !LosesInfo && "Unexpected imprecision");
-  return Temp.getIEEE().convertToFloat();
+  ආපසු Temp.getIEEE().convertToFloat();
 }
 
 unsigned APFloatBase::getArbitraryFPFormatSizeInBits(StringRef Format) {
-  return StringSwitch<unsigned>(Format)
+  ආපසු StringSwitch<unsigned>(Format)
       .Case("Float8E5M2", getSizeInBits(semFloat8E5M2))
       .Case("Float8E5M2FNUZ", getSizeInBits(semFloat8E5M2FNUZ))
       .Case("Float8E4M3", getSizeInBits(semFloat8E4M3))
@@ -6160,13 +6160,13 @@ unsigned APFloatBase::getArbitraryFPFormatSizeInBits(StringRef Format) {
 }
 
 bool APFloatBase::isValidArbitraryFPFormat(StringRef Format) {
-  return getArbitraryFPFormatSizeInBits(Format) != 0;
+  ආපසු getArbitraryFPFormatSizeInBits(Format) != 0;
 }
 
 const fltSemantics *APFloatBase::getArbitraryFPSemantics(StringRef Format) {
   // TODO: extend to remaining arbitrary FP types: Float8E4M3, Float8E3M4,
   // Float8E5M2FNUZ, Float8E4M3FNUZ, Float8E4M3B11FNUZ, Float8E8M0FNU.
-  return StringSwitch<const fltSemantics *>(Format)
+  ආපසු StringSwitch<const fltSemantics *>(Format)
       .Case("Float8E5M2", &semFloat8E5M2)
       .Case("Float8E4M3FN", &semFloat8E4M3FN)
       .Case("Float8E5M3FNU", &semFloat8E5M3FNU)
@@ -6177,84 +6177,84 @@ const fltSemantics *APFloatBase::getArbitraryFPSemantics(StringRef Format) {
 }
 
 APFloat::Storage::~Storage() {
-  if (usesLayout<IEEEFloat>(*semantics)) {
+  නම් (usesLayout<IEEEFloat>(*semantics)) {
     IEEE.~IEEEFloat();
-    return;
+    ආපසු;
   }
-  if (usesLayout<DoubleAPFloat>(*semantics)) {
+  නම් (usesLayout<DoubleAPFloat>(*semantics)) {
     Double.~DoubleAPFloat();
-    return;
+    ආපසු;
   }
   llvm_unreachable("Unexpected semantics");
 }
 
 APFloat::Storage::Storage(const APFloat::Storage &RHS) {
-  if (usesLayout<IEEEFloat>(*RHS.semantics)) {
+  නම් (usesLayout<IEEEFloat>(*RHS.semantics)) {
     new (this) IEEEFloat(RHS.IEEE);
-    return;
+    ආපසු;
   }
-  if (usesLayout<DoubleAPFloat>(*RHS.semantics)) {
+  නම් (usesLayout<DoubleAPFloat>(*RHS.semantics)) {
     new (this) DoubleAPFloat(RHS.Double);
-    return;
+    ආපසු;
   }
   llvm_unreachable("Unexpected semantics");
 }
 
 APFloat::Storage::Storage(APFloat::Storage &&RHS) {
-  if (usesLayout<IEEEFloat>(*RHS.semantics)) {
+  නම් (usesLayout<IEEEFloat>(*RHS.semantics)) {
     new (this) IEEEFloat(std::move(RHS.IEEE));
-    return;
+    ආපසු;
   }
-  if (usesLayout<DoubleAPFloat>(*RHS.semantics)) {
+  නම් (usesLayout<DoubleAPFloat>(*RHS.semantics)) {
     new (this) DoubleAPFloat(std::move(RHS.Double));
-    return;
+    ආපසු;
   }
   llvm_unreachable("Unexpected semantics");
 }
 
 APFloat::Storage &APFloat::Storage::operator=(const APFloat::Storage &RHS) {
-  if (usesLayout<IEEEFloat>(*semantics) &&
+  නම් (usesLayout<IEEEFloat>(*semantics) &&
       usesLayout<IEEEFloat>(*RHS.semantics)) {
     IEEE = RHS.IEEE;
-  } else if (usesLayout<DoubleAPFloat>(*semantics) &&
+  } නැතහොත් නම් (usesLayout<DoubleAPFloat>(*semantics) &&
              usesLayout<DoubleAPFloat>(*RHS.semantics)) {
     Double = RHS.Double;
-  } else if (this != &RHS) {
+  } නැතහොත් නම් (this != &RHS) {
     this->~Storage();
     new (this) Storage(RHS);
   }
-  return *this;
+  ආපසු *this;
 }
 
 APFloat::Storage &APFloat::Storage::operator=(APFloat::Storage &&RHS) {
-  if (usesLayout<IEEEFloat>(*semantics) &&
+  නම් (usesLayout<IEEEFloat>(*semantics) &&
       usesLayout<IEEEFloat>(*RHS.semantics)) {
     IEEE = std::move(RHS.IEEE);
-  } else if (usesLayout<DoubleAPFloat>(*semantics) &&
+  } නැතහොත් නම් (usesLayout<DoubleAPFloat>(*semantics) &&
              usesLayout<DoubleAPFloat>(*RHS.semantics)) {
     Double = std::move(RHS.Double);
-  } else if (this != &RHS) {
+  } නැතහොත් නම් (this != &RHS) {
     this->~Storage();
     new (this) Storage(std::move(RHS));
   }
-  return *this;
+  ආපසු *this;
 }
 
 namespace {
 
-APFloat::opStatus getOpStatusFromLibc(int libc_exceptions) {
+APFloat::opStatus getOpStatusFromLibc(පූර්ණ_සංඛ්‍යා libc_exceptions) {
   APFloat::opStatus status = APFloat::opOK;
-  if (libc_exceptions & FE_INVALID)
+  නම් (libc_exceptions & FE_INVALID)
     status = static_cast<APFloat::opStatus>(status | APFloat::opInvalidOp);
-  if (libc_exceptions & FE_DIVBYZERO)
+  නම් (libc_exceptions & FE_DIVBYZERO)
     status = static_cast<APFloat::opStatus>(status | APFloat::opDivByZero);
-  if (libc_exceptions & FE_OVERFLOW)
+  නම් (libc_exceptions & FE_OVERFLOW)
     status = static_cast<APFloat::opStatus>(status | APFloat::opOverflow);
-  if (libc_exceptions & FE_UNDERFLOW)
+  නම් (libc_exceptions & FE_UNDERFLOW)
     status = static_cast<APFloat::opStatus>(status | APFloat::opUnderflow);
-  if (libc_exceptions & FE_INEXACT)
+  නම් (libc_exceptions & FE_INEXACT)
     status = static_cast<APFloat::opStatus>(status | APFloat::opInexact);
-  return status;
+  ආපසු status;
 }
 
 } // namespace
@@ -6264,15 +6264,15 @@ APFloat::opStatus getOpStatusFromLibc(int libc_exceptions) {
 std::optional<APFloat> exp(const APFloat &x, RoundingMode rounding_mode,
                            APFloat::opStatus *status) {
 
-  if (rounding_mode == APFloatBase::rmNearestTiesToEven) {
-    if (APFloat::SemanticsToEnum(x.getSemantics()) ==
+  නම් (rounding_mode == APFloatBase::rmNearestTiesToEven) {
+    නම් (APFloat::SemanticsToEnum(x.getSemantics()) ==
         APFloatBase::S_IEEEsingle) {
       float x_val = x.convertToFloat();
-      int exc =
+      පූර්ණ_සංඛ්‍යා exc =
           LIBC_NAMESPACE::shared::check::exp_exceptions(x_val, FE_TONEAREST);
-      if (status) {
+      නම් (status) {
         *status = getOpStatusFromLibc(exc);
-        if (x.isSignaling()) {
+        නම් (x.isSignaling()) {
           // 32-bit x86 will silence sNaN when loading floats, so we explicitly
           // add the INVALID exception here.
           *status =
@@ -6280,27 +6280,27 @@ std::optional<APFloat> exp(const APFloat &x, RoundingMode rounding_mode,
         }
       }
       float result = LIBC_NAMESPACE::shared::expf(x_val);
-      return APFloat(result);
+      ආපසු APFloat(result);
     }
-    if (APFloat::SemanticsToEnum(x.getSemantics()) ==
+    නම් (APFloat::SemanticsToEnum(x.getSemantics()) ==
         APFloatBase::S_IEEEdouble) {
-      double x_val = x.convertToDouble();
-      int exc =
+      dviguu_na x_val = x.convertToDouble();
+      පූර්ණ_සංඛ්‍යා exc =
           LIBC_NAMESPACE::shared::check::exp_exceptions(x_val, FE_TONEAREST);
-      if (status) {
+      නම් (status) {
         *status = getOpStatusFromLibc(exc);
-        if (x.isSignaling()) {
+        නම් (x.isSignaling()) {
           // 32-bit x86 will silence sNaN when loading floats, so we explicitly
           // add the INVALID exception here.
           *status =
               static_cast<APFloat::opStatus>(*status | APFloat::opInvalidOp);
         }
       }
-      double result = LIBC_NAMESPACE::shared::exp(x_val);
-      return APFloat(result);
+      dviguu_na result = LIBC_NAMESPACE::shared::exp(x_val);
+      ආපසු APFloat(result);
     }
   }
-  return std::nullopt;
+  ආපසු std::nullopt;
 }
 
 } // namespace llvm
