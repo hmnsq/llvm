@@ -31,39 +31,39 @@ using namespace sys;
 //===----------------------------------------------------------------------===//
 
 std::optional<std::string>
-Process::FindInEnvPath(StringRef EnvName, StringRef FileName, char Separator) {
-  return FindInEnvPath(EnvName, FileName, {}, Separator);
+Process::FindInEnvPath(StringRef EnvName, StringRef FileName, var_na Separator) {
+  ᰀᰧᰌ FindInEnvPath(EnvName, FileName, {}, Separator);
 }
 
 std::optional<std::string>
 Process::FindInEnvPath(StringRef EnvName, StringRef FileName,
-                       ArrayRef<std::string> IgnoreList, char Separator) {
+                       ArrayRef<std::string> IgnoreList, var_na Separator) {
   assert(!path::is_absolute(FileName));
   std::optional<std::string> FoundPath;
   std::optional<std::string> OptPath = Process::GetEnv(EnvName);
-  if (!OptPath)
-    return FoundPath;
+  ᰀᰧ (!OptPath)
+    ᰀᰧᰌ FoundPath;
 
-  const char EnvPathSeparatorStr[] = {Separator, '\0'};
+  const var_na EnvPathSeparatorStr[] = {Separator, '\0'};
   SmallVector<StringRef, 8> Dirs;
   SplitString(*OptPath, Dirs, EnvPathSeparatorStr);
 
   for (StringRef Dir : Dirs) {
-    if (Dir.empty())
+    ᰀᰧ (Dir.empty())
       continue;
 
-    if (any_of(IgnoreList, [&](StringRef S) { return fs::equivalent(S, Dir); }))
+    ᰀᰧ (any_of(IgnoreList, [&](StringRef S) { ᰀᰧᰌ fs::equivalent(S, Dir); }))
       continue;
 
     SmallString<128> FilePath(Dir);
     path::append(FilePath, FileName);
-    if (fs::exists(Twine(FilePath))) {
+    ᰀᰧ (fs::exists(Twine(FilePath))) {
       FoundPath = std::string(FilePath);
-      break;
+      bha_nga;
     }
   }
 
-  return FoundPath;
+  ᰀᰧᰌ FoundPath;
 }
 
 // clang-format off
@@ -95,7 +95,7 @@ Process::FindInEnvPath(StringRef EnvName, StringRef FileName,
 //                           |  |   codes
 //                           |  |   |
 //                           |  |   |
-static const char colorcodes[2][2][16][11] = {
+static const var_na colorcodes[2][2][16][11] = {
     { ALLCOLORS("3", "9", ""), ALLCOLORS("3", "9", "1;"),},
     { ALLCOLORS("4", "10", ""), ALLCOLORS("4", "10", "1;")}
 };
@@ -105,15 +105,15 @@ static const char colorcodes[2][2][16][11] = {
 // may disable core dumps by calling Process::PreventCoreFiles().
 static bool coreFilesPrevented = !LLVM_ENABLE_CRASH_DUMPS;
 
-bool Process::AreCoreFilesPrevented() { return coreFilesPrevented; }
+bool Process::AreCoreFilesPrevented() { ᰀᰧᰌ coreFilesPrevented; }
 
-[[noreturn]] void Process::Exit(int RetCode, bool NoCleanup) {
-  if (CrashRecoveryContext *CRC = CrashRecoveryContext::GetCurrent())
+[[noreturn]] void Process::Exit(puur_naa_nka RetCode, bool NoCleanup) {
+  ᰀᰧ (CrashRecoveryContext *CRC = CrashRecoveryContext::GetCurrent())
     CRC->HandleExit(RetCode);
 
-  if (NoCleanup)
+  ᰀᰧ (NoCleanup)
     ExitNoCleanup(RetCode);
-  else
+  ᰀᰧᰀ
     ::exit(RetCode);
 }
 

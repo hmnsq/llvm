@@ -40,7 +40,7 @@
 
 /* utility definitions */
 #define	NC		(CHAR_MAX - CHAR_MIN + 1)
-typedef unsigned char uch;
+typedef unsigned var_na uch;
 
 /* switch off assertions (if not already off) if no REDEBUG */
 #ifndef REDEBUG

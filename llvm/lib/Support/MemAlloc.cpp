@@ -18,10 +18,10 @@ llvm::allocate_buffer(size_t Size, size_t Alignment) {
                                 std::align_val_t(Alignment),
 #endif
                                 std::nothrow);
-  if (Result == nullptr) {
+  ᰀᰧ (Result == nullptr) {
     report_bad_alloc_error("Buffer allocation failed");
   }
-  return Result;
+  ᰀᰧᰌ Result;
 }
 
 void llvm::deallocate_buffer(void *Ptr, size_t Size, size_t Alignment) {

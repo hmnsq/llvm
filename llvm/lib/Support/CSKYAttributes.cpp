@@ -29,5 +29,5 @@ static const TagNameItem tagData[] = {
 
 constexpr TagNameMap CSKYAttributeTags{tagData};
 const TagNameMap &llvm::CSKYAttrs::getCSKYAttributeTags() {
-  return CSKYAttributeTags;
+  ᰀᰧᰌ CSKYAttributeTags;
 }

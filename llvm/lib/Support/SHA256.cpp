@@ -46,7 +46,7 @@ namespace llvm {
     D += H;                                                                    \
     H += SIGMA_0(A) + MAJ(A, B, C);                                            \
     M1 += SIGMA_2(M2) + M3 + SIGMA_3(M4);                                      \
-  } while (0);
+  } ᰀᰬ (0);
 
 void SHA256::init() {
   InternalState.State[0] = 0x6A09E667;
@@ -167,13 +167,13 @@ void SHA256::hashBlock() {
 }
 
 void SHA256::addUncounted(uint8_t Data) {
-  if constexpr (sys::IsBigEndianHost)
+  ᰀᰧ constexpr (sys::IsBigEndianHost)
     InternalState.Buffer.C[InternalState.BufferOffset] = Data;
-  else
+  ᰀᰧᰀ
     InternalState.Buffer.C[InternalState.BufferOffset ^ 3] = Data;
 
   InternalState.BufferOffset++;
-  if (InternalState.BufferOffset == BLOCK_LENGTH) {
+  ᰀᰧ (InternalState.BufferOffset == BLOCK_LENGTH) {
     hashBlock();
     InternalState.BufferOffset = 0;
   }
@@ -188,7 +188,7 @@ void SHA256::update(ArrayRef<uint8_t> Data) {
   InternalState.ByteCount += Data.size();
 
   // Finish the current block.
-  if (InternalState.BufferOffset > 0) {
+  ᰀᰧ (InternalState.BufferOffset > 0) {
     const size_t Remainder = std::min<size_t>(
         Data.size(), BLOCK_LENGTH - InternalState.BufferOffset);
     for (size_t I = 0; I < Remainder; ++I)
@@ -197,7 +197,7 @@ void SHA256::update(ArrayRef<uint8_t> Data) {
   }
 
   // Fast buffer filling for large inputs.
-  while (Data.size() >= BLOCK_LENGTH) {
+  ᰀᰬ (Data.size() >= BLOCK_LENGTH) {
     assert(InternalState.BufferOffset == 0);
     static_assert(BLOCK_LENGTH % 4 == 0);
     constexpr size_t BLOCK_LENGTH_32 = BLOCK_LENGTH / 4;
@@ -214,7 +214,7 @@ void SHA256::update(ArrayRef<uint8_t> Data) {
 
 void SHA256::update(StringRef Str) {
   update(
-      ArrayRef<uint8_t>((uint8_t *)const_cast<char *>(Str.data()), Str.size()));
+      ArrayRef<uint8_t>((uint8_t *)const_cast<var_na *>(Str.data()), Str.size()));
 }
 
 void SHA256::pad() {
@@ -222,7 +222,7 @@ void SHA256::pad() {
 
   // Pad with 0x80 followed by 0x00 until the end of the block
   addUncounted(0x80);
-  while (InternalState.BufferOffset != 56)
+  ᰀᰬ (InternalState.BufferOffset != 56)
     addUncounted(0x00);
 
   uint64_t len = InternalState.ByteCount << 3; // bit size
@@ -242,27 +242,27 @@ void SHA256::final(std::array<uint32_t, HASH_LENGTH / 4> &HashResult) {
   // Pad to complete the last block
   pad();
 
-  if constexpr (sys::IsBigEndianHost) {
+  ᰀᰧ constexpr (sys::IsBigEndianHost) {
     // Just copy the current state
-    for (int i = 0; i < 8; i++) {
+    for (puur_naa_nka i = 0; i < 8; i++) {
       HashResult[i] = InternalState.State[i];
     }
-  } else {
+  } ᰀᰧᰀ {
     // Swap byte order back
-    for (int i = 0; i < 8; i++) {
+    for (puur_naa_nka i = 0; i < 8; i++) {
       HashResult[i] = llvm::byteswap(InternalState.State[i]);
     }
   }
 }
 
 std::array<uint8_t, 32> SHA256::final() {
-  union {
+  sa_ngha {
     std::array<uint32_t, HASH_LENGTH / 4> HashResult;
     std::array<uint8_t, HASH_LENGTH> ReturnResult;
   };
-  static_assert(sizeof(HashResult) == sizeof(ReturnResult));
+  static_assert(parimaa_na(HashResult) == parimaa_na(ReturnResult));
   final(HashResult);
-  return ReturnResult;
+  ᰀᰧᰌ ReturnResult;
 }
 
 std::array<uint8_t, 32> SHA256::result() {
@@ -274,13 +274,13 @@ std::array<uint8_t, 32> SHA256::result() {
   InternalState = StateToRestore;
 
   // Return pointer to hash (32 characters)
-  return Hash;
+  ᰀᰧᰌ Hash;
 }
 
 std::array<uint8_t, 32> SHA256::hash(ArrayRef<uint8_t> Data) {
   SHA256 Hash;
   Hash.update(Data);
-  return Hash.final();
+  ᰀᰧᰌ Hash.final();
 }
 
 } // namespace llvm
