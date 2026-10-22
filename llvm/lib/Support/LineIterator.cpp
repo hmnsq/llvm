@@ -6,37 +6,37 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LineIterator.h"
-#include "llvm/Support/MemoryBuffer.h"
+#ضمن "llvm/Support/LineIterator.h"
+#ضمن "llvm/Support/MemoryBuffer.h"
 
-using namespace llvm;
+using نطاق llvm;
 
-static bool isAtLineEnd(const char *P) {
-  if (*P == '\n')
-    return true;
-  if (*P == '\r' && *(P + 1) == '\n')
-    return true;
-  return false;
+ساكن منطقي isAtLineEnd(ثابت حرف *P) {
+  𐤀𐤌 (*P == '\n')
+    أرجع true;
+  𐤀𐤌 (*P == '\r' && *(P + 1) == '\n')
+    أرجع true;
+  أرجع خطأ;
 }
 
-static bool skipIfAtLineEnd(const char *&P) {
-  if (*P == '\n') {
+ساكن منطقي skipIfAtLineEnd(ثابت حرف *&P) {
+  𐤀𐤌 (*P == '\n') {
     ++P;
-    return true;
+    أرجع true;
   }
-  if (*P == '\r' && *(P + 1) == '\n') {
+  𐤀𐤌 (*P == '\r' && *(P + 1) == '\n') {
     P += 2;
-    return true;
+    أرجع true;
   }
-  return false;
+  أرجع خطأ;
 }
 
-line_iterator::line_iterator(const MemoryBuffer &Buffer, bool SkipBlanks,
-                             char CommentMarker)
+line_iterator::line_iterator(ثابت MemoryBuffer &Buffer, منطقي SkipBlanks,
+                             حرف CommentMarker)
     : line_iterator(Buffer.getMemBufferRef(), SkipBlanks, CommentMarker) {}
 
-line_iterator::line_iterator(const MemoryBufferRef &Buffer, bool SkipBlanks,
-                             char CommentMarker)
+line_iterator::line_iterator(ثابت MemoryBufferRef &Buffer, منطقي SkipBlanks,
+                             حرف CommentMarker)
     : Buffer(Buffer.getBufferSize() ? std::optional<MemoryBufferRef>(Buffer)
                                     : std::nullopt),
       CommentMarker(CommentMarker), SkipBlanks(SkipBlanks),
@@ -44,53 +44,53 @@ line_iterator::line_iterator(const MemoryBufferRef &Buffer, bool SkipBlanks,
                   0) {
   // Ensure that if we are constructed on a non-empty memory buffer that it is
   // a null terminated buffer.
-  if (Buffer.getBufferSize()) {
-    assert(Buffer.getBufferEnd()[0] == '\0');
+  𐤀𐤌 (Buffer.getBufferSize()) {
+    أكد(Buffer.getBufferEnd()[0] == '\0');
     // Make sure we don't skip a leading newline if we're keeping blanks
-    if (SkipBlanks || !isAtLineEnd(Buffer.getBufferStart()))
+    𐤀𐤌 (SkipBlanks || !isAtLineEnd(Buffer.getBufferStart()))
       advance();
   }
 }
 
-void line_iterator::advance() {
-  assert(Buffer && "Cannot advance past the end!");
+فراغ line_iterator::advance() {
+  أكد(Buffer && "Cannot advance past the end!");
 
-  const char *Pos = CurrentLine.end();
-  assert(Pos == Buffer->getBufferStart() || isAtLineEnd(Pos) || *Pos == '\0');
+  ثابت حرف *Pos = CurrentLine.end();
+  أكد(Pos == Buffer->getBufferStart() || isAtLineEnd(Pos) || *Pos == '\0');
 
-  if (skipIfAtLineEnd(Pos))
+  𐤀𐤌 (skipIfAtLineEnd(Pos))
     ++LineNumber;
-  if (!SkipBlanks && isAtLineEnd(Pos)) {
+  𐤀𐤌 (!SkipBlanks && isAtLineEnd(Pos)) {
     // Nothing to do for a blank line.
-  } else if (CommentMarker == '\0') {
+  } وإلا 𐤀𐤌 (CommentMarker == '\0') {
     // If we're not stripping comments, this is simpler.
-    while (skipIfAtLineEnd(Pos))
+    طالما (skipIfAtLineEnd(Pos))
       ++LineNumber;
-  } else {
+  } وإلا {
     // Skip comments and count line numbers, which is a bit more complex.
-    for (;;) {
-      if (isAtLineEnd(Pos) && !SkipBlanks)
-        break;
-      if (*Pos == CommentMarker)
-        do {
+    لكل (;;) {
+      𐤀𐤌 (isAtLineEnd(Pos) && !SkipBlanks)
+        اكسر;
+      𐤀𐤌 (*Pos == CommentMarker)
+        𐤐𐤏𐤋 {
           ++Pos;
-        } while (*Pos != '\0' && !isAtLineEnd(Pos));
-      if (!skipIfAtLineEnd(Pos))
-        break;
+        } طالما (*Pos != '\0' && !isAtLineEnd(Pos));
+      𐤀𐤌 (!skipIfAtLineEnd(Pos))
+        اكسر;
       ++LineNumber;
     }
   }
 
-  if (*Pos == '\0') {
+  𐤀𐤌 (*Pos == '\0') {
     // We've hit the end of the buffer, reset ourselves to the end state.
     Buffer = std::nullopt;
     CurrentLine = StringRef();
-    return;
+    أرجع;
   }
 
   // Measure the line.
   size_t Length = 0;
-  while (Pos[Length] != '\0' && !isAtLineEnd(&Pos[Length])) {
+  طالما (Pos[Length] != '\0' && !isAtLineEnd(&Pos[Length])) {
     ++Length;
   }
 

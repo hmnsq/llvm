@@ -13,64 +13,64 @@
 
 #ifdef __MVS__
 
-#include "llvm/Support/AutoConvert.h"
-#include <cassert>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#ضمن "llvm/Support/AutoConvert.h"
+#ضمن <cassert>
+#ضمن <fcntl.h>
+#ضمن <sys/stat.h>
+#ضمن <unistd.h>
 
-using namespace llvm;
+using نطاق llvm;
 
-static int savedStdHandleAutoConversionMode[3] = {-1, -1, -1};
+ساكن صحيح savedStdHandleAutoConversionMode[3] = {-1, -1, -1};
 
-int disablezOSAutoConversion(int FD) {
-  static const struct f_cnvrt Convert = {
+صحيح disablezOSAutoConversion(صحيح FD) {
+  ساكن ثابت بنية f_cnvrt Convert = {
       SETCVTOFF, // cvtcmd
       0,         // pccsid
       0,         // fccsid
   };
 
-  return fcntl(FD, F_CONTROL_CVT, &Convert);
+  أرجع fcntl(FD, F_CONTROL_CVT, &Convert);
 }
 
-int restorezOSStdHandleAutoConversion(int FD) {
-  assert(FD == STDIN_FILENO || FD == STDOUT_FILENO || FD == STDERR_FILENO);
-  if (savedStdHandleAutoConversionMode[FD] == -1)
-    return 0;
-  struct f_cnvrt Cvt = {
+صحيح restorezOSStdHandleAutoConversion(صحيح FD) {
+  أكد(FD == STDIN_FILENO || FD == STDOUT_FILENO || FD == STDERR_FILENO);
+  𐤀𐤌 (savedStdHandleAutoConversionMode[FD] == -1)
+    أرجع 0;
+  بنية f_cnvrt Cvt = {
       savedStdHandleAutoConversionMode[FD], // cvtcmd
       0,                                    // pccsid
       0,                                    // fccsid
   };
-  return (fcntl(FD, F_CONTROL_CVT, &Cvt));
+  أرجع (fcntl(FD, F_CONTROL_CVT, &Cvt));
 }
 
-int enablezOSAutoConversion(int FD) {
-  struct f_cnvrt Query = {
+صحيح enablezOSAutoConversion(صحيح FD) {
+  بنية f_cnvrt Query = {
       QUERYCVT, // cvtcmd
       0,        // pccsid
       0,        // fccsid
   };
 
-  if (fcntl(FD, F_CONTROL_CVT, &Query) == -1)
-    return -1;
+  𐤀𐤌 (fcntl(FD, F_CONTROL_CVT, &Query) == -1)
+    أرجع -1;
 
   // We don't need conversion for UTF-8 tagged files.
   // TODO: Remove the assumption of ISO8859-1 = UTF-8 here when we fully resolve
   // problems related to UTF-8 tagged source files.
   // When the pccsid is not ISO8859-1, autoconversion is still needed.
-  if (Query.pccsid == CCSID_ISO8859_1 &&
+  𐤀𐤌 (Query.pccsid == CCSID_ISO8859_1 &&
       (Query.fccsid == CCSID_UTF_8 || Query.fccsid == CCSID_ISO8859_1))
-    return 0;
+    أرجع 0;
 
   // Save the state of std handles before we make changes to it.
-  if ((FD == STDIN_FILENO || FD == STDOUT_FILENO || FD == STDERR_FILENO) &&
+  𐤀𐤌 ((FD == STDIN_FILENO || FD == STDOUT_FILENO || FD == STDERR_FILENO) &&
       savedStdHandleAutoConversionMode[FD] == -1)
     savedStdHandleAutoConversionMode[FD] = Query.cvtcmd;
 
-  if (FD == STDOUT_FILENO || FD == STDERR_FILENO)
+  𐤀𐤌 (FD == STDOUT_FILENO || FD == STDERR_FILENO)
     Query.cvtcmd = SETCVTON;
-  else
+  وإلا
     Query.cvtcmd = SETCVTALL;
 
   Query.pccsid =
@@ -79,93 +79,93 @@ int enablezOSAutoConversion(int FD) {
           : CCSID_UTF_8;
   // Assume untagged files to be IBM-1047 encoded.
   Query.fccsid = (Query.fccsid == FT_UNTAGGED) ? CCSID_IBM_1047 : Query.fccsid;
-  return fcntl(FD, F_CONTROL_CVT, &Query);
+  أرجع fcntl(FD, F_CONTROL_CVT, &Query);
 }
 
-int enablezOSAutoConversionCcsid(int FD, int ccsid) {
-  struct f_cnvrt cvt = {
+صحيح enablezOSAutoConversionCcsid(صحيح FD, صحيح ccsid) {
+  بنية f_cnvrt cvt = {
       SETCVTALL,   // cvtcmd
       CCSID_UTF_8, // pccsid
       0,           // fccsid
   };
-  if (ccsid == FT_UNTAGGED)
-    return -1;
+  𐤀𐤌 (ccsid == FT_UNTAGGED)
+    أرجع -1;
   cvt.fccsid = ccsid;
-  return fcntl(FD, F_CONTROL_CVT, &cvt);
+  أرجع fcntl(FD, F_CONTROL_CVT, &cvt);
 }
 
-std::error_code llvm::setzOSFileTag(sys::fs::file_t FD, int CCSID,
-                                    bool IsText) {
-  assert((!IsText || (CCSID != FT_UNTAGGED && CCSID != FT_BINARY)) &&
+std::error_code llvm::setzOSFileTag(sys::fs::file_t FD, صحيح CCSID,
+                                    منطقي IsText) {
+  أكد((!IsText || (CCSID != FT_UNTAGGED && CCSID != FT_BINARY)) &&
          "FT_UNTAGGED and FT_BINARY are not allowed for text files");
-  struct file_tag Tag;
+  بنية file_tag Tag;
   Tag.ft_ccsid = CCSID;
   Tag.ft_txtflag = IsText;
   Tag.ft_deferred = 0;
   Tag.ft_rsvflags = 0;
 
-  if (fcntl(FD.get(), F_SETTAG, &Tag) == -1) {
-    if (errno == ENOSYS)
+  𐤀𐤌 (fcntl(FD.get(), F_SETTAG, &Tag) == -1) {
+    𐤀𐤌 (errno == ENOSYS)
       // Some file systems do not support filetags.
       // Ignore ENOSYS error to allow compilation.
       errno = 0;
-    else
-      return errnoAsErrorCode();
+    وإلا
+      أرجع errnoAsErrorCode();
   }
-  return std::error_code();
+  أرجع std::error_code();
 }
 
-ErrorOr<__ccsid_t> llvm::getzOSFileTag(const Twine &FileName,
-                                       const sys::fs::file_t FD) {
+ErrorOr<__ccsid_t> llvm::getzOSFileTag(ثابت Twine &FileName,
+                                       ثابت sys::fs::file_t FD) {
   // If we have a file descriptor, use it to find out file tagging. Otherwise we
   // need to use stat() with the file path.
-  if (FD != -1) {
-    struct f_cnvrt Query = {
+  𐤀𐤌 (FD != -1) {
+    بنية f_cnvrt Query = {
         QUERYCVT, // cvtcmd
         0,        // pccsid
         0,        // fccsid
     };
-    if (fcntl(FD.get(), F_CONTROL_CVT, &Query) == -1)
-      return std::error_code(errno, std::generic_category());
-    return Query.fccsid;
+    𐤀𐤌 (fcntl(FD.get(), F_CONTROL_CVT, &Query) == -1)
+      أرجع std::error_code(errno, std::generic_category());
+    أرجع Query.fccsid;
   }
-  struct stat Attr;
-  if (stat(FileName.str().c_str(), &Attr) == -1)
-    return std::error_code(errno, std::generic_category());
-  return Attr.st_tag.ft_ccsid;
+  بنية stat Attr;
+  𐤀𐤌 (stat(FileName.str().c_str(), &Attr) == -1)
+    أرجع std::error_code(errno, std::generic_category());
+  أرجع Attr.st_tag.ft_ccsid;
 }
 
-ErrorOr<bool> llvm::needzOSConversion(const Twine &FileName,
-                                      const sys::fs::file_t FD) {
+ErrorOr<منطقي> llvm::needzOSConversion(ثابت Twine &FileName,
+                                      ثابت sys::fs::file_t FD) {
   ErrorOr<__ccsid_t> Ccsid = getzOSFileTag(FileName, FD);
-  if (std::error_code EC = Ccsid.getError())
-    return EC;
+  𐤀𐤌 (std::error_code EC = Ccsid.getError())
+    أرجع EC;
   // We don't need conversion for UTF-8 tagged files or binary files.
   // TODO: Remove the assumption of ISO8859-1 = UTF-8 here when we fully resolve
   // problems related to UTF-8 tagged source files.
-  switch (*Ccsid) {
-  case CCSID_UTF_8:
-  case CCSID_ISO8859_1:
-  case FT_BINARY:
-    return false;
-  default:
-    return true;
+  بدل (*Ccsid) {
+  حالة CCSID_UTF_8:
+  حالة CCSID_ISO8859_1:
+  حالة FT_BINARY:
+    أرجع خطأ;
+  افتراضي:
+    أرجع true;
   }
 }
 
 std::error_code
-llvm::copyFileTagAttributes(const std::string &Source,
-                            const sys::fs::file_t DestinationFD) {
-  struct stat SourceAttributes;
-  if (stat(Source.c_str(), &SourceAttributes) == -1)
-    return std::error_code(errno, std::generic_category());
+llvm::copyFileTagAttributes(ثابت std::string &Source,
+                            ثابت sys::fs::file_t DestinationFD) {
+  بنية stat SourceAttributes;
+  𐤀𐤌 (stat(Source.c_str(), &SourceAttributes) == -1)
+    أرجع std::error_code(errno, std::generic_category());
 
-  if (SourceAttributes.st_tag.ft_txtflag)
-    if (enablezOSAutoConversionCcsid(DestinationFD.get(),
+  𐤀𐤌 (SourceAttributes.st_tag.ft_txtflag)
+    𐤀𐤌 (enablezOSAutoConversionCcsid(DestinationFD.get(),
                                      SourceAttributes.st_tag.ft_ccsid) == -1)
-      return errnoAsErrorCode();
+      أرجع errnoAsErrorCode();
 
-  return setzOSFileTag(DestinationFD, SourceAttributes.st_tag.ft_ccsid,
+  أرجع setzOSFileTag(DestinationFD, SourceAttributes.st_tag.ft_ccsid,
                        SourceAttributes.st_tag.ft_txtflag);
 }
 

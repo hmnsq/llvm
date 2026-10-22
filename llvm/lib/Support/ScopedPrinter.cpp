@@ -6,35 +6,35 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ScopedPrinter.h"
-#include "llvm/Support/Format.h"
+#ضمن "llvm/Support/ScopedPrinter.h"
+#ضمن "llvm/Support/Format.h"
 
-using namespace llvm;
+using نطاق llvm;
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, const HexNumber &Value) {
+raw_ostream &llvm::operator<<(raw_ostream &OS, ثابت HexNumber &Value) {
   OS << "0x" << utohexstr(Value.Value);
-  return OS;
+  أرجع OS;
 }
 
-void ScopedPrinter::printBinaryImpl(StringRef Label, StringRef Str,
-                                    ArrayRef<uint8_t> Data, bool Block,
+فراغ ScopedPrinter::printBinaryImpl(StringRef Label, StringRef Str,
+                                    ArrayRef<uint8_t> Data, منطقي Block,
                                     uint32_t StartOffset) {
-  if (Data.size() > 16)
+  𐤀𐤌 (Data.size() > 16)
     Block = true;
 
-  if (Block) {
+  𐤀𐤌 (Block) {
     startLine() << Label;
-    if (!Str.empty())
+    𐤀𐤌 (!Str.empty())
       OS << ": " << Str;
     OS << " (\n";
-    if (!Data.empty())
+    𐤀𐤌 (!Data.empty())
       OS << format_bytes_with_ascii(Data, StartOffset, 16, 4,
                                     (IndentLevel + 1) * 2, true)
          << "\n";
     startLine() << ")\n";
-  } else {
+  } وإلا {
     startLine() << Label << ":";
-    if (!Str.empty())
+    𐤀𐤌 (!Str.empty())
       OS << " " << Str;
     OS << " (" << format_bytes(Data, std::nullopt, Data.size(), 1, 0, true)
        << ")\n";
@@ -42,11 +42,11 @@ void ScopedPrinter::printBinaryImpl(StringRef Label, StringRef Str,
 }
 
 JSONScopedPrinter::JSONScopedPrinter(
-    raw_ostream &OS, bool PrettyPrint,
+    raw_ostream &OS, منطقي PrettyPrint,
     std::unique_ptr<DelimitedScope> &&OuterScope)
     : ScopedPrinter(OS, ScopedPrinter::ScopedPrinterKind::JSON),
       JOS(OS, /*Indent=*/PrettyPrint ? 2 : 0),
       OuterScope(std::move(OuterScope)) {
-  if (this->OuterScope)
-    this->OuterScope->setPrinter(*this);
+  𐤀𐤌 (هذا->OuterScope)
+    هذا->OuterScope->setPrinter(*هذا);
 }

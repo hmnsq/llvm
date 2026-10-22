@@ -11,20 +11,20 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/SmallPtrSet.h"
-#include "llvm/ADT/DenseMapInfo.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/MemAlloc.h"
-#include <algorithm>
-#include <cassert>
-#include <cstdlib>
+#ضمن "llvm/ADT/SmallPtrSet.h"
+#ضمن "llvm/ADT/DenseMapInfo.h"
+#ضمن "llvm/ADT/STLExtras.h"
+#ضمن "llvm/Support/MathExtras.h"
+#ضمن "llvm/Support/MemAlloc.h"
+#ضمن <algorithm>
+#ضمن <cassert>
+#ضمن <cstdlib>
 
-using namespace llvm;
+using نطاق llvm;
 
-void SmallPtrSetImplBase::shrink_and_clear() {
-  assert(!isSmall() && "Can't shrink a small set!");
-  free(CurArray);
+فراغ SmallPtrSetImplBase::shrink_and_clear() {
+  أكد(!isSmall() && "Can't shrink a small set!");
+  حرر(CurArray);
 
   // Reduce the number of buckets.
   unsigned Size = size();
@@ -32,25 +32,25 @@ void SmallPtrSetImplBase::shrink_and_clear() {
   NumEntries = 0;
 
   // Install the new array.  Clear all the buckets to empty.
-  CurArray = (const void**)safe_malloc(sizeof(void*) * CurArraySize);
+  CurArray = (ثابت فراغ**)safe_malloc(حجم(فراغ*) * CurArraySize);
 
-  memset(CurArray, -1, CurArraySize*sizeof(void*));
+  memset(CurArray, -1, CurArraySize*حجم(فراغ*));
 }
 
-std::pair<const void *const *, bool>
-SmallPtrSetImplBase::insert_imp_big(const void *Ptr) {
-  if (LLVM_UNLIKELY(size() * 3 >= CurArraySize * 2)) {
+std::pair<ثابت فراغ *ثابت *, منطقي>
+SmallPtrSetImplBase::insert_imp_big(ثابت فراغ *Ptr) {
+  𐤀𐤌 (LLVM_UNLIKELY(size() * 3 >= CurArraySize * 2)) {
     // If more than 2/3 of the array is full, grow.
     Grow(CurArraySize < 64 ? 128 : CurArraySize * 2);
   }
 
   // Find the first empty bucket or Ptr itself on the probe chain.
   unsigned Mask = CurArraySize - 1;
-  unsigned I = DenseMapInfo<void *>::getHashValue(Ptr) & Mask;
-  const void **Array = CurArray;
-  while (Array[I] != getEmptyMarker()) {
-    if (Array[I] == Ptr)
-      return {Array + I, false};
+  unsigned I = DenseMapInfo<فراغ *>::getHashValue(Ptr) & Mask;
+  ثابت فراغ **Array = CurArray;
+  طالما (Array[I] != getEmptyMarker()) {
+    𐤀𐤌 (Array[I] == Ptr)
+      أرجع {Array + I, خطأ};
     I = (I + 1) & Mask;
   }
 
@@ -58,32 +58,32 @@ SmallPtrSetImplBase::insert_imp_big(const void *Ptr) {
   ++NumEntries;
   Array[I] = Ptr;
   incrementEpoch();
-  return {Array + I, true};
+  أرجع {Array + I, true};
 }
 
-const void *const *SmallPtrSetImplBase::doFind(const void *Ptr) const {
+ثابت فراغ *ثابت *SmallPtrSetImplBase::doFind(ثابت فراغ *Ptr) ثابت {
   unsigned Mask = CurArraySize - 1;
-  unsigned BucketNo = DenseMapInfo<void *>::getHashValue(Ptr) & Mask;
-  while (true) {
-    const void *const *Bucket = CurArray + BucketNo;
-    if (LLVM_LIKELY(*Bucket == Ptr))
-      return Bucket;
-    if (LLVM_LIKELY(*Bucket == getEmptyMarker()))
-      return nullptr;
+  unsigned BucketNo = DenseMapInfo<فراغ *>::getHashValue(Ptr) & Mask;
+  طالما (true) {
+    ثابت فراغ *ثابت *Bucket = CurArray + BucketNo;
+    𐤀𐤌 (LLVM_LIKELY(*Bucket == Ptr))
+      أرجع Bucket;
+    𐤀𐤌 (LLVM_LIKELY(*Bucket == getEmptyMarker()))
+      أرجع nullptr;
     BucketNo = (BucketNo + 1) & Mask;
   }
 }
 
-void SmallPtrSetImplBase::eraseFromBucket(const void **Bucket) {
+فراغ SmallPtrSetImplBase::eraseFromBucket(ثابت فراغ **Bucket) {
   // Knuth TAOCP 6.4 Algorithm R: walk forward sliding each following entry
   // whose probe path crosses the hole.
   unsigned Mask = CurArraySize - 1;
   unsigned I = Bucket - CurArray;
   unsigned J = I;
-  const void *Empty = getEmptyMarker();
-  while ((J = (J + 1) & Mask), CurArray[J] != Empty) {
-    auto Ideal = DenseMapInfo<void *>::getHashValue(CurArray[J]);
-    if (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
+  ثابت فراغ *Empty = getEmptyMarker();
+  طالما ((J = (J + 1) & Mask), CurArray[J] != Empty) {
+    auto Ideal = DenseMapInfo<فراغ *>::getHashValue(CurArray[J]);
+    𐤀𐤌 (((I - Ideal) & Mask) < ((J - Ideal) & Mask)) {
       CurArray[I] = CurArray[J];
       I = J;
     }
@@ -93,88 +93,88 @@ void SmallPtrSetImplBase::eraseFromBucket(const void **Bucket) {
 
 /// Grow - Allocate a larger backing store for the buckets and move it over.
 ///
-void SmallPtrSetImplBase::Grow(unsigned NewSize) {
+فراغ SmallPtrSetImplBase::Grow(unsigned NewSize) {
   auto OldBuckets = buckets();
-  bool WasSmall = isSmall();
+  منطقي WasSmall = isSmall();
 
   // Install the new array.  Clear all the buckets to empty.
-  const void **NewBuckets = (const void**) safe_malloc(sizeof(void*) * NewSize);
+  ثابت فراغ **NewBuckets = (ثابت فراغ**) safe_malloc(حجم(فراغ*) * NewSize);
 
   // Reset member only if memory was allocated successfully
   CurArray = NewBuckets;
   CurArraySize = NewSize;
-  memset(CurArray, -1, NewSize*sizeof(void*));
+  memset(CurArray, -1, NewSize*حجم(فراغ*));
 
   // Copy over all valid entries.
   unsigned Mask = CurArraySize - 1;
-  for (const void *Ptr : OldBuckets) {
-    if (Ptr == getEmptyMarker())
-      continue;
+  لكل (ثابت فراغ *Ptr : OldBuckets) {
+    𐤀𐤌 (Ptr == getEmptyMarker())
+      استمر;
     // Find the first empty bucket on this key's probe chain; there is no equal
     // key, so nothing to compare against.
-    unsigned I = DenseMapInfo<void *>::getHashValue(Ptr) & Mask;
-    while (NewBuckets[I] != getEmptyMarker())
+    unsigned I = DenseMapInfo<فراغ *>::getHashValue(Ptr) & Mask;
+    طالما (NewBuckets[I] != getEmptyMarker())
       I = (I + 1) & Mask;
     NewBuckets[I] = Ptr;
   }
 
-  if (!WasSmall)
-    free(OldBuckets.begin());
-  IsSmall = false;
+  𐤀𐤌 (!WasSmall)
+    حرر(OldBuckets.begin());
+  IsSmall = خطأ;
 }
 
-SmallPtrSetImplBase::SmallPtrSetImplBase(const void **SmallStorage,
-                                         const SmallPtrSetImplBase &that) {
+SmallPtrSetImplBase::SmallPtrSetImplBase(ثابت فراغ **SmallStorage,
+                                         ثابت SmallPtrSetImplBase &that) {
   IsSmall = that.isSmall();
-  if (IsSmall) {
+  𐤀𐤌 (IsSmall) {
     // If we're becoming small, prepare to insert into our stack space
     CurArray = SmallStorage;
-  } else {
+  } وإلا {
     // Otherwise, allocate new heap space (unless we were the same size)
-    CurArray = (const void**)safe_malloc(sizeof(void*) * that.CurArraySize);
+    CurArray = (ثابت فراغ**)safe_malloc(حجم(فراغ*) * that.CurArraySize);
   }
 
   // Copy over the that array.
   copyHelper(that);
 }
 
-SmallPtrSetImplBase::SmallPtrSetImplBase(const void **SmallStorage,
+SmallPtrSetImplBase::SmallPtrSetImplBase(ثابت فراغ **SmallStorage,
                                          unsigned SmallSize,
-                                         const void **RHSSmallStorage,
+                                         ثابت فراغ **RHSSmallStorage,
                                          SmallPtrSetImplBase &&that) {
   moveHelper(SmallStorage, SmallSize, RHSSmallStorage, std::move(that));
 }
 
-void SmallPtrSetImplBase::copyFrom(const void **SmallStorage,
-                                   const SmallPtrSetImplBase &RHS) {
-  assert(&RHS != this && "Self-copy should be handled by the caller.");
+فراغ SmallPtrSetImplBase::copyFrom(ثابت فراغ **SmallStorage,
+                                   ثابت SmallPtrSetImplBase &RHS) {
+  أكد(&RHS != هذا && "Self-copy should be handled by the caller.");
 
-  if (isSmall() && RHS.isSmall())
-    assert(CurArraySize == RHS.CurArraySize &&
+  𐤀𐤌 (isSmall() && RHS.isSmall())
+    أكد(CurArraySize == RHS.CurArraySize &&
            "Cannot assign sets with different small sizes");
 
   // If we're becoming small, prepare to insert into our stack space
-  if (RHS.isSmall()) {
-    if (!isSmall())
-      free(CurArray);
+  𐤀𐤌 (RHS.isSmall()) {
+    𐤀𐤌 (!isSmall())
+      حرر(CurArray);
     CurArray = SmallStorage;
     IsSmall = true;
     // Otherwise, allocate new heap space (unless we were the same size)
-  } else if (CurArraySize != RHS.CurArraySize) {
-    if (isSmall())
-      CurArray = (const void**)safe_malloc(sizeof(void*) * RHS.CurArraySize);
-    else {
-      const void **T = (const void**)safe_realloc(CurArray,
-                                             sizeof(void*) * RHS.CurArraySize);
+  } وإلا 𐤀𐤌 (CurArraySize != RHS.CurArraySize) {
+    𐤀𐤌 (isSmall())
+      CurArray = (ثابت فراغ**)safe_malloc(حجم(فراغ*) * RHS.CurArraySize);
+    وإلا {
+      ثابت فراغ **T = (ثابت فراغ**)safe_realloc(CurArray,
+                                             حجم(فراغ*) * RHS.CurArraySize);
       CurArray = T;
     }
-    IsSmall = false;
+    IsSmall = خطأ;
   }
 
   copyHelper(RHS);
 }
 
-void SmallPtrSetImplBase::copyHelper(const SmallPtrSetImplBase &RHS) {
+فراغ SmallPtrSetImplBase::copyHelper(ثابت SmallPtrSetImplBase &RHS) {
   // Copy over the new array size
   CurArraySize = RHS.CurArraySize;
 
@@ -184,28 +184,28 @@ void SmallPtrSetImplBase::copyHelper(const SmallPtrSetImplBase &RHS) {
   NumEntries = RHS.NumEntries;
 }
 
-void SmallPtrSetImplBase::moveFrom(const void **SmallStorage,
+فراغ SmallPtrSetImplBase::moveFrom(ثابت فراغ **SmallStorage,
                                    unsigned SmallSize,
-                                   const void **RHSSmallStorage,
+                                   ثابت فراغ **RHSSmallStorage,
                                    SmallPtrSetImplBase &&RHS) {
-  if (!isSmall())
-    free(CurArray);
+  𐤀𐤌 (!isSmall())
+    حرر(CurArray);
   moveHelper(SmallStorage, SmallSize, RHSSmallStorage, std::move(RHS));
 }
 
-void SmallPtrSetImplBase::moveHelper(const void **SmallStorage,
+فراغ SmallPtrSetImplBase::moveHelper(ثابت فراغ **SmallStorage,
                                      unsigned SmallSize,
-                                     const void **RHSSmallStorage,
+                                     ثابت فراغ **RHSSmallStorage,
                                      SmallPtrSetImplBase &&RHS) {
-  assert(&RHS != this && "Self-move should be handled by the caller.");
+  أكد(&RHS != هذا && "Self-move should be handled by the caller.");
   incrementEpoch();
   RHS.incrementEpoch();
 
-  if (RHS.isSmall()) {
+  𐤀𐤌 (RHS.isSmall()) {
     // Copy a small RHS rather than moving.
     CurArray = SmallStorage;
     llvm::copy(RHS.small_buckets(), CurArray);
-  } else {
+  } وإلا {
     CurArray = RHS.CurArray;
     RHS.CurArray = RHSSmallStorage;
   }
@@ -221,50 +221,50 @@ void SmallPtrSetImplBase::moveHelper(const void **SmallStorage,
   RHS.IsSmall = true;
 }
 
-void SmallPtrSetImplBase::swap(const void **SmallStorage,
-                               const void **RHSSmallStorage,
+فراغ SmallPtrSetImplBase::swap(ثابت فراغ **SmallStorage,
+                               ثابت فراغ **RHSSmallStorage,
                                SmallPtrSetImplBase &RHS) {
-  if (this == &RHS) return;
+  𐤀𐤌 (هذا == &RHS) أرجع;
   incrementEpoch();
   RHS.incrementEpoch();
 
   // We can only avoid copying elements if neither set is small.
-  if (!this->isSmall() && !RHS.isSmall()) {
-    std::swap(this->CurArray, RHS.CurArray);
-    std::swap(this->CurArraySize, RHS.CurArraySize);
-    std::swap(this->NumEntries, RHS.NumEntries);
-    return;
+  𐤀𐤌 (!هذا->isSmall() && !RHS.isSmall()) {
+    std::swap(هذا->CurArray, RHS.CurArray);
+    std::swap(هذا->CurArraySize, RHS.CurArraySize);
+    std::swap(هذا->NumEntries, RHS.NumEntries);
+    أرجع;
   }
 
   // FIXME: From here on we assume that both sets have the same small size.
 
   // Both a small, just swap the small elements.
-  if (this->isSmall() && RHS.isSmall()) {
-    unsigned MinEntries = std::min(this->NumEntries, RHS.NumEntries);
-    std::swap_ranges(this->CurArray, this->CurArray + MinEntries, RHS.CurArray);
-    if (this->NumEntries > MinEntries) {
-      std::copy(this->CurArray + MinEntries, this->CurArray + this->NumEntries,
+  𐤀𐤌 (هذا->isSmall() && RHS.isSmall()) {
+    unsigned MinEntries = std::min(هذا->NumEntries, RHS.NumEntries);
+    std::swap_ranges(هذا->CurArray, هذا->CurArray + MinEntries, RHS.CurArray);
+    𐤀𐤌 (هذا->NumEntries > MinEntries) {
+      std::copy(هذا->CurArray + MinEntries, هذا->CurArray + هذا->NumEntries,
                 RHS.CurArray + MinEntries);
-    } else {
+    } وإلا {
       std::copy(RHS.CurArray + MinEntries, RHS.CurArray + RHS.NumEntries,
-                this->CurArray + MinEntries);
+                هذا->CurArray + MinEntries);
     }
-    assert(this->CurArraySize == RHS.CurArraySize);
-    std::swap(this->NumEntries, RHS.NumEntries);
-    return;
+    أكد(هذا->CurArraySize == RHS.CurArraySize);
+    std::swap(هذا->NumEntries, RHS.NumEntries);
+    أرجع;
   }
 
   // If only one side is small, copy the small elements into the large side and
   // move the pointer from the large side to the small side.
-  SmallPtrSetImplBase &SmallSide = this->isSmall() ? *this : RHS;
-  SmallPtrSetImplBase &LargeSide = this->isSmall() ? RHS : *this;
-  const void **LargeSideInlineStorage =
-      this->isSmall() ? RHSSmallStorage : SmallStorage;
+  SmallPtrSetImplBase &SmallSide = هذا->isSmall() ? *هذا : RHS;
+  SmallPtrSetImplBase &LargeSide = هذا->isSmall() ? RHS : *هذا;
+  ثابت فراغ **LargeSideInlineStorage =
+      هذا->isSmall() ? RHSSmallStorage : SmallStorage;
   llvm::copy(SmallSide.small_buckets(), LargeSideInlineStorage);
   std::swap(LargeSide.CurArraySize, SmallSide.CurArraySize);
   std::swap(LargeSide.NumEntries, SmallSide.NumEntries);
   SmallSide.CurArray = LargeSide.CurArray;
-  SmallSide.IsSmall = false;
+  SmallSide.IsSmall = خطأ;
   LargeSide.CurArray = LargeSideInlineStorage;
   LargeSide.IsSmall = true;
 }

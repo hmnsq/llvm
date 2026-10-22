@@ -6,129 +6,129 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Driver.h"
+#ضمن "llvm/Support/Driver.h"
 
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/InitLLVM.h"
-#include "llvm/Support/Path.h"
+#ضمن "llvm/ADT/SmallVector.h"
+#ضمن "llvm/ADT/StringExtras.h"
+#ضمن "llvm/Support/InitLLVM.h"
+#ضمن "llvm/Support/Path.h"
 
-#include <cassert>
-#include <string>
-#include <system_error>
-#include <utility>
-#include <vector>
+#ضمن <cassert>
+#ضمن <string>
+#ضمن <system_error>
+#ضمن <utility>
+#ضمن <vector>
 
-using namespace llvm;
+using نطاق llvm;
 
-namespace {
+نطاق {
 
-bool matchesToolName(StringRef RegisteredName, StringRef InvokedName) {
+منطقي matchesToolName(StringRef RegisteredName, StringRef InvokedName) {
   StringRef Stem = sys::path::stem(InvokedName);
   StringRef Filename = sys::path::filename(InvokedName);
   auto Matches = [RegisteredName](StringRef Candidate) {
     size_t Position = Candidate.rfind_insensitive(RegisteredName);
-    return Position != StringRef::npos &&
+    أرجع Position != StringRef::npos &&
            (Position + RegisteredName.size() == Candidate.size() ||
             !llvm::isAlnum(Candidate[Position + RegisteredName.size()]));
   };
-  return Matches(Stem) || Matches(Filename);
+  أرجع Matches(Stem) || Matches(Filename);
 }
 
-bool isMulticallName(StringRef Name) { return matchesToolName("llvm", Name); }
+منطقي isMulticallName(StringRef Name) { أرجع matchesToolName("llvm", Name); }
 
 } // namespace
 
-struct ToolSession::Impl {
+بنية ToolSession::Impl {
   InitLLVM Initialization;
   std::string ExecutablePath;
   std::vector<std::pair<std::string, ToolMainFn>> Tools;
 
-  Impl(int &Argc, char **&Argv, ArrayRef<CallableTool> RegisteredTools,
-       bool InstallPipeSignalExitHandler, bool NeedsPOSIXUtilitySignalHandling)
+  Impl(صحيح &Argc, حرف **&Argv, ArrayRef<CallableTool> RegisteredTools,
+       منطقي InstallPipeSignalExitHandler, منطقي NeedsPOSIXUtilitySignalHandling)
       : Initialization(Argc, Argv, InstallPipeSignalExitHandler,
                        NeedsPOSIXUtilitySignalHandling),
         ExecutablePath(Argv[0]) {
     Tools.reserve(RegisteredTools.size());
-    for (const CallableTool &Tool : RegisteredTools)
+    لكل (ثابت CallableTool &Tool : RegisteredTools)
       Tools.emplace_back(Tool.Name.str(), Tool.Main);
   }
 };
 
-ToolSession::ToolSession(int &Argc, char **&Argv, ArrayRef<CallableTool> Tools,
-                         bool InstallPipeSignalExitHandler,
-                         bool NeedsPOSIXUtilitySignalHandling) {
-  assert(Argc > 0 && Argv && Argv[0] && "ToolSession requires a valid argv[0]");
+ToolSession::ToolSession(صحيح &Argc, حرف **&Argv, ArrayRef<CallableTool> Tools,
+                         منطقي InstallPipeSignalExitHandler,
+                         منطقي NeedsPOSIXUtilitySignalHandling) {
+  أكد(Argc > 0 && Argv && Argv[0] && "ToolSession requires a valid argv[0]");
   PImpl =
       std::make_unique<Impl>(Argc, Argv, Tools, InstallPipeSignalExitHandler,
                              NeedsPOSIXUtilitySignalHandling);
 }
 
-ToolSession::~ToolSession() = default;
+ToolSession::~ToolSession() = افتراضي;
 
-ErrorOr<CallableTool> ToolSession::findTool(StringRef Name) const {
+ErrorOr<CallableTool> ToolSession::findTool(StringRef Name) ثابت {
   StringRef Stem = sys::path::stem(Name);
   StringRef Filename = sys::path::filename(Name);
-  for (const auto &[RegisteredName, Main] : PImpl->Tools)
-    if (Stem.equals_insensitive(RegisteredName) ||
+  لكل (ثابت auto &[RegisteredName, Main] : PImpl->Tools)
+    𐤀𐤌 (Stem.equals_insensitive(RegisteredName) ||
         Filename.equals_insensitive(RegisteredName))
-      return CallableTool{RegisteredName, Main};
+      أرجع CallableTool{RegisteredName, Main};
 
-  for (const auto &[RegisteredName, Main] : PImpl->Tools)
-    if (matchesToolName(RegisteredName, Name))
-      return CallableTool{RegisteredName, Main};
-  return make_error_code(std::errc::no_such_file_or_directory);
+  لكل (ثابت auto &[RegisteredName, Main] : PImpl->Tools)
+    𐤀𐤌 (matchesToolName(RegisteredName, Name))
+      أرجع CallableTool{RegisteredName, Main};
+  أرجع make_error_code(std::errc::no_such_file_or_directory);
 }
 
 ToolContext ToolSession::makeContext(StringRef RegisteredName,
-                                     const char *PrependArg) {
+                                     ثابت حرف *PrependArg) {
   ErrorOr<CallableTool> ExecutableTool = findTool(PImpl->ExecutablePath);
-  bool NeedsPrependArg =
+  منطقي NeedsPrependArg =
       !ExecutableTool ||
       !ExecutableTool->Name.equals_insensitive(RegisteredName);
   ToolContext Context(PImpl->ExecutablePath.c_str(), PrependArg,
                       NeedsPrependArg);
-  Context.Session = this;
-  return Context;
+  Context.Session = هذا;
+  أرجع Context;
 }
 
-ErrorOr<int> ToolSession::callTool(ArrayRef<const char *> Args) {
-  if (Args.empty())
-    return make_error_code(std::errc::invalid_argument);
+ErrorOr<صحيح> ToolSession::callTool(ArrayRef<ثابت حرف *> Args) {
+  𐤀𐤌 (Args.empty())
+    أرجع make_error_code(std::errc::invalid_argument);
 
   StringRef InvokedName = Args.front();
   ErrorOr<CallableTool> Tool = findTool(InvokedName);
-  if (!Tool) {
-    if (InvokedName != PImpl->ExecutablePath && !isMulticallName(InvokedName))
-      return make_error_code(std::errc::no_such_file_or_directory);
+  𐤀𐤌 (!Tool) {
+    𐤀𐤌 (InvokedName != PImpl->ExecutablePath && !isMulticallName(InvokedName))
+      أرجع make_error_code(std::errc::no_such_file_or_directory);
     Args = Args.drop_front();
-    if (Args.empty())
-      return make_error_code(std::errc::invalid_argument);
+    𐤀𐤌 (Args.empty())
+      أرجع make_error_code(std::errc::invalid_argument);
     InvokedName = Args.front();
     Tool = findTool(InvokedName);
   }
 
-  if (!Tool)
-    return Tool.getError();
+  𐤀𐤌 (!Tool)
+    أرجع Tool.getError();
 
   std::string PrependArg = sys::path::stem(InvokedName).str();
   ToolContext Context = makeContext(Tool->Name, PrependArg.c_str());
-  SmallVector<char *, 16> MutableArgs;
+  SmallVector<حرف *, 16> MutableArgs;
   MutableArgs.reserve(Args.size() + 1);
-  for (const char *Arg : Args)
-    MutableArgs.push_back(const_cast<char *>(Arg));
+  لكل (ثابت حرف *Arg : Args)
+    MutableArgs.push_back(const_cast<حرف *>(Arg));
   MutableArgs.push_back(nullptr);
-  return Tool->Main(Args.size(), MutableArgs.data(), Context);
+  أرجع Tool->Main(Args.size(), MutableArgs.data(), Context);
 }
 
-ErrorOr<CallableTool> ToolContext::getCallableTool(StringRef Name) const {
-  if (!Session)
-    return make_error_code(std::errc::operation_not_permitted);
-  return Session->findTool(Name);
+ErrorOr<CallableTool> ToolContext::getCallableTool(StringRef Name) ثابت {
+  𐤀𐤌 (!Session)
+    أرجع make_error_code(std::errc::operation_not_permitted);
+  أرجع Session->findTool(Name);
 }
 
-ErrorOr<int> ToolContext::callTool(ArrayRef<const char *> Args) const {
-  if (!Session)
-    return make_error_code(std::errc::operation_not_permitted);
-  return Session->callTool(Args);
+ErrorOr<صحيح> ToolContext::callTool(ArrayRef<ثابت حرف *> Args) ثابت {
+  𐤀𐤌 (!Session)
+    أرجع make_error_code(std::errc::operation_not_permitted);
+  أرجع Session->callTool(Args);
 }
