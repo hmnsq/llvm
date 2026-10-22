@@ -3,7 +3,7 @@
 #include "llvm_blake3_prefix.h"
 
 #if defined(__ELF__) && !(defined(__sun__) && defined(__svr4__))
-.section .note.GNU-stack,"",%progbits
+.खण्डः .note.GNU-stack,"",%progbits
 #endif
 
 #if defined(__ELF__) && defined(__CET__) && defined(__has_include)
@@ -31,32 +31,32 @@ HIDDEN blake3_compress_xof_avx512
 HIDDEN _blake3_compress_xof_avx512
 HIDDEN blake3_xof_many_avx512
 HIDDEN _blake3_xof_many_avx512
-.global _blake3_hash_many_avx512
-.global blake3_hash_many_avx512
-.global blake3_compress_in_place_avx512
-.global _blake3_compress_in_place_avx512
-.global blake3_compress_xof_avx512
-.global _blake3_compress_xof_avx512
-.global blake3_xof_many_avx512
-.global _blake3_xof_many_avx512
+.वैश्विक _blake3_hash_many_avx512
+.वैश्विक blake3_hash_many_avx512
+.वैश्विक blake3_compress_in_place_avx512
+.वैश्विक _blake3_compress_in_place_avx512
+.वैश्विक blake3_compress_xof_avx512
+.वैश्विक _blake3_compress_xof_avx512
+.वैश्विक blake3_xof_many_avx512
+.वैश्विक _blake3_xof_many_avx512
 
 #ifdef __APPLE__
 .text
 #else
-.section .text
+.खण्डः .text
 #endif
 .p2align  6
 _blake3_hash_many_avx512:
 blake3_hash_many_avx512:
         _CET_ENDBR
-        push    r15
-        push    r14
-        push    r13
-        push    r12
-        push    rbx
-        push    rbp
-        mov     rbp, rsp
-        sub     rsp, 144
+        निक्षिप    r15
+        निक्षिप    r14
+        निक्षिप    r13
+        निक्षिप    r12
+        निक्षिप    rbx
+        निक्षिप    rbp
+        चालय     rbp, rsp
+        वियोजय     rsp, 144
         and     rsp, 0xFFFFFFFFFFFFFFC0
         neg     r9
         kmovw   k1, r9d
@@ -83,8 +83,8 @@ blake3_hash_many_avx512:
         vmovdqa ymmword ptr [rsp+0x2*0x20], ymm4
         vmovdqa ymmword ptr [rsp+0x3*0x20], ymm5
         shl     rdx, 6
-        mov     qword ptr [rsp+0x80], rdx
-        cmp     rsi, 16
+        चालय     qword ptr [rsp+0x80], rdx
+        तुलय     rsi, 16
         jc      3f
 2:
         vpbroadcastd zmm0, dword ptr [rcx]
@@ -103,18 +103,18 @@ blake3_hash_many_avx512:
 9:
         movzx   ebx, byte ptr [rbp+0x48]
         or      ebx, eax
-        add     rdx, 64
-        cmp     rdx, qword ptr [rsp+0x80]
+        योजय     rdx, 64
+        तुलय     rdx, qword ptr [rsp+0x80]
         cmove   eax, ebx
-        mov     dword ptr [rsp+0x88], eax
-        mov     r8, qword ptr [rdi]
-        mov     r9, qword ptr [rdi+0x8]
-        mov     r10, qword ptr [rdi+0x10]
-        mov     r11, qword ptr [rdi+0x18]
-        mov     r12, qword ptr [rdi+0x40]
-        mov     r13, qword ptr [rdi+0x48]
-        mov     r14, qword ptr [rdi+0x50]
-        mov     r15, qword ptr [rdi+0x58]
+        चालय     dword ptr [rsp+0x88], eax
+        चालय     r8, qword ptr [rdi]
+        चालय     r9, qword ptr [rdi+0x8]
+        चालय     r10, qword ptr [rdi+0x10]
+        चालय     r11, qword ptr [rdi+0x18]
+        चालय     r12, qword ptr [rdi+0x40]
+        चालय     r13, qword ptr [rdi+0x48]
+        चालय     r14, qword ptr [rdi+0x50]
+        चालय     r15, qword ptr [rdi+0x58]
         vmovdqu32 ymm16, ymmword ptr [rdx+r8-0x2*0x20]
         vinserti64x4 zmm16, zmm16, ymmword ptr [rdx+r12-0x2*0x20], 0x01
         vmovdqu32 ymm17, ymmword ptr [rdx+r9-0x2*0x20]
@@ -127,14 +127,14 @@ blake3_hash_many_avx512:
         vinserti64x4 zmm19, zmm19, ymmword ptr [rdx+r15-0x2*0x20], 0x01
         vpunpcklqdq zmm10, zmm18, zmm19
         vpunpckhqdq zmm11, zmm18, zmm19
-        mov     r8, qword ptr [rdi+0x20]
-        mov     r9, qword ptr [rdi+0x28]
-        mov     r10, qword ptr [rdi+0x30]
-        mov     r11, qword ptr [rdi+0x38]
-        mov     r12, qword ptr [rdi+0x60]
-        mov     r13, qword ptr [rdi+0x68]
-        mov     r14, qword ptr [rdi+0x70]
-        mov     r15, qword ptr [rdi+0x78]
+        चालय     r8, qword ptr [rdi+0x20]
+        चालय     r9, qword ptr [rdi+0x28]
+        चालय     r10, qword ptr [rdi+0x30]
+        चालय     r11, qword ptr [rdi+0x38]
+        चालय     r12, qword ptr [rdi+0x60]
+        चालय     r13, qword ptr [rdi+0x68]
+        चालय     r14, qword ptr [rdi+0x70]
+        चालय     r15, qword ptr [rdi+0x78]
         vmovdqu32 ymm16, ymmword ptr [rdx+r8-0x2*0x20]
         vinserti64x4 zmm16, zmm16, ymmword ptr [rdx+r12-0x2*0x20], 0x01
         vmovdqu32 ymm17, ymmword ptr [rdx+r9-0x2*0x20]
@@ -169,14 +169,14 @@ blake3_hash_many_avx512:
         vmovdqa32 zmm23, zmm19
         vpermt2d zmm19, zmm27, zmm8
         vpermt2d zmm23, zmm31, zmm8
-        mov     r8, qword ptr [rdi]
-        mov     r9, qword ptr [rdi+0x8]
-        mov     r10, qword ptr [rdi+0x10]
-        mov     r11, qword ptr [rdi+0x18]
-        mov     r12, qword ptr [rdi+0x40]
-        mov     r13, qword ptr [rdi+0x48]
-        mov     r14, qword ptr [rdi+0x50]
-        mov     r15, qword ptr [rdi+0x58]
+        चालय     r8, qword ptr [rdi]
+        चालय     r9, qword ptr [rdi+0x8]
+        चालय     r10, qword ptr [rdi+0x10]
+        चालय     r11, qword ptr [rdi+0x18]
+        चालय     r12, qword ptr [rdi+0x40]
+        चालय     r13, qword ptr [rdi+0x48]
+        चालय     r14, qword ptr [rdi+0x50]
+        चालय     r15, qword ptr [rdi+0x58]
         vmovdqu32 ymm24, ymmword ptr [r8+rdx-0x1*0x20]
         vinserti64x4 zmm24, zmm24, ymmword ptr [r12+rdx-0x1*0x20], 0x01
         vmovdqu32 ymm25, ymmword ptr [r9+rdx-0x1*0x20]
@@ -197,14 +197,14 @@ blake3_hash_many_avx512:
         prefetcht0 [r14+rdx+0x80]
         prefetcht0 [r11+rdx+0x80]
         prefetcht0 [r15+rdx+0x80]
-        mov     r8, qword ptr [rdi+0x20]
-        mov     r9, qword ptr [rdi+0x28]
-        mov     r10, qword ptr [rdi+0x30]
-        mov     r11, qword ptr [rdi+0x38]
-        mov     r12, qword ptr [rdi+0x60]
-        mov     r13, qword ptr [rdi+0x68]
-        mov     r14, qword ptr [rdi+0x70]
-        mov     r15, qword ptr [rdi+0x78]
+        चालय     r8, qword ptr [rdi+0x20]
+        चालय     r9, qword ptr [rdi+0x28]
+        चालय     r10, qword ptr [rdi+0x30]
+        चालय     r11, qword ptr [rdi+0x38]
+        चालय     r12, qword ptr [rdi+0x60]
+        चालय     r13, qword ptr [rdi+0x68]
+        चालय     r14, qword ptr [rdi+0x70]
+        चालय     r15, qword ptr [rdi+0x78]
         vmovdqu32 ymm24, ymmword ptr [r8+rdx-0x1*0x20]
         vinserti64x4 zmm24, zmm24, ymmword ptr [r12+rdx-0x1*0x20], 0x01
         vmovdqu32 ymm25, ymmword ptr [r9+rdx-0x1*0x20]
@@ -1046,7 +1046,7 @@ blake3_hash_many_avx512:
         vpxord  zmm7, zmm7, zmm15
         movzx   eax, byte ptr [rbp+0x38]
         jne     9b
-        mov     rbx, qword ptr [rbp+0x50]
+        चालय     rbx, qword ptr [rbp+0x50]
         vpunpckldq zmm16, zmm0, zmm1
         vpunpckhdq zmm17, zmm0, zmm1
         vpunpckldq zmm18, zmm2, zmm3
@@ -1095,24 +1095,24 @@ blake3_hash_many_avx512:
         vpaddd  zmm1 {k2}, zmm1, dword ptr [ADD1+rip] {1to16}
         vmovdqa32 zmmword ptr [rsp], zmm2
         vmovdqa32 zmmword ptr [rsp+0x1*0x40], zmm1
-        add     rdi, 128
-        add     rbx, 512
-        mov     qword ptr [rbp+0x50], rbx
-        sub     rsi, 16
-        cmp     rsi, 16
+        योजय     rdi, 128
+        योजय     rbx, 512
+        चालय     qword ptr [rbp+0x50], rbx
+        वियोजय     rsi, 16
+        तुलय     rsi, 16
         jnc     2b
         test    rsi, rsi
         jnz     3f
 4:
         vzeroupper
-        mov     rsp, rbp
-        pop     rbp
-        pop     rbx
-        pop     r12
-        pop     r13
-        pop     r14
-        pop     r15
-        ret
+        चालय     rsp, rbp
+        उद्धर     rbp
+        उद्धर     rbx
+        उद्धर     r12
+        उद्धर     r13
+        उद्धर     r14
+        उद्धर     r15
+        प्रत्यागच्छ
 .p2align 6
 3:
         test    esi, 0x8
@@ -1125,14 +1125,14 @@ blake3_hash_many_avx512:
         vpbroadcastd ymm5, dword ptr [rcx+0x14]
         vpbroadcastd ymm6, dword ptr [rcx+0x18]
         vpbroadcastd ymm7, dword ptr [rcx+0x1C]
-        mov     r8, qword ptr [rdi]
-        mov     r9, qword ptr [rdi+0x8]
-        mov     r10, qword ptr [rdi+0x10]
-        mov     r11, qword ptr [rdi+0x18]
-        mov     r12, qword ptr [rdi+0x20]
-        mov     r13, qword ptr [rdi+0x28]
-        mov     r14, qword ptr [rdi+0x30]
-        mov     r15, qword ptr [rdi+0x38]
+        चालय     r8, qword ptr [rdi]
+        चालय     r9, qword ptr [rdi+0x8]
+        चालय     r10, qword ptr [rdi+0x10]
+        चालय     r11, qword ptr [rdi+0x18]
+        चालय     r12, qword ptr [rdi+0x20]
+        चालय     r13, qword ptr [rdi+0x28]
+        चालय     r14, qword ptr [rdi+0x30]
+        चालय     r15, qword ptr [rdi+0x38]
         movzx   eax, byte ptr [rbp+0x38]
         movzx   ebx, byte ptr [rbp+0x40]
         or      eax, ebx
@@ -1140,10 +1140,10 @@ blake3_hash_many_avx512:
 2:
         movzx   ebx, byte ptr [rbp+0x48]
         or      ebx, eax
-        add     rdx, 64
-        cmp     rdx, qword ptr [rsp+0x80]
+        योजय     rdx, 64
+        तुलय     rdx, qword ptr [rsp+0x80]
         cmove   eax, ebx
-        mov     dword ptr [rsp+0x88], eax
+        चालय     dword ptr [rsp+0x88], eax
         vmovups xmm8, xmmword ptr [r8+rdx-0x40]
         vinsertf128 ymm8, ymm8, xmmword ptr [r12+rdx-0x40], 0x01
         vmovups xmm9, xmmword ptr [r9+rdx-0x40]
@@ -2010,7 +2010,7 @@ blake3_hash_many_avx512:
         vpxor   ymm7, ymm7, ymm15
         movzx   eax, byte ptr [rbp+0x38]
         jne     2b
-        mov     rbx, qword ptr [rbp+0x50]
+        चालय     rbx, qword ptr [rbp+0x50]
         vunpcklps ymm8, ymm0, ymm1
         vunpcklps ymm9, ymm2, ymm3
         vunpckhps ymm10, ymm0, ymm1
@@ -2053,13 +2053,13 @@ blake3_hash_many_avx512:
         vmovdqa32 ymm2 {k1}, ymmword ptr [rsp+0x3*0x20]
         vmovdqa ymmword ptr [rsp], ymm0
         vmovdqa ymmword ptr [rsp+0x2*0x20], ymm2
-        add     rbx, 256
-        mov     qword ptr [rbp+0x50], rbx
-        add     rdi, 64
-        sub     rsi, 8
+        योजय     rbx, 256
+        चालय     qword ptr [rbp+0x50], rbx
+        योजय     rdi, 64
+        वियोजय     rsi, 8
 3:
-        mov     rbx, qword ptr [rbp+0x50]
-        mov     r15, qword ptr [rsp+0x80]
+        चालय     rbx, qword ptr [rbp+0x50]
+        चालय     r15, qword ptr [rsp+0x80]
         movzx   r13, byte ptr [rbp+0x38]
         movzx   r12, byte ptr [rbp+0x48]
         test    esi, 0x4
@@ -2074,29 +2074,29 @@ blake3_hash_many_avx512:
         vpermq  ymm15, ymm15, 0xDC
         vpbroadcastd zmm12, dword ptr [BLAKE3_BLOCK_LEN+rip]
         vinserti64x4 zmm13, zmm14, ymm15, 0x01
-        mov     eax, 17476
+        चालय     eax, 17476
         kmovw   k2, eax
         vpblendmd zmm13 {k2}, zmm13, zmm12
         vbroadcasti32x4 zmm15, xmmword ptr [BLAKE3_IV+rip]
-        mov     r8, qword ptr [rdi]
-        mov     r9, qword ptr [rdi+0x8]
-        mov     r10, qword ptr [rdi+0x10]
-        mov     r11, qword ptr [rdi+0x18]
-        mov     eax, 43690
+        चालय     r8, qword ptr [rdi]
+        चालय     r9, qword ptr [rdi+0x8]
+        चालय     r10, qword ptr [rdi+0x10]
+        चालय     r11, qword ptr [rdi+0x18]
+        चालय     eax, 43690
         kmovw   k3, eax
-        mov     eax, 34952
+        चालय     eax, 34952
         kmovw   k4, eax
         movzx   eax, byte ptr [rbp+0x40]
         or      eax, r13d
         xor     edx, edx
 .p2align 5
 2:
-        mov     r14d, eax
+        चालय     r14d, eax
         or      eax, r12d
-        add     rdx, 64
-        cmp     rdx, r15
+        योजय     rdx, 64
+        तुलय     rdx, r15
         cmovne  eax, r14d
-        mov     dword ptr [rsp+0x88], eax
+        चालय     dword ptr [rsp+0x88], eax
         vmovdqa32 zmm2, zmm15
         vpbroadcastd zmm8, dword ptr [rsp+0x22*0x4]
         vpblendmd zmm3 {k4}, zmm13, zmm8
@@ -2122,7 +2122,7 @@ blake3_hash_many_avx512:
         vshufps zmm7, zmm8, zmm9, 221
         vpshufd zmm6, zmm6, 0x93
         vpshufd zmm7, zmm7, 0x93
-        mov     al, 7
+        चालय     al, 7
 9:
         vpaddd  zmm0, zmm0, zmm4
         vpaddd  zmm0, zmm0, zmm1
@@ -2173,12 +2173,12 @@ blake3_hash_many_avx512:
         vpshufd zmm7, zmm6, 0x1E
         vmovdqa32 zmm5, zmm9
         vmovdqa32 zmm6, zmm8
-        jmp     9b
+        कूर्द     9b
 9:
         vpxord  zmm0, zmm0, zmm2
         vpxord  zmm1, zmm1, zmm3
-        mov     eax, r13d
-        cmp     rdx, r15
+        चालय     eax, r13d
+        तुलय     rdx, r15
         jne     2b
         vmovdqu xmmword ptr [rbx], xmm0
         vmovdqu xmmword ptr [rbx+0x10], xmm1
@@ -2194,9 +2194,9 @@ blake3_hash_many_avx512:
         vmovdqa32 xmm2 {k1}, xmmword ptr [rsp+0x5*0x10]
         vmovdqa xmmword ptr [rsp], xmm0
         vmovdqa xmmword ptr [rsp+0x40], xmm2
-        add     rbx, 128
-        add     rdi, 32
-        sub     rsi, 4
+        योजय     rbx, 128
+        योजय     rdi, 32
+        वियोजय     rsi, 4
 3:
         test    esi, 0x2
         je      3f
@@ -2209,19 +2209,19 @@ blake3_hash_many_avx512:
         vpinsrd xmm14, xmm14, dword ptr [rsp+0x44], 1
         vpinsrd xmm14, xmm14, dword ptr [BLAKE3_BLOCK_LEN+rip], 2
         vinserti128 ymm13, ymm13, xmm14, 0x01
-        mov     r8, qword ptr [rdi]
-        mov     r9, qword ptr [rdi+0x8]
+        चालय     r8, qword ptr [rdi]
+        चालय     r9, qword ptr [rdi+0x8]
         movzx   eax, byte ptr [rbp+0x40]
         or      eax, r13d
         xor     edx, edx
 .p2align 5
 2:
-        mov     r14d, eax
+        चालय     r14d, eax
         or      eax, r12d
-        add     rdx, 64
-        cmp     rdx, r15
+        योजय     rdx, 64
+        तुलय     rdx, r15
         cmovne  eax, r14d
-        mov     dword ptr [rsp+0x88], eax
+        चालय     dword ptr [rsp+0x88], eax
         vbroadcasti128 ymm2, xmmword ptr [BLAKE3_IV+rip]
         vpbroadcastd ymm8, dword ptr [rsp+0x88]
         vpblendd ymm3, ymm13, ymm8, 0x88
@@ -2239,7 +2239,7 @@ blake3_hash_many_avx512:
         vshufps ymm7, ymm8, ymm9, 221
         vpshufd ymm6, ymm6, 0x93
         vpshufd ymm7, ymm7, 0x93
-        mov     al, 7
+        चालय     al, 7
 9:
         vpaddd  ymm0, ymm0, ymm4
         vpaddd  ymm0, ymm0, ymm1
@@ -2290,12 +2290,12 @@ blake3_hash_many_avx512:
         vpshufd ymm7, ymm6, 0x1E
         vmovdqa ymm5, ymm9
         vmovdqa ymm6, ymm8
-        jmp     9b
+        कूर्द     9b
 9:
         vpxor   ymm0, ymm0, ymm2
         vpxor   ymm1, ymm1, ymm3
-        mov     eax, r13d
-        cmp     rdx, r15
+        चालय     eax, r13d
+        तुलय     rdx, r15
         jne     2b
         vmovdqu xmmword ptr [rbx], xmm0
         vmovdqu xmmword ptr [rbx+0x10], xmm1
@@ -2307,9 +2307,9 @@ blake3_hash_many_avx512:
         vmovdqu32 xmm2 {k1}, xmmword ptr [rsp+0x48]
         vmovdqa xmmword ptr [rsp], xmm0
         vmovdqa xmmword ptr [rsp+0x4*0x10], xmm2
-        add     rbx, 64
-        add     rdi, 16
-        sub     rsi, 2
+        योजय     rbx, 64
+        योजय     rdi, 16
+        वियोजय     rsi, 2
 3:
         test    esi, 0x1
         je      4b
@@ -2319,16 +2319,16 @@ blake3_hash_many_avx512:
         vpinsrd xmm14, xmm14, dword ptr [rsp+0x40], 1
         vpinsrd xmm14, xmm14, dword ptr [BLAKE3_BLOCK_LEN+rip], 2
         vmovdqa xmm15, xmmword ptr [BLAKE3_IV+rip]
-        mov     r8, qword ptr [rdi]
+        चालय     r8, qword ptr [rdi]
         movzx   eax, byte ptr [rbp+0x40]
         or      eax, r13d
         xor     edx, edx
 .p2align 5
 2:
-        mov     r14d, eax
+        चालय     r14d, eax
         or      eax, r12d
-        add     rdx, 64
-        cmp     rdx, r15
+        योजय     rdx, 64
+        तुलय     rdx, r15
         cmovne  eax, r14d
         vpinsrd xmm3, xmm14, eax, 3
         vmovdqa xmm2, xmm15
@@ -2342,7 +2342,7 @@ blake3_hash_many_avx512:
         vshufps xmm7, xmm8, xmm9, 221
         vpshufd xmm6, xmm6, 0x93
         vpshufd xmm7, xmm7, 0x93
-        mov     al, 7
+        चालय     al, 7
 9:
         vpaddd  xmm0, xmm0, xmm4
         vpaddd  xmm0, xmm0, xmm1
@@ -2393,16 +2393,16 @@ blake3_hash_many_avx512:
         vpshufd xmm7, xmm6, 0x1E
         vmovdqa xmm5, xmm9
         vmovdqa xmm6, xmm8
-        jmp     9b
+        कूर्द     9b
 9:
         vpxor   xmm0, xmm0, xmm2
         vpxor   xmm1, xmm1, xmm3
-        mov     eax, r13d
-        cmp     rdx, r15
+        चालय     eax, r13d
+        तुलय     rdx, r15
         jne     2b
         vmovdqu xmmword ptr [rbx], xmm0
         vmovdqu xmmword ptr [rbx+0x10], xmm1
-        jmp     4b
+        कूर्द     4b
 .p2align 6
 _blake3_compress_in_place_avx512:
 blake3_compress_in_place_avx512:
@@ -2412,7 +2412,7 @@ blake3_compress_in_place_avx512:
         movzx   eax, r8b
         movzx   edx, dl
         shl     rax, 32
-        add     rdx, rax
+        योजय     rdx, rax
         vmovq   xmm3, rcx
         vmovq   xmm4, rdx
         vpunpcklqdq xmm3, xmm3, xmm4
@@ -2427,7 +2427,7 @@ blake3_compress_in_place_avx512:
         vshufps xmm7, xmm8, xmm9, 221
         vpshufd xmm6, xmm6, 0x93
         vpshufd xmm7, xmm7, 0x93
-        mov     al, 7
+        चालय     al, 7
 9:
         vpaddd  xmm0, xmm0, xmm4
         vpaddd  xmm0, xmm0, xmm1
@@ -2478,13 +2478,13 @@ blake3_compress_in_place_avx512:
         vpshufd xmm7, xmm6, 0x1E
         vmovdqa xmm5, xmm9
         vmovdqa xmm6, xmm8
-        jmp     9b
+        कूर्द     9b
 9:
         vpxor   xmm0, xmm0, xmm2
         vpxor   xmm1, xmm1, xmm3
         vmovdqu xmmword ptr [rdi], xmm0
         vmovdqu xmmword ptr [rdi+0x10], xmm1
-        ret
+        प्रत्यागच्छ
 
 .p2align 6
 _blake3_compress_xof_avx512:
@@ -2495,7 +2495,7 @@ blake3_compress_xof_avx512:
         movzx   eax, r8b
         movzx   edx, dl
         shl     rax, 32
-        add     rdx, rax
+        योजय     rdx, rax
         vmovq   xmm3, rcx
         vmovq   xmm4, rdx
         vpunpcklqdq xmm3, xmm3, xmm4
@@ -2510,7 +2510,7 @@ blake3_compress_xof_avx512:
         vshufps xmm7, xmm8, xmm9, 221
         vpshufd xmm6, xmm6, 0x93
         vpshufd xmm7, xmm7, 0x93
-        mov     al, 7
+        चालय     al, 7
 9:
         vpaddd  xmm0, xmm0, xmm4
         vpaddd  xmm0, xmm0, xmm1
@@ -2561,7 +2561,7 @@ blake3_compress_xof_avx512:
         vpshufd xmm7, xmm6, 0x1E
         vmovdqa xmm5, xmm9
         vmovdqa xmm6, xmm8
-        jmp     9b
+        कूर्द     9b
 9:
         vpxor   xmm0, xmm0, xmm2
         vpxor   xmm1, xmm1, xmm3
@@ -2571,36 +2571,36 @@ blake3_compress_xof_avx512:
         vmovdqu xmmword ptr [r9+0x10], xmm1
         vmovdqu xmmword ptr [r9+0x20], xmm2
         vmovdqu xmmword ptr [r9+0x30], xmm3
-        ret
+        प्रत्यागच्छ
 
 .p2align 6
 blake3_xof_many_avx512:
 _blake3_xof_many_avx512:
         _CET_ENDBR
-        mov    r10,QWORD PTR [rsp+0x8]
-        cmp    r10,0x1
+        चालय    r10,QWORD निर्देशक [rsp+0x8]
+        तुलय    r10,0x1
         ja     2f
-        vmovdqu xmm0,XMMWORD PTR [rdi]
-        vmovdqu xmm1,XMMWORD PTR [rdi+0x10]
+        vmovdqu xmm0,XMMWORD निर्देशक [rdi]
+        vmovdqu xmm1,XMMWORD निर्देशक [rdi+0x10]
         movzx  eax,r8b
         movzx  edx,dl
         shl    rax,0x20
-        add    rdx,rax
+        योजय    rdx,rax
         vmovq  xmm3,rcx
         vmovq  xmm4,rdx
         vpunpcklqdq xmm3,xmm3,xmm4
-        vmovaps xmm2,XMMWORD PTR [BLAKE3_IV+rip]
-        vmovups xmm8,XMMWORD PTR [rsi]
-        vmovups xmm9,XMMWORD PTR [rsi+0x10]
+        vmovaps xmm2,XMMWORD निर्देशक [BLAKE3_IV+rip]
+        vmovups xmm8,XMMWORD निर्देशक [rsi]
+        vmovups xmm9,XMMWORD निर्देशक [rsi+0x10]
         vshufps xmm4,xmm8,xmm9,0x88
         vshufps xmm5,xmm8,xmm9,0xdd
-        vmovups xmm8,XMMWORD PTR [rsi+0x20]
-        vmovups xmm9,XMMWORD PTR [rsi+0x30]
+        vmovups xmm8,XMMWORD निर्देशक [rsi+0x20]
+        vmovups xmm9,XMMWORD निर्देशक [rsi+0x30]
         vshufps xmm6,xmm8,xmm9,0x88
         vshufps xmm7,xmm8,xmm9,0xdd
         vpshufd xmm6,xmm6,0x93
         vpshufd xmm7,xmm7,0x93
-        mov    al,0x7
+        चालय    al,0x7
 3:
         vpaddd xmm0,xmm0,xmm4
         vpaddd xmm0,xmm0,xmm1
@@ -2651,64 +2651,64 @@ _blake3_xof_many_avx512:
         vpshufd xmm7,xmm6,0x1e
         vmovdqa xmm5,xmm9
         vmovdqa xmm6,xmm8
-        jmp    3b
+        कूर्द    3b
 3:
         vpxor  xmm0,xmm0,xmm2
         vpxor  xmm1,xmm1,xmm3
-        vpxor  xmm2,xmm2,XMMWORD PTR [rdi]
-        vpxor  xmm3,xmm3,XMMWORD PTR [rdi+0x10]
-        vmovdqu XMMWORD PTR [r9],xmm0
-        vmovdqu XMMWORD PTR [r9+0x10],xmm1
-        vmovdqu XMMWORD PTR [r9+0x20],xmm2
-        vmovdqu XMMWORD PTR [r9+0x30],xmm3
-        ret    
+        vpxor  xmm2,xmm2,XMMWORD निर्देशक [rdi]
+        vpxor  xmm3,xmm3,XMMWORD निर्देशक [rdi+0x10]
+        vmovdqu XMMWORD निर्देशक [r9],xmm0
+        vmovdqu XMMWORD निर्देशक [r9+0x10],xmm1
+        vmovdqu XMMWORD निर्देशक [r9+0x20],xmm2
+        vmovdqu XMMWORD निर्देशक [r9+0x30],xmm3
+        प्रत्यागच्छ    
 .p2align 6
 2:
-        push   rbp
-        mov    rbp,rsp
-        sub    rsp,0x90
+        निक्षिप   rbp
+        चालय    rbp,rsp
+        वियोजय    rsp,0x90
         and    rsp,0xffffffffffffffc0
         vpbroadcastd zmm0,ecx
         shr    rcx,0x20
         vpbroadcastd zmm1,ecx
-        vpaddd zmm2,zmm0,ZMMWORD PTR [ADD0+rip]
+        vpaddd zmm2,zmm0,ZMMWORD निर्देशक [ADD0+rip]
         vpcmpltud k1,zmm2,zmm0
-        vpaddd zmm1{k1},zmm1,DWORD PTR [ADD1+rip]{1to16}
-        vmovdqa32 ZMMWORD PTR [rsp],zmm2
-        vmovdqa32 ZMMWORD PTR [rsp+0x40],zmm1
-        cmp    r10,0x10
+        vpaddd zmm1{k1},zmm1,DWORD निर्देशक [ADD1+rip]{1to16}
+        vmovdqa32 ZMMWORD निर्देशक [rsp],zmm2
+        vmovdqa32 ZMMWORD निर्देशक [rsp+0x40],zmm1
+        तुलय    r10,0x10
         jb     2f
 3:
-        vpbroadcastd zmm16,DWORD PTR [rsi]
-        vpbroadcastd zmm17,DWORD PTR [rsi+0x4]
-        vpbroadcastd zmm18,DWORD PTR [rsi+0x8]
-        vpbroadcastd zmm19,DWORD PTR [rsi+0xc]
-        vpbroadcastd zmm20,DWORD PTR [rsi+0x10]
-        vpbroadcastd zmm21,DWORD PTR [rsi+0x14]
-        vpbroadcastd zmm22,DWORD PTR [rsi+0x18]
-        vpbroadcastd zmm23,DWORD PTR [rsi+0x1c]
-        vpbroadcastd zmm24,DWORD PTR [rsi+0x20]
-        vpbroadcastd zmm25,DWORD PTR [rsi+0x24]
-        vpbroadcastd zmm26,DWORD PTR [rsi+0x28]
-        vpbroadcastd zmm27,DWORD PTR [rsi+0x2c]
-        vpbroadcastd zmm28,DWORD PTR [rsi+0x30]
-        vpbroadcastd zmm29,DWORD PTR [rsi+0x34]
-        vpbroadcastd zmm30,DWORD PTR [rsi+0x38]
-        vpbroadcastd zmm31,DWORD PTR [rsi+0x3c]
-        vpbroadcastd zmm0,DWORD PTR [rdi]
-        vpbroadcastd zmm1,DWORD PTR [rdi+0x4]
-        vpbroadcastd zmm2,DWORD PTR [rdi+0x8]
-        vpbroadcastd zmm3,DWORD PTR [rdi+0xc]
-        vpbroadcastd zmm4,DWORD PTR [rdi+0x10]
-        vpbroadcastd zmm5,DWORD PTR [rdi+0x14]
-        vpbroadcastd zmm6,DWORD PTR [rdi+0x18]
-        vpbroadcastd zmm7,DWORD PTR [rdi+0x1c]
-        vpbroadcastd zmm8,DWORD PTR [BLAKE3_IV_0+rip]
-        vpbroadcastd zmm9,DWORD PTR [BLAKE3_IV_1+rip]
-        vpbroadcastd zmm10,DWORD PTR [BLAKE3_IV_2+rip]
-        vpbroadcastd zmm11,DWORD PTR [BLAKE3_IV_3+rip]
-        vmovdqa32 zmm12,ZMMWORD PTR [rsp]
-        vmovdqa32 zmm13,ZMMWORD PTR [rsp+0x40]
+        vpbroadcastd zmm16,DWORD निर्देशक [rsi]
+        vpbroadcastd zmm17,DWORD निर्देशक [rsi+0x4]
+        vpbroadcastd zmm18,DWORD निर्देशक [rsi+0x8]
+        vpbroadcastd zmm19,DWORD निर्देशक [rsi+0xc]
+        vpbroadcastd zmm20,DWORD निर्देशक [rsi+0x10]
+        vpbroadcastd zmm21,DWORD निर्देशक [rsi+0x14]
+        vpbroadcastd zmm22,DWORD निर्देशक [rsi+0x18]
+        vpbroadcastd zmm23,DWORD निर्देशक [rsi+0x1c]
+        vpbroadcastd zmm24,DWORD निर्देशक [rsi+0x20]
+        vpbroadcastd zmm25,DWORD निर्देशक [rsi+0x24]
+        vpbroadcastd zmm26,DWORD निर्देशक [rsi+0x28]
+        vpbroadcastd zmm27,DWORD निर्देशक [rsi+0x2c]
+        vpbroadcastd zmm28,DWORD निर्देशक [rsi+0x30]
+        vpbroadcastd zmm29,DWORD निर्देशक [rsi+0x34]
+        vpbroadcastd zmm30,DWORD निर्देशक [rsi+0x38]
+        vpbroadcastd zmm31,DWORD निर्देशक [rsi+0x3c]
+        vpbroadcastd zmm0,DWORD निर्देशक [rdi]
+        vpbroadcastd zmm1,DWORD निर्देशक [rdi+0x4]
+        vpbroadcastd zmm2,DWORD निर्देशक [rdi+0x8]
+        vpbroadcastd zmm3,DWORD निर्देशक [rdi+0xc]
+        vpbroadcastd zmm4,DWORD निर्देशक [rdi+0x10]
+        vpbroadcastd zmm5,DWORD निर्देशक [rdi+0x14]
+        vpbroadcastd zmm6,DWORD निर्देशक [rdi+0x18]
+        vpbroadcastd zmm7,DWORD निर्देशक [rdi+0x1c]
+        vpbroadcastd zmm8,DWORD निर्देशक [BLAKE3_IV_0+rip]
+        vpbroadcastd zmm9,DWORD निर्देशक [BLAKE3_IV_1+rip]
+        vpbroadcastd zmm10,DWORD निर्देशक [BLAKE3_IV_2+rip]
+        vpbroadcastd zmm11,DWORD निर्देशक [BLAKE3_IV_3+rip]
+        vmovdqa32 zmm12,ZMMWORD निर्देशक [rsp]
+        vmovdqa32 zmm13,ZMMWORD निर्देशक [rsp+0x40]
         vpbroadcastd zmm14,edx
         vpbroadcastd zmm15,r8d
         vpaddd zmm0,zmm0,zmm16
@@ -3503,14 +3503,14 @@ _blake3_xof_many_avx512:
         vpxord zmm5,zmm5,zmm13
         vpxord zmm6,zmm6,zmm14
         vpxord zmm7,zmm7,zmm15
-        vpxord zmm8,zmm8,DWORD PTR [rdi]{1to16}
-        vpxord zmm9,zmm9,DWORD PTR [rdi+0x4]{1to16}
-        vpxord zmm10,zmm10,DWORD PTR [rdi+0x8]{1to16}
-        vpxord zmm11,zmm11,DWORD PTR [rdi+0xc]{1to16}
-        vpxord zmm12,zmm12,DWORD PTR [rdi+0x10]{1to16}
-        vpxord zmm13,zmm13,DWORD PTR [rdi+0x14]{1to16}
-        vpxord zmm14,zmm14,DWORD PTR [rdi+0x18]{1to16}
-        vpxord zmm15,zmm15,DWORD PTR [rdi+0x1c]{1to16}
+        vpxord zmm8,zmm8,DWORD निर्देशक [rdi]{1to16}
+        vpxord zmm9,zmm9,DWORD निर्देशक [rdi+0x4]{1to16}
+        vpxord zmm10,zmm10,DWORD निर्देशक [rdi+0x8]{1to16}
+        vpxord zmm11,zmm11,DWORD निर्देशक [rdi+0xc]{1to16}
+        vpxord zmm12,zmm12,DWORD निर्देशक [rdi+0x10]{1to16}
+        vpxord zmm13,zmm13,DWORD निर्देशक [rdi+0x14]{1to16}
+        vpxord zmm14,zmm14,DWORD निर्देशक [rdi+0x18]{1to16}
+        vpxord zmm15,zmm15,DWORD निर्देशक [rdi+0x1c]{1to16}
         vpunpckldq zmm16,zmm0,zmm1
         vpunpckhdq zmm17,zmm0,zmm1
         vpunpckldq zmm18,zmm2,zmm3
@@ -3575,73 +3575,73 @@ _blake3_xof_many_avx512:
         vshufi32x4 zmm13,zmm21,zmm29,0xdd
         vshufi32x4 zmm14,zmm22,zmm30,0xdd
         vshufi32x4 zmm15,zmm23,zmm31,0xdd
-        vmovdqu32 ZMMWORD PTR [r9],zmm0
-        vmovdqu32 ZMMWORD PTR [r9+0x40],zmm1
-        vmovdqu32 ZMMWORD PTR [r9+0x80],zmm2
-        vmovdqu32 ZMMWORD PTR [r9+0xc0],zmm3
-        vmovdqu32 ZMMWORD PTR [r9+0x100],zmm4
-        vmovdqu32 ZMMWORD PTR [r9+0x140],zmm5
-        vmovdqu32 ZMMWORD PTR [r9+0x180],zmm6
-        vmovdqu32 ZMMWORD PTR [r9+0x1c0],zmm7
-        vmovdqu32 ZMMWORD PTR [r9+0x200],zmm8
-        vmovdqu32 ZMMWORD PTR [r9+0x240],zmm9
-        vmovdqu32 ZMMWORD PTR [r9+0x280],zmm10
-        vmovdqu32 ZMMWORD PTR [r9+0x2c0],zmm11
-        vmovdqu32 ZMMWORD PTR [r9+0x300],zmm12
-        vmovdqu32 ZMMWORD PTR [r9+0x340],zmm13
-        vmovdqu32 ZMMWORD PTR [r9+0x380],zmm14
-        vmovdqu32 ZMMWORD PTR [r9+0x3c0],zmm15
-        vmovdqa32 zmm0,ZMMWORD PTR [rsp]
-        vmovdqa32 zmm1,ZMMWORD PTR [rsp+0x40]
-        vpaddd zmm2,zmm0,DWORD PTR [ADD16+rip]{1to16}
+        vmovdqu32 ZMMWORD निर्देशक [r9],zmm0
+        vmovdqu32 ZMMWORD निर्देशक [r9+0x40],zmm1
+        vmovdqu32 ZMMWORD निर्देशक [r9+0x80],zmm2
+        vmovdqu32 ZMMWORD निर्देशक [r9+0xc0],zmm3
+        vmovdqu32 ZMMWORD निर्देशक [r9+0x100],zmm4
+        vmovdqu32 ZMMWORD निर्देशक [r9+0x140],zmm5
+        vmovdqu32 ZMMWORD निर्देशक [r9+0x180],zmm6
+        vmovdqu32 ZMMWORD निर्देशक [r9+0x1c0],zmm7
+        vmovdqu32 ZMMWORD निर्देशक [r9+0x200],zmm8
+        vmovdqu32 ZMMWORD निर्देशक [r9+0x240],zmm9
+        vmovdqu32 ZMMWORD निर्देशक [r9+0x280],zmm10
+        vmovdqu32 ZMMWORD निर्देशक [r9+0x2c0],zmm11
+        vmovdqu32 ZMMWORD निर्देशक [r9+0x300],zmm12
+        vmovdqu32 ZMMWORD निर्देशक [r9+0x340],zmm13
+        vmovdqu32 ZMMWORD निर्देशक [r9+0x380],zmm14
+        vmovdqu32 ZMMWORD निर्देशक [r9+0x3c0],zmm15
+        vmovdqa32 zmm0,ZMMWORD निर्देशक [rsp]
+        vmovdqa32 zmm1,ZMMWORD निर्देशक [rsp+0x40]
+        vpaddd zmm2,zmm0,DWORD निर्देशक [ADD16+rip]{1to16}
         vpcmpltud k1,zmm2,zmm0
-        vpaddd zmm1{k1},zmm1,DWORD PTR [ADD1+rip]{1to16}
-        vmovdqa32 ZMMWORD PTR [rsp],zmm2
-        vmovdqa32 ZMMWORD PTR [rsp+0x40],zmm1
-        add    r9,0x400
-        sub    r10,0x10
-        cmp    r10,0x10
+        vpaddd zmm1{k1},zmm1,DWORD निर्देशक [ADD1+rip]{1to16}
+        vmovdqa32 ZMMWORD निर्देशक [rsp],zmm2
+        vmovdqa32 ZMMWORD निर्देशक [rsp+0x40],zmm1
+        योजय    r9,0x400
+        वियोजय    r10,0x10
+        तुलय    r10,0x10
         jae    3b
         test   r10,r10
         jne    2f
 9:
         vzeroupper 
-        mov    rsp,rbp
-        pop    rbp
-        ret    
+        चालय    rsp,rbp
+        उद्धर    rbp
+        प्रत्यागच्छ    
 2:
         test   r10,0x8
         je     2f
-        vpbroadcastd ymm16,DWORD PTR [rsi]
-        vpbroadcastd ymm17,DWORD PTR [rsi+0x4]
-        vpbroadcastd ymm18,DWORD PTR [rsi+0x8]
-        vpbroadcastd ymm19,DWORD PTR [rsi+0xc]
-        vpbroadcastd ymm20,DWORD PTR [rsi+0x10]
-        vpbroadcastd ymm21,DWORD PTR [rsi+0x14]
-        vpbroadcastd ymm22,DWORD PTR [rsi+0x18]
-        vpbroadcastd ymm23,DWORD PTR [rsi+0x1c]
-        vpbroadcastd ymm24,DWORD PTR [rsi+0x20]
-        vpbroadcastd ymm25,DWORD PTR [rsi+0x24]
-        vpbroadcastd ymm26,DWORD PTR [rsi+0x28]
-        vpbroadcastd ymm27,DWORD PTR [rsi+0x2c]
-        vpbroadcastd ymm28,DWORD PTR [rsi+0x30]
-        vpbroadcastd ymm29,DWORD PTR [rsi+0x34]
-        vpbroadcastd ymm30,DWORD PTR [rsi+0x38]
-        vpbroadcastd ymm31,DWORD PTR [rsi+0x3c]
-        vpbroadcastd ymm0,DWORD PTR [rdi]
-        vpbroadcastd ymm1,DWORD PTR [rdi+0x4]
-        vpbroadcastd ymm2,DWORD PTR [rdi+0x8]
-        vpbroadcastd ymm3,DWORD PTR [rdi+0xc]
-        vpbroadcastd ymm4,DWORD PTR [rdi+0x10]
-        vpbroadcastd ymm5,DWORD PTR [rdi+0x14]
-        vpbroadcastd ymm6,DWORD PTR [rdi+0x18]
-        vpbroadcastd ymm7,DWORD PTR [rdi+0x1c]
-        vpbroadcastd ymm8,DWORD PTR [BLAKE3_IV_0+rip]
-        vpbroadcastd ymm9,DWORD PTR [BLAKE3_IV_1+rip]
-        vpbroadcastd ymm10,DWORD PTR [BLAKE3_IV_2+rip]
-        vpbroadcastd ymm11,DWORD PTR [BLAKE3_IV_3+rip]
-        vmovdqa ymm12,YMMWORD PTR [rsp]
-        vmovdqa ymm13,YMMWORD PTR [rsp+0x40]
+        vpbroadcastd ymm16,DWORD निर्देशक [rsi]
+        vpbroadcastd ymm17,DWORD निर्देशक [rsi+0x4]
+        vpbroadcastd ymm18,DWORD निर्देशक [rsi+0x8]
+        vpbroadcastd ymm19,DWORD निर्देशक [rsi+0xc]
+        vpbroadcastd ymm20,DWORD निर्देशक [rsi+0x10]
+        vpbroadcastd ymm21,DWORD निर्देशक [rsi+0x14]
+        vpbroadcastd ymm22,DWORD निर्देशक [rsi+0x18]
+        vpbroadcastd ymm23,DWORD निर्देशक [rsi+0x1c]
+        vpbroadcastd ymm24,DWORD निर्देशक [rsi+0x20]
+        vpbroadcastd ymm25,DWORD निर्देशक [rsi+0x24]
+        vpbroadcastd ymm26,DWORD निर्देशक [rsi+0x28]
+        vpbroadcastd ymm27,DWORD निर्देशक [rsi+0x2c]
+        vpbroadcastd ymm28,DWORD निर्देशक [rsi+0x30]
+        vpbroadcastd ymm29,DWORD निर्देशक [rsi+0x34]
+        vpbroadcastd ymm30,DWORD निर्देशक [rsi+0x38]
+        vpbroadcastd ymm31,DWORD निर्देशक [rsi+0x3c]
+        vpbroadcastd ymm0,DWORD निर्देशक [rdi]
+        vpbroadcastd ymm1,DWORD निर्देशक [rdi+0x4]
+        vpbroadcastd ymm2,DWORD निर्देशक [rdi+0x8]
+        vpbroadcastd ymm3,DWORD निर्देशक [rdi+0xc]
+        vpbroadcastd ymm4,DWORD निर्देशक [rdi+0x10]
+        vpbroadcastd ymm5,DWORD निर्देशक [rdi+0x14]
+        vpbroadcastd ymm6,DWORD निर्देशक [rdi+0x18]
+        vpbroadcastd ymm7,DWORD निर्देशक [rdi+0x1c]
+        vpbroadcastd ymm8,DWORD निर्देशक [BLAKE3_IV_0+rip]
+        vpbroadcastd ymm9,DWORD निर्देशक [BLAKE3_IV_1+rip]
+        vpbroadcastd ymm10,DWORD निर्देशक [BLAKE3_IV_2+rip]
+        vpbroadcastd ymm11,DWORD निर्देशक [BLAKE3_IV_3+rip]
+        vmovdqa ymm12,YMMWORD निर्देशक [rsp]
+        vmovdqa ymm13,YMMWORD निर्देशक [rsp+0x40]
         vpbroadcastd ymm14,edx
         vpbroadcastd ymm15,r8d
         vpaddd ymm0,ymm0,ymm16
@@ -4436,14 +4436,14 @@ _blake3_xof_many_avx512:
         vpxor  ymm5,ymm5,ymm13
         vpxor  ymm6,ymm6,ymm14
         vpxor  ymm7,ymm7,ymm15
-        vpxord ymm8,ymm8,DWORD PTR [rdi]{1to8}
-        vpxord ymm9,ymm9,DWORD PTR [rdi+0x4]{1to8}
-        vpxord ymm10,ymm10,DWORD PTR [rdi+0x8]{1to8}
-        vpxord ymm11,ymm11,DWORD PTR [rdi+0xc]{1to8}
-        vpxord ymm12,ymm12,DWORD PTR [rdi+0x10]{1to8}
-        vpxord ymm13,ymm13,DWORD PTR [rdi+0x14]{1to8}
-        vpxord ymm14,ymm14,DWORD PTR [rdi+0x18]{1to8}
-        vpxord ymm15,ymm15,DWORD PTR [rdi+0x1c]{1to8}
+        vpxord ymm8,ymm8,DWORD निर्देशक [rdi]{1to8}
+        vpxord ymm9,ymm9,DWORD निर्देशक [rdi+0x4]{1to8}
+        vpxord ymm10,ymm10,DWORD निर्देशक [rdi+0x8]{1to8}
+        vpxord ymm11,ymm11,DWORD निर्देशक [rdi+0xc]{1to8}
+        vpxord ymm12,ymm12,DWORD निर्देशक [rdi+0x10]{1to8}
+        vpxord ymm13,ymm13,DWORD निर्देशक [rdi+0x14]{1to8}
+        vpxord ymm14,ymm14,DWORD निर्देशक [rdi+0x18]{1to8}
+        vpxord ymm15,ymm15,DWORD निर्देशक [rdi+0x1c]{1to8}
         vpunpckldq ymm16,ymm0,ymm1
         vpunpckhdq ymm17,ymm0,ymm1
         vpunpckldq ymm18,ymm2,ymm3
@@ -4492,62 +4492,62 @@ _blake3_xof_many_avx512:
         vshufi32x4 ymm29,ymm10,ymm14,0x3
         vshufi32x4 ymm30,ymm3,ymm7,0x3
         vshufi32x4 ymm31,ymm11,ymm15,0x3
-        vmovdqu32 YMMWORD PTR [r9],ymm16
-        vmovdqu32 YMMWORD PTR [r9+0x20],ymm17
-        vmovdqu32 YMMWORD PTR [r9+0x40],ymm18
-        vmovdqu32 YMMWORD PTR [r9+0x60],ymm19
-        vmovdqu32 YMMWORD PTR [r9+0x80],ymm20
-        vmovdqu32 YMMWORD PTR [r9+0xa0],ymm21
-        vmovdqu32 YMMWORD PTR [r9+0xc0],ymm22
-        vmovdqu32 YMMWORD PTR [r9+0xe0],ymm23
-        vmovdqu32 YMMWORD PTR [r9+0x100],ymm24
-        vmovdqu32 YMMWORD PTR [r9+0x120],ymm25
-        vmovdqu32 YMMWORD PTR [r9+0x140],ymm26
-        vmovdqu32 YMMWORD PTR [r9+0x160],ymm27
-        vmovdqu32 YMMWORD PTR [r9+0x180],ymm28
-        vmovdqu32 YMMWORD PTR [r9+0x1a0],ymm29
-        vmovdqu32 YMMWORD PTR [r9+0x1c0],ymm30
-        vmovdqu32 YMMWORD PTR [r9+0x1e0],ymm31
-        vmovdqa ymm0,YMMWORD PTR [rsp+0x20]
-        vmovdqa ymm1,YMMWORD PTR [rsp+0x60]
-        vmovdqa YMMWORD PTR [rsp],ymm0
-        vmovdqa YMMWORD PTR [rsp+0x40],ymm1
-        add    r9,0x200
-        sub    r10,0x8
+        vmovdqu32 YMMWORD निर्देशक [r9],ymm16
+        vmovdqu32 YMMWORD निर्देशक [r9+0x20],ymm17
+        vmovdqu32 YMMWORD निर्देशक [r9+0x40],ymm18
+        vmovdqu32 YMMWORD निर्देशक [r9+0x60],ymm19
+        vmovdqu32 YMMWORD निर्देशक [r9+0x80],ymm20
+        vmovdqu32 YMMWORD निर्देशक [r9+0xa0],ymm21
+        vmovdqu32 YMMWORD निर्देशक [r9+0xc0],ymm22
+        vmovdqu32 YMMWORD निर्देशक [r9+0xe0],ymm23
+        vmovdqu32 YMMWORD निर्देशक [r9+0x100],ymm24
+        vmovdqu32 YMMWORD निर्देशक [r9+0x120],ymm25
+        vmovdqu32 YMMWORD निर्देशक [r9+0x140],ymm26
+        vmovdqu32 YMMWORD निर्देशक [r9+0x160],ymm27
+        vmovdqu32 YMMWORD निर्देशक [r9+0x180],ymm28
+        vmovdqu32 YMMWORD निर्देशक [r9+0x1a0],ymm29
+        vmovdqu32 YMMWORD निर्देशक [r9+0x1c0],ymm30
+        vmovdqu32 YMMWORD निर्देशक [r9+0x1e0],ymm31
+        vmovdqa ymm0,YMMWORD निर्देशक [rsp+0x20]
+        vmovdqa ymm1,YMMWORD निर्देशक [rsp+0x60]
+        vmovdqa YMMWORD निर्देशक [rsp],ymm0
+        vmovdqa YMMWORD निर्देशक [rsp+0x40],ymm1
+        योजय    r9,0x200
+        वियोजय    r10,0x8
 2:
         test   r10,0x4
         je     2f
-        vbroadcasti32x4 zmm0,XMMWORD PTR [rdi]
-        vbroadcasti32x4 zmm1,XMMWORD PTR [rdi+0x10]
-        vbroadcasti32x4 zmm2,XMMWORD PTR [BLAKE3_IV+rip]
-        vmovdqa xmm12,XMMWORD PTR [rsp]
-        vmovdqa xmm13,XMMWORD PTR [rsp+0x40]
+        vbroadcasti32x4 zmm0,XMMWORD निर्देशक [rdi]
+        vbroadcasti32x4 zmm1,XMMWORD निर्देशक [rdi+0x10]
+        vbroadcasti32x4 zmm2,XMMWORD निर्देशक [BLAKE3_IV+rip]
+        vmovdqa xmm12,XMMWORD निर्देशक [rsp]
+        vmovdqa xmm13,XMMWORD निर्देशक [rsp+0x40]
         vpunpckldq xmm14,xmm12,xmm13
         vpunpckhdq xmm15,xmm12,xmm13
         vpermq ymm14,ymm14,0xdc
         vpermq ymm15,ymm15,0xdc
         vpbroadcastd zmm12,edx
         vinserti64x4 zmm13,zmm14,ymm15,0x1
-        mov    eax,0x4444
+        चालय    eax,0x4444
         kmovw  k2,eax
         vpblendmd zmm13{k2},zmm13,zmm12
         vpbroadcastd zmm15,r8d
-        mov    eax,0x8888
+        चालय    eax,0x8888
         kmovw  k4,eax
         vpblendmd zmm3{k4},zmm13,zmm15
-        mov    eax,0xaaaa
+        चालय    eax,0xaaaa
         kmovw  k3,eax
-        vbroadcasti32x4 zmm8,XMMWORD PTR [rsi]
-        vbroadcasti32x4 zmm9,XMMWORD PTR [rsi+0x10]
+        vbroadcasti32x4 zmm8,XMMWORD निर्देशक [rsi]
+        vbroadcasti32x4 zmm9,XMMWORD निर्देशक [rsi+0x10]
         vshufps zmm4,zmm8,zmm9,0x88
         vshufps zmm5,zmm8,zmm9,0xdd
-        vbroadcasti32x4 zmm8,XMMWORD PTR [rsi+0x20]
-        vbroadcasti32x4 zmm9,XMMWORD PTR [rsi+0x30]
+        vbroadcasti32x4 zmm8,XMMWORD निर्देशक [rsi+0x20]
+        vbroadcasti32x4 zmm9,XMMWORD निर्देशक [rsi+0x30]
         vshufps zmm6,zmm8,zmm9,0x88
         vshufps zmm7,zmm8,zmm9,0xdd
         vpshufd zmm6,zmm6,0x93
         vpshufd zmm7,zmm7,0x93
-        mov    al,0x7
+        चालय    al,0x7
 3:
         vpaddd zmm0,zmm0,zmm4
         vpaddd zmm0,zmm0,zmm1
@@ -4598,62 +4598,62 @@ _blake3_xof_many_avx512:
         vpshufd zmm7,zmm6,0x1e
         vmovdqa32 zmm5,zmm9
         vmovdqa32 zmm6,zmm8
-        jmp    3b
+        कूर्द    3b
 3:
         vpxord zmm0,zmm0,zmm2
         vpxord zmm1,zmm1,zmm3
-        vbroadcasti32x4 zmm8,XMMWORD PTR [rdi]
-        vbroadcasti32x4 zmm9,XMMWORD PTR [rdi+0x10]
+        vbroadcasti32x4 zmm8,XMMWORD निर्देशक [rdi]
+        vbroadcasti32x4 zmm9,XMMWORD निर्देशक [rdi+0x10]
         vpxord zmm2,zmm2,zmm8
         vpxord zmm3,zmm3,zmm9
-        vmovdqu XMMWORD PTR [r9],xmm0
-        vmovdqu XMMWORD PTR [r9+0x10],xmm1
-        vmovdqu XMMWORD PTR [r9+0x20],xmm2
-        vmovdqu XMMWORD PTR [r9+0x30],xmm3
-        vextracti128 XMMWORD PTR [r9+0x40],ymm0,0x1
-        vextracti128 XMMWORD PTR [r9+0x50],ymm1,0x1
-        vextracti128 XMMWORD PTR [r9+0x60],ymm2,0x1
-        vextracti128 XMMWORD PTR [r9+0x70],ymm3,0x1
-        vextracti32x4 XMMWORD PTR [r9+0x80],zmm0,0x2
-        vextracti32x4 XMMWORD PTR [r9+0x90],zmm1,0x2
-        vextracti32x4 XMMWORD PTR [r9+0xa0],zmm2,0x2
-        vextracti32x4 XMMWORD PTR [r9+0xb0],zmm3,0x2
-        vextracti32x4 XMMWORD PTR [r9+0xc0],zmm0,0x3
-        vextracti32x4 XMMWORD PTR [r9+0xd0],zmm1,0x3
-        vextracti32x4 XMMWORD PTR [r9+0xe0],zmm2,0x3
-        vextracti32x4 XMMWORD PTR [r9+0xf0],zmm3,0x3
-        vmovdqa xmm0,XMMWORD PTR [rsp+0x10]
-        vmovdqa xmm1,XMMWORD PTR [rsp+0x50]
-        vmovdqa XMMWORD PTR [rsp],xmm0
-        vmovdqa XMMWORD PTR [rsp+0x40],xmm1
-        add    r9,0x100
-        sub    r10,0x4
+        vmovdqu XMMWORD निर्देशक [r9],xmm0
+        vmovdqu XMMWORD निर्देशक [r9+0x10],xmm1
+        vmovdqu XMMWORD निर्देशक [r9+0x20],xmm2
+        vmovdqu XMMWORD निर्देशक [r9+0x30],xmm3
+        vextracti128 XMMWORD निर्देशक [r9+0x40],ymm0,0x1
+        vextracti128 XMMWORD निर्देशक [r9+0x50],ymm1,0x1
+        vextracti128 XMMWORD निर्देशक [r9+0x60],ymm2,0x1
+        vextracti128 XMMWORD निर्देशक [r9+0x70],ymm3,0x1
+        vextracti32x4 XMMWORD निर्देशक [r9+0x80],zmm0,0x2
+        vextracti32x4 XMMWORD निर्देशक [r9+0x90],zmm1,0x2
+        vextracti32x4 XMMWORD निर्देशक [r9+0xa0],zmm2,0x2
+        vextracti32x4 XMMWORD निर्देशक [r9+0xb0],zmm3,0x2
+        vextracti32x4 XMMWORD निर्देशक [r9+0xc0],zmm0,0x3
+        vextracti32x4 XMMWORD निर्देशक [r9+0xd0],zmm1,0x3
+        vextracti32x4 XMMWORD निर्देशक [r9+0xe0],zmm2,0x3
+        vextracti32x4 XMMWORD निर्देशक [r9+0xf0],zmm3,0x3
+        vmovdqa xmm0,XMMWORD निर्देशक [rsp+0x10]
+        vmovdqa xmm1,XMMWORD निर्देशक [rsp+0x50]
+        vmovdqa XMMWORD निर्देशक [rsp],xmm0
+        vmovdqa XMMWORD निर्देशक [rsp+0x40],xmm1
+        योजय    r9,0x100
+        वियोजय    r10,0x4
 2:
         test   r10,0x2
         je     2f
-        vbroadcasti128 ymm0,XMMWORD PTR [rdi]
-        vbroadcasti128 ymm1,XMMWORD PTR [rdi+0x10]
-        vmovd  xmm13,DWORD PTR [rsp]
-        vpinsrd xmm13,xmm13,DWORD PTR [rsp+0x40],0x1
+        vbroadcasti128 ymm0,XMMWORD निर्देशक [rdi]
+        vbroadcasti128 ymm1,XMMWORD निर्देशक [rdi+0x10]
+        vmovd  xmm13,DWORD निर्देशक [rsp]
+        vpinsrd xmm13,xmm13,DWORD निर्देशक [rsp+0x40],0x1
         vpinsrd xmm13,xmm13,edx,0x2
-        vmovd  xmm14,DWORD PTR [rsp+0x4]
-        vpinsrd xmm14,xmm14,DWORD PTR [rsp+0x44],0x1
+        vmovd  xmm14,DWORD निर्देशक [rsp+0x4]
+        vpinsrd xmm14,xmm14,DWORD निर्देशक [rsp+0x44],0x1
         vpinsrd xmm14,xmm14,edx,0x2
         vinserti128 ymm13,ymm13,xmm14,0x1
-        vbroadcasti128 ymm2,XMMWORD PTR [BLAKE3_IV+rip]
+        vbroadcasti128 ymm2,XMMWORD निर्देशक [BLAKE3_IV+rip]
         vpbroadcastd ymm8,r8d
         vpblendd ymm3,ymm13,ymm8,0x88
-        vbroadcasti128 ymm8,XMMWORD PTR [rsi]
-        vbroadcasti128 ymm9,XMMWORD PTR [rsi+0x10]
+        vbroadcasti128 ymm8,XMMWORD निर्देशक [rsi]
+        vbroadcasti128 ymm9,XMMWORD निर्देशक [rsi+0x10]
         vshufps ymm4,ymm8,ymm9,0x88
         vshufps ymm5,ymm8,ymm9,0xdd
-        vbroadcasti128 ymm8,XMMWORD PTR [rsi+0x20]
-        vbroadcasti128 ymm9,XMMWORD PTR [rsi+0x30]
+        vbroadcasti128 ymm8,XMMWORD निर्देशक [rsi+0x20]
+        vbroadcasti128 ymm9,XMMWORD निर्देशक [rsi+0x30]
         vshufps ymm6,ymm8,ymm9,0x88
         vshufps ymm7,ymm8,ymm9,0xdd
         vpshufd ymm6,ymm6,0x93
         vpshufd ymm7,ymm7,0x93
-        mov    al,0x7
+        चालय    al,0x7
 3:
         vpaddd ymm0,ymm0,ymm4
         vpaddd ymm0,ymm0,ymm1
@@ -4704,49 +4704,49 @@ _blake3_xof_many_avx512:
         vpshufd ymm7,ymm6,0x1e
         vmovdqa ymm5,ymm9
         vmovdqa ymm6,ymm8
-        jmp    3b
+        कूर्द    3b
 3:
         vpxor  ymm0,ymm0,ymm2
         vpxor  ymm1,ymm1,ymm3
-        vbroadcasti128 ymm8,XMMWORD PTR [rdi]
-        vbroadcasti128 ymm9,XMMWORD PTR [rdi+0x10]
+        vbroadcasti128 ymm8,XMMWORD निर्देशक [rdi]
+        vbroadcasti128 ymm9,XMMWORD निर्देशक [rdi+0x10]
         vpxor  ymm2,ymm2,ymm8
         vpxor  ymm3,ymm3,ymm9
-        vmovdqu XMMWORD PTR [r9],xmm0
-        vmovdqu XMMWORD PTR [r9+0x10],xmm1
-        vmovdqu XMMWORD PTR [r9+0x20],xmm2
-        vmovdqu XMMWORD PTR [r9+0x30],xmm3
-        vextracti128 XMMWORD PTR [r9+0x40],ymm0,0x1
-        vextracti128 XMMWORD PTR [r9+0x50],ymm1,0x1
-        vextracti128 XMMWORD PTR [r9+0x60],ymm2,0x1
-        vextracti128 XMMWORD PTR [r9+0x70],ymm3,0x1
-        vmovdqu xmm0,XMMWORD PTR [rsp+0x8]
-        vmovdqu xmm1,XMMWORD PTR [rsp+0x48]
-        vmovdqa XMMWORD PTR [rsp],xmm0
-        vmovdqa XMMWORD PTR [rsp+0x40],xmm1
-        add    r9,0x80
-        sub    r10,0x2
+        vmovdqu XMMWORD निर्देशक [r9],xmm0
+        vmovdqu XMMWORD निर्देशक [r9+0x10],xmm1
+        vmovdqu XMMWORD निर्देशक [r9+0x20],xmm2
+        vmovdqu XMMWORD निर्देशक [r9+0x30],xmm3
+        vextracti128 XMMWORD निर्देशक [r9+0x40],ymm0,0x1
+        vextracti128 XMMWORD निर्देशक [r9+0x50],ymm1,0x1
+        vextracti128 XMMWORD निर्देशक [r9+0x60],ymm2,0x1
+        vextracti128 XMMWORD निर्देशक [r9+0x70],ymm3,0x1
+        vmovdqu xmm0,XMMWORD निर्देशक [rsp+0x8]
+        vmovdqu xmm1,XMMWORD निर्देशक [rsp+0x48]
+        vmovdqa XMMWORD निर्देशक [rsp],xmm0
+        vmovdqa XMMWORD निर्देशक [rsp+0x40],xmm1
+        योजय    r9,0x80
+        वियोजय    r10,0x2
 2:
         test   r10,0x1
         je     9b
-        vmovdqu xmm0,XMMWORD PTR [rdi]
-        vmovdqu xmm1,XMMWORD PTR [rdi+0x10]
-        vmovd  xmm14,DWORD PTR [rsp]
-        vpinsrd xmm14,xmm14,DWORD PTR [rsp+0x40],0x1
+        vmovdqu xmm0,XMMWORD निर्देशक [rdi]
+        vmovdqu xmm1,XMMWORD निर्देशक [rdi+0x10]
+        vmovd  xmm14,DWORD निर्देशक [rsp]
+        vpinsrd xmm14,xmm14,DWORD निर्देशक [rsp+0x40],0x1
         vpinsrd xmm14,xmm14,edx,0x2
-        vmovdqa xmm2,XMMWORD PTR [BLAKE3_IV+rip]
+        vmovdqa xmm2,XMMWORD निर्देशक [BLAKE3_IV+rip]
         vpinsrd xmm3,xmm14,r8d,0x3
-        vmovups xmm8,XMMWORD PTR [rsi]
-        vmovups xmm9,XMMWORD PTR [rsi+0x10]
+        vmovups xmm8,XMMWORD निर्देशक [rsi]
+        vmovups xmm9,XMMWORD निर्देशक [rsi+0x10]
         vshufps xmm4,xmm8,xmm9,0x88
         vshufps xmm5,xmm8,xmm9,0xdd
-        vmovups xmm8,XMMWORD PTR [rsi+0x20]
-        vmovups xmm9,XMMWORD PTR [rsi+0x30]
+        vmovups xmm8,XMMWORD निर्देशक [rsi+0x20]
+        vmovups xmm9,XMMWORD निर्देशक [rsi+0x30]
         vshufps xmm6,xmm8,xmm9,0x88
         vshufps xmm7,xmm8,xmm9,0xdd
         vpshufd xmm6,xmm6,0x93
         vpshufd xmm7,xmm7,0x93
-        mov    al,0x7
+        चालय    al,0x7
 3:
         vpaddd xmm0,xmm0,xmm4
         vpaddd xmm0,xmm0,xmm1
@@ -4797,23 +4797,23 @@ _blake3_xof_many_avx512:
         vpshufd xmm7,xmm6,0x1e
         vmovdqa xmm5,xmm9
         vmovdqa xmm6,xmm8
-        jmp    3b
+        कूर्द    3b
 3:
         vpxor  xmm0,xmm0,xmm2
         vpxor  xmm1,xmm1,xmm3
-        vpxor  xmm2,xmm2,XMMWORD PTR [rdi]
-        vpxor  xmm3,xmm3,XMMWORD PTR [rdi+0x10]
-        vmovdqu XMMWORD PTR [r9],xmm0
-        vmovdqu XMMWORD PTR [r9+0x10],xmm1
-        vmovdqu XMMWORD PTR [r9+0x20],xmm2
-        vmovdqu XMMWORD PTR [r9+0x30],xmm3
-        jmp    9b
+        vpxor  xmm2,xmm2,XMMWORD निर्देशक [rdi]
+        vpxor  xmm3,xmm3,XMMWORD निर्देशक [rdi+0x10]
+        vmovdqu XMMWORD निर्देशक [r9],xmm0
+        vmovdqu XMMWORD निर्देशक [r9+0x10],xmm1
+        vmovdqu XMMWORD निर्देशक [r9+0x20],xmm2
+        vmovdqu XMMWORD निर्देशक [r9+0x30],xmm3
+        कूर्द    9b
 
 
 #ifdef __APPLE__
 .static_data
 #else
-.section .rodata
+.खण्डः .rodata
 #endif
 .p2align  6
 INDEX0:

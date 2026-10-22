@@ -10,60 +10,60 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/BlockFrequency.h"
-#include "llvm/Support/BranchProbability.h"
-#include "llvm/Support/MathExtras.h"
-#include "llvm/Support/ScaledNumber.h"
-#include "llvm/Support/raw_ostream.h"
+#अन्तर्भाव "llvm/Support/BlockFrequency.h"
+#अन्तर्भाव "llvm/Support/BranchProbability.h"
+#अन्तर्भाव "llvm/Support/MathExtras.h"
+#अन्तर्भाव "llvm/Support/ScaledNumber.h"
+#अन्तर्भाव "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+उपयुज्य नामाकाश llvm;
 
-BlockFrequency &BlockFrequency::operator*=(BranchProbability Prob) {
+खण्डम्_Frequency &खण्डम्_Frequency::संक्रियकः*=(BranchProbability Prob) {
   Frequency = Prob.scale(Frequency);
-  return *this;
+  प्रत्यागम *एतत्;
 }
 
-BlockFrequency BlockFrequency::operator*(BranchProbability Prob) const {
-  BlockFrequency Freq(Frequency);
+खण्डम्_Frequency खण्डम्_Frequency::संक्रियकः*(BranchProbability Prob) ध्रुव {
+  खण्डम्_Frequency Freq(Frequency);
   Freq *= Prob;
-  return Freq;
+  प्रत्यागम Freq;
 }
 
-BlockFrequency &BlockFrequency::operator/=(BranchProbability Prob) {
+खण्डम्_Frequency &खण्डम्_Frequency::संक्रियकः/=(BranchProbability Prob) {
   Frequency = Prob.scaleByInverse(Frequency);
-  return *this;
+  प्रत्यागम *एतत्;
 }
 
-BlockFrequency BlockFrequency::operator/(BranchProbability Prob) const {
-  BlockFrequency Freq(Frequency);
+खण्डम्_Frequency खण्डम्_Frequency::संक्रियकः/(BranchProbability Prob) ध्रुव {
+  खण्डम्_Frequency Freq(Frequency);
   Freq /= Prob;
-  return Freq;
+  प्रत्यागम Freq;
 }
 
-std::optional<BlockFrequency> BlockFrequency::mul(uint64_t Factor) const {
-  bool Overflow;
-  uint64_t ResultFrequency = SaturatingMultiply(Frequency, Factor, &Overflow);
-  if (Overflow)
-    return {};
-  return BlockFrequency(ResultFrequency);
+std::optional<खण्डम्_Frequency> खण्डम्_Frequency::mul(uint64_t गुणकः) ध्रुव {
+  तार्किक अतिप्रवाहः;
+  uint64_t परिणाम_Frequency = SaturatingMultiply(Frequency, गुणकः, &अतिप्रवाहः);
+  यदि (अतिप्रवाहः)
+    प्रत्यागम {};
+  प्रत्यागम खण्डम्_Frequency(परिणाम_Frequency);
 }
 
-raw_ostream &llvm::operator<<(raw_ostream &OS, BlockFrequency Freq) {
+raw_ostream &llvm::संक्रियकः<<(raw_ostream &OS, खण्डम्_Frequency Freq) {
   OS << Freq.getFrequency();
-  return OS;
+  प्रत्यागम OS;
 }
 
-void llvm::printRelativeBlockFreq(raw_ostream &OS, BlockFrequency EntryFreq,
-                                  BlockFrequency Freq) {
-  if (Freq == BlockFrequency(0)) {
+शून्य llvm::print_Relative_खण्डम्_Freq(raw_ostream &OS, खण्डम्_Frequency प्रविष्टिः_Freq,
+                                  खण्डम्_Frequency Freq) {
+  यदि (Freq == खण्डम्_Frequency(0)) {
     OS << "0";
-    return;
+    प्रत्यागम;
   }
-  if (EntryFreq == BlockFrequency(0)) {
+  यदि (प्रविष्टिः_Freq == खण्डम्_Frequency(0)) {
     OS << "<invalid BFI>";
-    return;
+    प्रत्यागम;
   }
-  ScaledNumber<uint64_t> Block(Freq.getFrequency(), 0);
-  ScaledNumber<uint64_t> Entry(EntryFreq.getFrequency(), 0);
-  OS << Block / Entry;
+  Scaled_सङ्ख्या<uint64_t> खण्डम्_2(Freq.getFrequency(), 0);
+  Scaled_सङ्ख्या<uint64_t> प्रविष्टिः(प्रविष्टिः_Freq.getFrequency(), 0);
+  OS << खण्डम्_2 / प्रविष्टिः;
 }

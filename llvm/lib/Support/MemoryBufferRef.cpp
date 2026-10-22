@@ -10,10 +10,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/MemoryBufferRef.h"
-#include "llvm/Support/MemoryBuffer.h"
+#अन्तर्भाव "llvm/Support/MemoryBufferRef.h"
+#अन्तर्भाव "llvm/Support/MemoryBuffer.h"
 
-using namespace llvm;
+उपयुज्य नामाकाश llvm;
 
-MemoryBufferRef::MemoryBufferRef(const MemoryBuffer &Buffer)
-    : Buffer(Buffer.getBuffer()), Identifier(Buffer.getBufferIdentifier()) {}
+स्मृतिः_बफर_Ref::स्मृतिः_बफर_Ref(ध्रुव स्मृतिः_बफर &बफर)
+    : बफर(बफर.get_बफर()), Identifier(बफर.get_बफर_Identifier()) {}

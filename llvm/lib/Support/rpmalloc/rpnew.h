@@ -11,103 +11,103 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifdef __cplusplus
+#यदि_परिभाषितम् __cplusplus
 
-#include <new>
-#include <rpmalloc.h>
+#अन्तर्भाव <new>
+#अन्तर्भाव <rpmalloc.h>
 
-#ifndef __CRTDECL
-#define __CRTDECL
-#endif
+#यदि_अपरिभाषितम् __CRTDECL
+#परिभाषय __CRTDECL
+#यदि_अन्तः
 
-extern void __CRTDECL operator delete(void *p) noexcept { rpfree(p); }
+बाह्य शून्य __CRTDECL संक्रियकः delete(शून्य *p) noexcept { rpfree(p); }
 
-extern void __CRTDECL operator delete[](void *p) noexcept { rpfree(p); }
+बाह्य शून्य __CRTDECL संक्रियकः delete[](शून्य *p) noexcept { rpfree(p); }
 
-extern void *__CRTDECL operator new(std::size_t size) noexcept(false) {
-  return rpmalloc(size);
+बाह्य शून्य *__CRTDECL संक्रियकः new(std::size_t आकार_2) noexcept(false) {
+  प्रत्यागम rpmalloc(आकार_2);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size) noexcept(false) {
-  return rpmalloc(size);
+बाह्य शून्य *__CRTDECL संक्रियकः new[](std::size_t आकार_2) noexcept(false) {
+  प्रत्यागम rpmalloc(आकार_2);
 }
 
-extern void *__CRTDECL operator new(std::size_t size,
-                                    const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpmalloc(size);
+बाह्य शून्य *__CRTDECL संक्रियकः new(std::size_t आकार_2,
+                                    ध्रुव std::nothrow_t &चिह्नकम्_2) noexcept {
+  (शून्य)परिमाण(चिह्नकम्_2);
+  प्रत्यागम rpmalloc(आकार_2);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size,
-                                      const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpmalloc(size);
+बाह्य शून्य *__CRTDECL संक्रियकः new[](std::size_t आकार_2,
+                                      ध्रुव std::nothrow_t &चिह्नकम्_2) noexcept {
+  (शून्य)परिमाण(चिह्नकम्_2);
+  प्रत्यागम rpmalloc(आकार_2);
 }
 
-#if (__cplusplus >= 201402L || _MSC_VER >= 1916)
+#यदि (__cplusplus >= 201402L || _MSC_VER >= 1916)
 
-extern void __CRTDECL operator delete(void *p, std::size_t size) noexcept {
-  (void)sizeof(size);
+बाह्य शून्य __CRTDECL संक्रियकः delete(शून्य *p, std::size_t आकार_2) noexcept {
+  (शून्य)परिमाण(आकार_2);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p, std::size_t size) noexcept {
-  (void)sizeof(size);
+बाह्य शून्य __CRTDECL संक्रियकः delete[](शून्य *p, std::size_t आकार_2) noexcept {
+  (शून्य)परिमाण(आकार_2);
   rpfree(p);
 }
 
-#endif
+#यदि_अन्तः
 
-#if (__cplusplus > 201402L || defined(__cpp_aligned_new))
+#यदि (__cplusplus > 201402L || defined(__cpp_aligned_new))
 
-extern void __CRTDECL operator delete(void *p,
+बाह्य शून्य __CRTDECL संक्रियकः delete(शून्य *p,
                                       std::align_val_t align) noexcept {
-  (void)sizeof(align);
+  (शून्य)परिमाण(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p,
+बाह्य शून्य __CRTDECL संक्रियकः delete[](शून्य *p,
                                         std::align_val_t align) noexcept {
-  (void)sizeof(align);
+  (शून्य)परिमाण(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete(void *p, std::size_t size,
+बाह्य शून्य __CRTDECL संक्रियकः delete(शून्य *p, std::size_t आकार_2,
                                       std::align_val_t align) noexcept {
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (शून्य)परिमाण(आकार_2);
+  (शून्य)परिमाण(align);
   rpfree(p);
 }
 
-extern void __CRTDECL operator delete[](void *p, std::size_t size,
+बाह्य शून्य __CRTDECL संक्रियकः delete[](शून्य *p, std::size_t आकार_2,
                                         std::align_val_t align) noexcept {
-  (void)sizeof(size);
-  (void)sizeof(align);
+  (शून्य)परिमाण(आकार_2);
+  (शून्य)परिमाण(align);
   rpfree(p);
 }
 
-extern void *__CRTDECL operator new(std::size_t size,
+बाह्य शून्य *__CRTDECL संक्रियकः new(std::size_t आकार_2,
                                     std::align_val_t align) noexcept(false) {
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+  प्रत्यागम rpaligned_alloc(static_cast<size_t>(align), आकार_2);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size,
+बाह्य शून्य *__CRTDECL संक्रियकः new[](std::size_t आकार_2,
                                       std::align_val_t align) noexcept(false) {
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+  प्रत्यागम rpaligned_alloc(static_cast<size_t>(align), आकार_2);
 }
 
-extern void *__CRTDECL operator new(std::size_t size, std::align_val_t align,
-                                    const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+बाह्य शून्य *__CRTDECL संक्रियकः new(std::size_t आकार_2, std::align_val_t align,
+                                    ध्रुव std::nothrow_t &चिह्नकम्_2) noexcept {
+  (शून्य)परिमाण(चिह्नकम्_2);
+  प्रत्यागम rpaligned_alloc(static_cast<size_t>(align), आकार_2);
 }
 
-extern void *__CRTDECL operator new[](std::size_t size, std::align_val_t align,
-                                      const std::nothrow_t &tag) noexcept {
-  (void)sizeof(tag);
-  return rpaligned_alloc(static_cast<size_t>(align), size);
+बाह्य शून्य *__CRTDECL संक्रियकः new[](std::size_t आकार_2, std::align_val_t align,
+                                      ध्रुव std::nothrow_t &चिह्नकम्_2) noexcept {
+  (शून्य)परिमाण(चिह्नकम्_2);
+  प्रत्यागम rpaligned_alloc(static_cast<size_t>(align), आकार_2);
 }
 
-#endif
+#यदि_अन्तः
 
-#endif
+#यदि_अन्तः

@@ -6,8 +6,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/raw_ostream.h"
+#अन्तर्भाव "llvm/Support/raw_ostream.h"
 
-llvm::raw_ostream &llvm::operator<<(raw_ostream &OS, std::nullopt_t) {
-  return OS << "None";
+llvm::raw_ostream &llvm::संक्रियकः<<(raw_ostream &OS, std::nullopt_t) {
+  प्रत्यागम OS << "None";
 }

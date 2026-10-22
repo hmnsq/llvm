@@ -6,17 +6,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/MSP430Attributes.h"
+#अन्तर्भाव "llvm/Support/MSP430Attributes.h"
 
-using namespace llvm;
-using namespace llvm::MSP430Attrs;
+उपयुज्य नामाकाश llvm;
+उपयुज्य नामाकाश llvm::MSP430Attrs;
 
-static constexpr TagNameItem TagData[] = {{TagISA, "Tag_ISA"},
-                                          {TagCodeModel, "Tag_Code_Model"},
-                                          {TagDataModel, "Tag_Data_Model"},
-                                          {TagEnumSize, "Tag_Enum_Size"}};
+स्थिर constexpr चिह्नकम्_Name_Item चिह्नकम्_दत्त_2[] = {{चिह्नकम्_ISA, "Tag_ISA"},
+                                          {चिह्नकम्_संहिता_Model, "Tag_Code_Model"},
+                                          {चिह्नकम्_दत्त_Model, "Tag_Data_Model"},
+                                          {चिह्नकम्_Enum_आकार, "Tag_Enum_Size"}};
 
-constexpr TagNameMap MSP430AttributeTags{TagData};
-const TagNameMap &llvm::MSP430Attrs::getMSP430AttributeTags() {
-  return MSP430AttributeTags;
+constexpr चिह्नकम्_Name_Map MSP430_Attribute_चिह्नकानि{चिह्नकम्_दत्त_2};
+ध्रुव चिह्नकम्_Name_Map &llvm::MSP430Attrs::get_MSP430_Attribute_चिह्नकानि() {
+  प्रत्यागम MSP430_Attribute_चिह्नकानि;
 }

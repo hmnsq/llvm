@@ -8,18 +8,18 @@ public _llvm_blake3_compress_xof_sse41
 _TEXT   SEGMENT ALIGN(16) 'CODE'
 
 ALIGN   16
-llvm_blake3_hash_many_sse41 PROC
-_llvm_blake3_hash_many_sse41 PROC
-        push    r15
-        push    r14
-        push    r13
-        push    r12
-        push    rsi
-        push    rdi
-        push    rbx
-        push    rbp
-        mov     rbp, rsp
-        sub     rsp, 528
+llvm_blake3_hash_many_sse41 विधि
+_llvm_blake3_hash_many_sse41 विधि
+        निक्षिप    r15
+        निक्षिप    r14
+        निक्षिप    r13
+        निक्षिप    r12
+        निक्षिप    rsi
+        निक्षिप    rdi
+        निक्षिप    rbx
+        निक्षिप    rbp
+        चालय     rbp, rsp
+        वियोजय     rsp, 528
         and     rsp, 0FFFFFFFFFFFFFFC0H
         movdqa  xmmword ptr [rsp+170H], xmm6
         movdqa  xmmword ptr [rsp+180H], xmm7
@@ -31,11 +31,11 @@ _llvm_blake3_hash_many_sse41 PROC
         movdqa  xmmword ptr [rsp+1E0H], xmm13
         movdqa  xmmword ptr [rsp+1F0H], xmm14
         movdqa  xmmword ptr [rsp+200H], xmm15
-        mov     rdi, rcx
-        mov     rsi, rdx
-        mov     rdx, r8
-        mov     rcx, r9
-        mov     r8, qword ptr [rbp+68H]
+        चालय     rdi, rcx
+        चालय     rsi, rdx
+        चालय     rdx, r8
+        चालय     rcx, r9
+        चालय     r8, qword ptr [rbp+68H]
         movzx   r9, byte ptr [rbp+70H]
         neg     r9d
         movd    xmm0, r9d
@@ -57,12 +57,12 @@ _llvm_blake3_hash_many_sse41 PROC
         pshufd  xmm2, xmm2, 00H
         psubd   xmm2, xmm1
         movdqa  xmmword ptr [rsp+120H], xmm2
-        mov     rbx, qword ptr [rbp+90H]
-        mov     r15, rdx
+        चालय     rbx, qword ptr [rbp+90H]
+        चालय     r15, rdx
         shl     r15, 6
         movzx   r13d, byte ptr [rbp+78H]
         movzx   r12d, byte ptr [rbp+88H]
-        cmp     rsi, 4
+        तुलय     rsi, 4
         jc      final3blocks
 outerloop4:
         movdqu  xmm3, xmmword ptr [rcx]
@@ -75,18 +75,18 @@ outerloop4:
         pshufd  xmm5, xmm7, 55H
         pshufd  xmm6, xmm7, 0AAH
         pshufd  xmm7, xmm7, 0FFH
-        mov     r8, qword ptr [rdi]
-        mov     r9, qword ptr [rdi+8H]
-        mov     r10, qword ptr [rdi+10H]
-        mov     r11, qword ptr [rdi+18H]
+        चालय     r8, qword ptr [rdi]
+        चालय     r9, qword ptr [rdi+8H]
+        चालय     r10, qword ptr [rdi+10H]
+        चालय     r11, qword ptr [rdi+18H]
         movzx   eax, byte ptr [rbp+80H]
         or      eax, r13d
         xor     edx, edx
 innerloop4:
-        mov     r14d, eax
+        चालय     r14d, eax
         or      eax, r12d
-        add     rdx, 64
-        cmp     rdx, r15
+        योजय     rdx, 64
+        तुलय     rdx, r15
         cmovne  eax, r14d
         movdqu  xmm8, xmmword ptr [r8+rdx-40H]
         movdqu  xmm9, xmmword ptr [r9+rdx-40H]
@@ -1391,7 +1391,7 @@ innerloop4:
         pxor    xmm5, xmm13
         pxor    xmm6, xmm14
         pxor    xmm7, xmm15
-        mov     eax, r13d
+        चालय     eax, r13d
         jne     innerloop4
         movdqa  xmm9, xmm0
         punpckldq xmm0, xmm1
@@ -1435,10 +1435,10 @@ innerloop4:
         movdqa  xmm1, xmmword ptr [rsp+120H]
         psubd   xmm1, xmm0
         movdqa  xmmword ptr [rsp+120H], xmm1
-        add     rbx, 128
-        add     rdi, 32
-        sub     rsi, 4
-        cmp     rsi, 4
+        योजय     rbx, 128
+        योजय     rdi, 32
+        वियोजय     rsi, 4
+        तुलय     rsi, 4
         jnc     outerloop4
         test    rsi, rsi
         jne     final3blocks
@@ -1453,16 +1453,16 @@ unwind:
         movdqa  xmm13, xmmword ptr [rsp+1E0H]
         movdqa  xmm14, xmmword ptr [rsp+1F0H]
         movdqa  xmm15, xmmword ptr [rsp+200H]
-        mov     rsp, rbp
-        pop     rbp
-        pop     rbx
-        pop     rdi
-        pop     rsi
-        pop     r12
-        pop     r13
-        pop     r14
-        pop     r15
-        ret
+        चालय     rsp, rbp
+        उद्धर     rbp
+        उद्धर     rbx
+        उद्धर     rdi
+        उद्धर     rsi
+        उद्धर     r12
+        उद्धर     r13
+        उद्धर     r14
+        उद्धर     r15
+        प्रत्यागच्छ
 ALIGN   16
 final3blocks:
         test    esi, 2H
@@ -1479,16 +1479,16 @@ final3blocks:
         pinsrd  xmm14, dword ptr [rsp+124H], 1
         pinsrd  xmm14, dword ptr [BLAKE3_BLOCK_LEN], 2
         movaps  xmmword ptr [rsp+10H], xmm14
-        mov     r8, qword ptr [rdi]
-        mov     r9, qword ptr [rdi+8H]
+        चालय     r8, qword ptr [rdi]
+        चालय     r9, qword ptr [rdi+8H]
         movzx   eax, byte ptr [rbp+80H]
         or      eax, r13d
         xor     edx, edx
 innerloop2:
-        mov     r14d, eax
+        चालय     r14d, eax
         or      eax, r12d
-        add     rdx, 64
-        cmp     rdx, r15
+        योजय     rdx, 64
+        तुलय     rdx, r15
         cmovne  eax, r14d
         movaps  xmm2, xmmword ptr [BLAKE3_IV]
         movaps  xmm10, xmm2
@@ -1522,7 +1522,7 @@ innerloop2:
         movaps  xmm11, xmmword ptr [rsp+10H]
         pinsrd  xmm3, eax, 3
         pinsrd  xmm11, eax, 3
-        mov     al, 7
+        चालय     al, 7
 roundloop2:
         paddd   xmm0, xmm4
         paddd   xmm8, xmm12
@@ -1660,14 +1660,14 @@ roundloop2:
         movdqa  xmm14, xmm5
         movdqa  xmm5, xmmword ptr [rsp+20H]
         movdqa  xmm6, xmmword ptr [rsp+40H]
-        jmp     roundloop2
+        कूर्द     roundloop2
 endroundloop2:
         pxor    xmm0, xmm2
         pxor    xmm1, xmm3
         pxor    xmm8, xmm10
         pxor    xmm9, xmm11
-        mov     eax, r13d
-        cmp     rdx, r15
+        चालय     eax, r13d
+        तुलय     rdx, r15
         jne     innerloop2
         movups  xmmword ptr [rbx], xmm0
         movups  xmmword ptr [rbx+10H], xmm1
@@ -1682,9 +1682,9 @@ endroundloop2:
         blendvps xmm2, xmm4, xmm0
         movdqa  xmmword ptr [rsp+110H], xmm1
         movdqa  xmmword ptr [rsp+120H], xmm2
-        add     rdi, 16
-        add     rbx, 64
-        sub     rsi, 2
+        योजय     rdi, 16
+        योजय     rbx, 64
+        वियोजय     rsi, 2
 final1block:
         test    esi, 1H
         je      unwind
@@ -1695,15 +1695,15 @@ final1block:
         pinsrd  xmm13, dword ptr [BLAKE3_BLOCK_LEN], 2
         movaps  xmm14, xmmword ptr [ROT8]
         movaps  xmm15, xmmword ptr [ROT16]
-        mov     r8, qword ptr [rdi]
+        चालय     r8, qword ptr [rdi]
         movzx   eax, byte ptr [rbp+80H]
         or      eax, r13d
         xor     edx, edx
 innerloop1:
-        mov     r14d, eax
+        चालय     r14d, eax
         or      eax, r12d
-        add     rdx, 64
-        cmp     rdx, r15
+        योजय     rdx, 64
+        तुलय     rdx, r15
         cmovne  eax, r14d
         movaps  xmm2, xmmword ptr [BLAKE3_IV]
         movaps  xmm3, xmm13
@@ -1721,7 +1721,7 @@ innerloop1:
         pshufd  xmm6, xmm6, 93H
         shufps  xmm8, xmm7, 221
         pshufd  xmm7, xmm8, 93H
-        mov     al, 7
+        चालय     al, 7
 roundloop1:
         paddd   xmm0, xmm4
         paddd   xmm0, xmm1
@@ -1787,22 +1787,22 @@ roundloop1:
         pshufd  xmm7, xmm6, 1EH
         movdqa  xmm5, xmm9
         movdqa  xmm6, xmm8
-        jmp     roundloop1
+        कूर्द     roundloop1
 endroundloop1:
         pxor    xmm0, xmm2
         pxor    xmm1, xmm3
-        mov     eax, r13d
-        cmp     rdx, r15
+        चालय     eax, r13d
+        तुलय     rdx, r15
         jne     innerloop1
         movups  xmmword ptr [rbx], xmm0
         movups  xmmword ptr [rbx+10H], xmm1
-        jmp     unwind
+        कूर्द     unwind
 _llvm_blake3_hash_many_sse41 ENDP
 llvm_blake3_hash_many_sse41 ENDP
 
-llvm_blake3_compress_in_place_sse41 PROC
-_llvm_blake3_compress_in_place_sse41 PROC
-        sub     rsp, 120
+llvm_blake3_compress_in_place_sse41 विधि
+_llvm_blake3_compress_in_place_sse41 विधि
+        वियोजय     rsp, 120
         movdqa  xmmword ptr [rsp], xmm6
         movdqa  xmmword ptr [rsp+10H], xmm7
         movdqa  xmmword ptr [rsp+20H], xmm8
@@ -1816,7 +1816,7 @@ _llvm_blake3_compress_in_place_sse41 PROC
         movzx   eax, byte ptr [rsp+0A0H]
         movzx   r8d, r8b
         shl     rax, 32
-        add     r8, rax
+        योजय     r8, rax
         movd    xmm3, r9
         movd    xmm4, r8
         punpcklqdq xmm3, xmm4
@@ -1835,7 +1835,7 @@ _llvm_blake3_compress_in_place_sse41 PROC
         pshufd  xmm7, xmm8, 93H
         movaps  xmm14, xmmword ptr [ROT8]
         movaps  xmm15, xmmword ptr [ROT16]
-        mov     al, 7
+        चालय     al, 7
 @@:
         paddd   xmm0, xmm4
         paddd   xmm0, xmm1
@@ -1901,7 +1901,7 @@ _llvm_blake3_compress_in_place_sse41 PROC
         pshufd  xmm7, xmm6, 1EH
         movdqa  xmm5, xmm9
         movdqa  xmm6, xmm8
-        jmp     @B
+        कूर्द     @B
 @@:
         pxor    xmm0, xmm2
         pxor    xmm1, xmm3
@@ -1914,15 +1914,15 @@ _llvm_blake3_compress_in_place_sse41 PROC
         movdqa  xmm11, xmmword ptr [rsp+40H]
         movdqa  xmm14, xmmword ptr [rsp+50H]
         movdqa  xmm15, xmmword ptr [rsp+60H]
-        add     rsp, 120
-        ret
+        योजय     rsp, 120
+        प्रत्यागच्छ
 _llvm_blake3_compress_in_place_sse41 ENDP
 llvm_blake3_compress_in_place_sse41 ENDP
 
 ALIGN 16
-llvm_blake3_compress_xof_sse41 PROC
-_llvm_blake3_compress_xof_sse41 PROC
-        sub     rsp, 120
+llvm_blake3_compress_xof_sse41 विधि
+_llvm_blake3_compress_xof_sse41 विधि
+        वियोजय     rsp, 120
         movdqa  xmmword ptr [rsp], xmm6
         movdqa  xmmword ptr [rsp+10H], xmm7
         movdqa  xmmword ptr [rsp+20H], xmm8
@@ -1935,9 +1935,9 @@ _llvm_blake3_compress_xof_sse41 PROC
         movaps  xmm2, xmmword ptr [BLAKE3_IV]
         movzx   eax, byte ptr [rsp+0A0H]
         movzx   r8d, r8b
-        mov     r10, qword ptr [rsp+0A8H]
+        चालय     r10, qword ptr [rsp+0A8H]
         shl     rax, 32
-        add     r8, rax
+        योजय     r8, rax
         movd    xmm3, r9
         movd    xmm4, r8
         punpcklqdq xmm3, xmm4
@@ -1956,7 +1956,7 @@ _llvm_blake3_compress_xof_sse41 PROC
         pshufd  xmm7, xmm8, 93H
         movaps  xmm14, xmmword ptr [ROT8]
         movaps  xmm15, xmmword ptr [ROT16]
-        mov     al, 7
+        चालय     al, 7
 @@:
         paddd   xmm0, xmm4
         paddd   xmm0, xmm1
@@ -2022,7 +2022,7 @@ _llvm_blake3_compress_xof_sse41 PROC
         pshufd  xmm7, xmm6, 1EH
         movdqa  xmm5, xmm9
         movdqa  xmm6, xmm8
-        jmp     @B
+        कूर्द     @B
 @@:
         movdqu  xmm4, xmmword ptr [rcx]
         movdqu  xmm5, xmmword ptr [rcx+10H]
@@ -2041,8 +2041,8 @@ _llvm_blake3_compress_xof_sse41 PROC
         movdqa  xmm11, xmmword ptr [rsp+40H]
         movdqa  xmm14, xmmword ptr [rsp+50H]
         movdqa  xmm15, xmmword ptr [rsp+60H]
-        add     rsp, 120
-        ret
+        योजय     rsp, 120
+        प्रत्यागच्छ
 _llvm_blake3_compress_xof_sse41 ENDP
 llvm_blake3_compress_xof_sse41 ENDP
 
@@ -2085,5 +2085,5 @@ CMP_MSB_MASK:
         dd 8 dup(80000000H)
 
 _RDATA ENDS
-END
+अन्त
 

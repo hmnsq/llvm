@@ -11,34 +11,34 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SuffixTreeNode.h"
+#अन्तर्भाव "llvm/Support/SuffixTreeNode.h"
 
-using namespace llvm;
+उपयुज्य नामाकाश llvm;
 
-unsigned SuffixTreeNode::getStartIdx() const { return StartIdx; }
-void SuffixTreeNode::incrementStartIdx(unsigned Inc) { StartIdx += Inc; }
-void SuffixTreeNode::setConcatLen(unsigned Len) { ConcatLen = Len; }
-unsigned SuffixTreeNode::getConcatLen() const { return ConcatLen; }
+अचिह्नित Suffix_वृक्षः_ग्रन्थिः::getStartIdx() ध्रुव { प्रत्यागम StartIdx; }
+शून्य Suffix_वृक्षः_ग्रन्थिः::incrementStartIdx(अचिह्नित Inc) { StartIdx += Inc; }
+शून्य Suffix_वृक्षः_ग्रन्थिः::समुच्चयः_Concat_Len(अचिह्नित Len) { ConcatLen = Len; }
+अचिह्नित Suffix_वृक्षः_ग्रन्थिः::getConcatLen() ध्रुव { प्रत्यागम ConcatLen; }
 
-bool SuffixTreeInternalNode::isRoot() const {
-  return getStartIdx() == EmptyIdx;
+तार्किक Suffix_वृक्षः_आन्तरिकम्_ग्रन्थिः::is_मूलम्() ध्रुव {
+  प्रत्यागम getStartIdx() == रिक्तानि_Idx;
 }
-unsigned SuffixTreeInternalNode::getEndIdx() const { return EndIdx; }
-void SuffixTreeInternalNode::setLink(SuffixTreeInternalNode *L) {
-  assert(L && "Cannot set a null link?");
+अचिह्नित Suffix_वृक्षः_आन्तरिकम्_ग्रन्थिः::get_अन्तः_Idx() ध्रुव { प्रत्यागम अन्तः_Idx; }
+शून्य Suffix_वृक्षः_आन्तरिकम्_ग्रन्थिः::समुच्चयः_Link(Suffix_वृक्षः_आन्तरिकम्_ग्रन्थिः *L) {
+  प्रतिज्ञा(L && "Cannot set a null link?");
   Link = L;
 }
-SuffixTreeInternalNode *SuffixTreeInternalNode::getLink() const { return Link; }
+Suffix_वृक्षः_आन्तरिकम्_ग्रन्थिः *Suffix_वृक्षः_आन्तरिकम्_ग्रन्थिः::getLink() ध्रुव { प्रत्यागम Link; }
 
-unsigned SuffixTreeLeafNode::getEndIdx() const {
-  assert(EndIdx && "EndIdx is empty?");
-  return *EndIdx;
+अचिह्नित Suffix_वृक्षः_पर्णम्_ग्रन्थिः::get_अन्तः_Idx() ध्रुव {
+  प्रतिज्ञा(अन्तः_Idx && "EndIdx is empty?");
+  प्रत्यागम *अन्तः_Idx;
 }
 
-unsigned SuffixTreeLeafNode::getSuffixIdx() const { return SuffixIdx; }
-void SuffixTreeLeafNode::setSuffixIdx(unsigned Idx) { SuffixIdx = Idx; }
+अचिह्नित Suffix_वृक्षः_पर्णम्_ग्रन्थिः::getSuffixIdx() ध्रुव { प्रत्यागम SuffixIdx; }
+शून्य Suffix_वृक्षः_पर्णम्_ग्रन्थिः::समुच्चयः_Suffix_Idx(अचिह्नित Idx) { SuffixIdx = Idx; }
 
-unsigned SuffixTreeNode::getLeftLeafIdx() const { return LeftLeafIdx; }
-unsigned SuffixTreeNode::getRightLeafIdx() const { return RightLeafIdx; }
-void SuffixTreeNode::setLeftLeafIdx(unsigned Idx) { LeftLeafIdx = Idx; }
-void SuffixTreeNode::setRightLeafIdx(unsigned Idx) { RightLeafIdx = Idx; }
+अचिह्नित Suffix_वृक्षः_ग्रन्थिः::get_वामः_पर्णम्_Idx() ध्रुव { प्रत्यागम वामः_पर्णम्_Idx; }
+अचिह्नित Suffix_वृक्षः_ग्रन्थिः::get_दक्षिणः_पर्णम्_Idx() ध्रुव { प्रत्यागम दक्षिणः_पर्णम्_Idx; }
+शून्य Suffix_वृक्षः_ग्रन्थिः::समुच्चयः_वामः_पर्णम्_Idx(अचिह्नित Idx) { वामः_पर्णम्_Idx = Idx; }
+शून्य Suffix_वृक्षः_ग्रन्थिः::समुच्चयः_दक्षिणः_पर्णम्_Idx(अचिह्नित Idx) { दक्षिणः_पर्णम्_Idx = Idx; }

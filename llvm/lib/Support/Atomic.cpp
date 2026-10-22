@@ -10,50 +10,50 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Atomic.h"
-#include "llvm/Config/llvm-config.h"
+#अन्तर्भाव "llvm/Support/Atomic.h"
+#अन्तर्भाव "llvm/Config/llvm-config.h"
 
-using namespace llvm;
+उपयुज्य नामाकाश llvm;
 
-#if defined(_MSC_VER)
-#include <intrin.h>
+#यदि defined(_MSC_VER)
+#अन्तर्भाव <intrin.h>
 
 // We must include windows.h after intrin.h.
-#include <windows.h>
-#undef MemoryFence
-#endif
+#अन्तर्भाव <windows.h>
+#अपरिभाषय स्मृतिः_Fence
+#यदि_अन्तः
 
-#if defined(__GNUC__) || (defined(__IBMCPP__) && __IBMCPP__ >= 1210)
-#define GNU_ATOMICS
-#endif
+#यदि defined(__GNUC__) || (defined(__IBMCPP__) && __IBMCPP__ >= 1210)
+#परिभाषय GNU_ATOMICS
+#यदि_अन्तः
 
-void sys::MemoryFence() {
-#if LLVM_HAS_ATOMICS == 0
-  return;
-#else
-#  if defined(GNU_ATOMICS)
+शून्य sys::स्मृतिः_Fence() {
+#यदि LLVM_HAS_ATOMICS == 0
+  प्रत्यागम;
+#अन्यथा
+#  यदि defined(GNU_ATOMICS)
   __sync_synchronize();
 #  elif defined(_MSC_VER)
-  MemoryBarrier();
-#  else
-# error No memory fence implementation for your platform!
+  स्मृतिः_Barrier();
+#  अन्यथा
+# error No स्मृतिः fence implementation प्रति your platform!
 #  endif
-#endif
+#यदि_अन्तः
 }
 
-sys::cas_flag sys::CompareAndSwap(volatile sys::cas_flag* ptr,
-                                  sys::cas_flag new_value,
-                                  sys::cas_flag old_value) {
-#if LLVM_HAS_ATOMICS == 0
-  sys::cas_flag result = *ptr;
-  if (result == old_value)
-    *ptr = new_value;
-  return result;
-#elif defined(GNU_ATOMICS)
-  return __sync_val_compare_and_swap(ptr, old_value, new_value);
-#elif defined(_MSC_VER)
-  return InterlockedCompareExchange(ptr, new_value, old_value);
-#else
-#  error No compare-and-swap implementation for your platform!
-#endif
+sys::cas_flag sys::CompareAndSwap(चञ्चल sys::cas_flag* ptr,
+                                  sys::cas_flag new_मानम्,
+                                  sys::cas_flag old_मानम्) {
+#यदि LLVM_HAS_ATOMICS == 0
+  sys::cas_flag परिणाम_2 = *ptr;
+  यदि (परिणाम_2 == old_मानम्)
+    *ptr = new_मानम्;
+  प्रत्यागम परिणाम_2;
+#नोचेद्यदि defined(GNU_ATOMICS)
+  प्रत्यागम __sync_val_compare_and_swap(ptr, old_मानम्, new_मानम्);
+#नोचेद्यदि defined(_MSC_VER)
+  प्रत्यागम InterlockedCompareExchange(ptr, new_मानम्, old_मानम्);
+#अन्यथा
+#  error No compare-and-swap implementation प्रति your platform!
+#यदि_अन्तः
 }

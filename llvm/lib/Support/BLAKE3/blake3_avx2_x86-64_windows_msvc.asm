@@ -4,18 +4,18 @@ public llvm_blake3_hash_many_avx2
 _TEXT   SEGMENT ALIGN(16) 'CODE'
 
 ALIGN   16
-llvm_blake3_hash_many_avx2 PROC
-_llvm_blake3_hash_many_avx2 PROC
-        push    r15
-        push    r14
-        push    r13
-        push    r12
-        push    rsi
-        push    rdi
-        push    rbx
-        push    rbp
-        mov     rbp, rsp
-        sub     rsp, 880
+llvm_blake3_hash_many_avx2 विधि
+_llvm_blake3_hash_many_avx2 विधि
+        निक्षिप    r15
+        निक्षिप    r14
+        निक्षिप    r13
+        निक्षिप    r12
+        निक्षिप    rsi
+        निक्षिप    rdi
+        निक्षिप    rbx
+        निक्षिप    rbp
+        चालय     rbp, rsp
+        वियोजय     rsp, 880
         and     rsp, 0FFFFFFFFFFFFFFC0H
         vmovdqa xmmword ptr [rsp+2D0H], xmm6
         vmovdqa xmmword ptr [rsp+2E0H], xmm7
@@ -27,11 +27,11 @@ _llvm_blake3_hash_many_avx2 PROC
         vmovdqa xmmword ptr [rsp+340H], xmm13
         vmovdqa xmmword ptr [rsp+350H], xmm14
         vmovdqa xmmword ptr [rsp+360H], xmm15
-        mov     rdi, rcx
-        mov     rsi, rdx
-        mov     rdx, r8
-        mov     rcx, r9
-        mov     r8, qword ptr [rbp+68H]
+        चालय     rdi, rcx
+        चालय     rsi, rdx
+        चालय     rdx, r8
+        चालय     rcx, r9
+        चालय     r8, qword ptr [rbp+68H]
         movzx   r9, byte ptr [rbp+70H]
         neg     r9d
         vmovd   xmm0, r9d
@@ -53,8 +53,8 @@ _llvm_blake3_hash_many_avx2 PROC
         vpsubd  ymm3, ymm3, ymm2
         vmovdqa ymmword ptr [rsp+240H], ymm3
         shl     rdx, 6
-        mov     qword ptr [rsp+2C0H], rdx
-        cmp     rsi, 8
+        चालय     qword ptr [rsp+2C0H], rdx
+        तुलय     rsi, 8
         jc      final7blocks
 outerloop8:
         vpbroadcastd ymm0, dword ptr [rcx]
@@ -65,14 +65,14 @@ outerloop8:
         vpbroadcastd ymm5, dword ptr [rcx+14H]
         vpbroadcastd ymm6, dword ptr [rcx+18H]
         vpbroadcastd ymm7, dword ptr [rcx+1CH]
-        mov     r8, qword ptr [rdi]
-        mov     r9, qword ptr [rdi+8H]
-        mov     r10, qword ptr [rdi+10H]
-        mov     r11, qword ptr [rdi+18H]
-        mov     r12, qword ptr [rdi+20H]
-        mov     r13, qword ptr [rdi+28H]
-        mov     r14, qword ptr [rdi+30H]
-        mov     r15, qword ptr [rdi+38H]
+        चालय     r8, qword ptr [rdi]
+        चालय     r9, qword ptr [rdi+8H]
+        चालय     r10, qword ptr [rdi+10H]
+        चालय     r11, qword ptr [rdi+18H]
+        चालय     r12, qword ptr [rdi+20H]
+        चालय     r13, qword ptr [rdi+28H]
+        चालय     r14, qword ptr [rdi+30H]
+        चालय     r15, qword ptr [rdi+38H]
         movzx   eax, byte ptr [rbp+78H]
         movzx   ebx, byte ptr [rbp+80H]
         or      eax, ebx
@@ -81,10 +81,10 @@ ALIGN   16
 innerloop8:
         movzx   ebx, byte ptr [rbp+88H]
         or      ebx, eax
-        add     rdx, 64
-        cmp     rdx, qword ptr [rsp+2C0H]
+        योजय     rdx, 64
+        तुलय     rdx, qword ptr [rsp+2C0H]
         cmove   eax, ebx
-        mov     dword ptr [rsp+200H], eax
+        चालय     dword ptr [rsp+200H], eax
         vmovups xmm8, xmmword ptr [r8+rdx-40H]
         vinsertf128 ymm8, ymm8, xmmword ptr [r12+rdx-40H], 01H
         vmovups xmm9, xmmword ptr [r9+rdx-40H]
@@ -1247,7 +1247,7 @@ innerloop8:
         vpxor   ymm7, ymm7, ymm15
         movzx   eax, byte ptr [rbp+78H]
         jne     innerloop8
-        mov     rbx, qword ptr [rbp+90H]
+        चालय     rbx, qword ptr [rbp+90H]
         vunpcklps ymm8, ymm0, ymm1
         vunpcklps ymm9, ymm2, ymm3
         vunpckhps ymm10, ymm0, ymm1
@@ -1293,11 +1293,11 @@ innerloop8:
         vmovdqa ymm0, ymmword ptr [rsp+240H]
         vpsubd  ymm2, ymm0, ymm2
         vmovdqa ymmword ptr [rsp+240H], ymm2
-        add     rdi, 64
-        add     rbx, 256
-        mov     qword ptr [rbp+90H], rbx
-        sub     rsi, 8
-        cmp     rsi, 8
+        योजय     rdi, 64
+        योजय     rbx, 256
+        चालय     qword ptr [rbp+90H], rbx
+        वियोजय     rsi, 8
+        तुलय     rsi, 8
         jnc     outerloop8
         test    rsi, rsi
         jnz     final7blocks
@@ -1313,20 +1313,20 @@ unwind:
         vmovdqa xmm13, xmmword ptr [rsp+340H]
         vmovdqa xmm14, xmmword ptr [rsp+350H]
         vmovdqa xmm15, xmmword ptr [rsp+360H]
-        mov     rsp, rbp
-        pop     rbp
-        pop     rbx
-        pop     rdi
-        pop     rsi
-        pop     r12
-        pop     r13
-        pop     r14
-        pop     r15
-        ret
+        चालय     rsp, rbp
+        उद्धर     rbp
+        उद्धर     rbx
+        उद्धर     rdi
+        उद्धर     rsi
+        उद्धर     r12
+        उद्धर     r13
+        उद्धर     r14
+        उद्धर     r15
+        प्रत्यागच्छ
 ALIGN   16
 final7blocks:
-        mov     rbx, qword ptr [rbp+90H]
-        mov     r15, qword ptr [rsp+2C0H]
+        चालय     rbx, qword ptr [rbp+90H]
+        चालय     r15, qword ptr [rsp+2C0H]
         movzx   r13d, byte ptr [rbp+78H]
         movzx   r12d, byte ptr [rbp+88H]
         test    rsi, 4H
@@ -1346,21 +1346,21 @@ final7blocks:
         vpblendd ymm15, ymm15, ymm12, 44H
         vmovdqa ymmword ptr [rsp], ymm14
         vmovdqa ymmword ptr [rsp+20H], ymm15
-        mov     r8, qword ptr [rdi]
-        mov     r9, qword ptr [rdi+8H]
-        mov     r10, qword ptr [rdi+10H]
-        mov     r11, qword ptr [rdi+18H]
+        चालय     r8, qword ptr [rdi]
+        चालय     r9, qword ptr [rdi+8H]
+        चालय     r10, qword ptr [rdi+10H]
+        चालय     r11, qword ptr [rdi+18H]
         movzx   eax, byte ptr [rbp+80H]
         or      eax, r13d
         xor     edx, edx
 ALIGN   16
 innerloop4:
-        mov     r14d, eax
+        चालय     r14d, eax
         or      eax, r12d
-        add     rdx, 64
-        cmp     rdx, r15
+        योजय     rdx, 64
+        तुलय     rdx, r15
         cmovne  eax, r14d
-        mov     dword ptr [rsp+200H], eax
+        चालय     dword ptr [rsp+200H], eax
         vmovups ymm2, ymmword ptr [r8+rdx-40H]
         vinsertf128 ymm2, ymm2, xmmword ptr [r9+rdx-40H], 01H
         vmovups ymm3, ymmword ptr [r8+rdx-30H]
@@ -1396,7 +1396,7 @@ innerloop4:
         vpblendd ymm11, ymm11, ymm2, 88H
         vbroadcasti128 ymm2, xmmword ptr [BLAKE3_IV]
         vmovdqa ymm10, ymm2
-        mov     al, 7
+        चालय     al, 7
 roundloop4:
         vpaddd  ymm0, ymm0, ymm4
         vpaddd  ymm8, ymm8, ymm12
@@ -1526,14 +1526,14 @@ roundloop4:
         vmovdqa ymm14, ymm5
         vmovdqa ymm5, ymmword ptr [rsp+40H]
         vmovdqa ymm6, ymmword ptr [rsp+80H]
-        jmp     roundloop4
+        कूर्द     roundloop4
 endroundloop4:
         vpxor   ymm0, ymm0, ymm2
         vpxor   ymm1, ymm1, ymm3
         vpxor   ymm8, ymm8, ymm10
         vpxor   ymm9, ymm9, ymm11
-        mov     eax, r13d
-        cmp     rdx, r15
+        चालय     eax, r13d
+        तुलय     rdx, r15
         jne     innerloop4
         vmovdqu xmmword ptr [rbx], xmm0
         vmovdqu xmmword ptr [rbx+10H], xmm1
@@ -1552,9 +1552,9 @@ endroundloop4:
         vblendvps xmm2, xmm2, xmm3, xmm8
         vmovaps xmmword ptr [rsp+220H], xmm0
         vmovaps xmmword ptr [rsp+240H], xmm2
-        add     rbx, 128
-        add     rdi, 32
-        sub     rsi, 4
+        योजय     rbx, 128
+        योजय     rdi, 32
+        वियोजय     rsi, 4
 final3blocks:
         test    rsi, 2H
         je      final1blocks
@@ -1569,19 +1569,19 @@ final3blocks:
         vinserti128 ymm13, ymm13, xmm14, 01H
         vbroadcasti128 ymm14, xmmword ptr [ROT16]
         vbroadcasti128 ymm15, xmmword ptr [ROT8]
-        mov     r8, qword ptr [rdi]
-        mov     r9, qword ptr [rdi+8H]
+        चालय     r8, qword ptr [rdi]
+        चालय     r9, qword ptr [rdi+8H]
         movzx   eax, byte ptr [rbp+80H]
         or      eax, r13d
         xor     edx, edx
 ALIGN   16
 innerloop2:
-        mov     r14d, eax
+        चालय     r14d, eax
         or      eax, r12d
-        add     rdx, 64
-        cmp     rdx, r15
+        योजय     rdx, 64
+        तुलय     rdx, r15
         cmovne  eax, r14d
-        mov     dword ptr [rsp+200H], eax
+        चालय     dword ptr [rsp+200H], eax
         vbroadcasti128 ymm2, xmmword ptr [BLAKE3_IV]
         vpbroadcastd ymm8, dword ptr [rsp+200H]
         vpblendd ymm3, ymm13, ymm8, 88H
@@ -1599,7 +1599,7 @@ innerloop2:
         vshufps ymm7, ymm8, ymm9, 221
         vpshufd ymm6, ymm6, 93H
         vpshufd ymm7, ymm7, 93H
-        mov     al, 7
+        चालय     al, 7
 roundloop2:
         vpaddd  ymm0, ymm0, ymm4
         vpaddd  ymm0, ymm0, ymm1
@@ -1658,12 +1658,12 @@ roundloop2:
         vpshufd ymm7, ymm6, 1EH
         vmovdqa ymm5, ymm9
         vmovdqa ymm6, ymm8
-        jmp     roundloop2
+        कूर्द     roundloop2
 endroundloop2:
         vpxor   ymm0, ymm0, ymm2
         vpxor   ymm1, ymm1, ymm3
-        mov     eax, r13d
-        cmp     rdx, r15
+        चालय     eax, r13d
+        तुलय     rdx, r15
         jne     innerloop2
         vmovdqu xmmword ptr [rbx], xmm0
         vmovdqu xmmword ptr [rbx+10H], xmm1
@@ -1678,9 +1678,9 @@ endroundloop2:
         vblendvps ymm2, ymm2, ymm3, ymm8
         vmovaps ymmword ptr [rsp+220H], ymm0
         vmovaps ymmword ptr [rsp+240H], ymm2
-        add     rbx, 64
-        add     rdi, 16
-        sub     rsi, 2
+        योजय     rbx, 64
+        योजय     rdi, 16
+        वियोजय     rsi, 2
 final1blocks:
         test    rsi, 1H
         je      unwind
@@ -1691,16 +1691,16 @@ final1blocks:
         vpinsrd xmm13, xmm3, dword ptr [BLAKE3_BLOCK_LEN], 2
         vmovdqa xmm14, xmmword ptr [ROT16]
         vmovdqa xmm15, xmmword ptr [ROT8]
-        mov     r8, qword ptr [rdi]
+        चालय     r8, qword ptr [rdi]
         movzx   eax, byte ptr [rbp+80H]
         or      eax, r13d
         xor     edx, edx
 ALIGN   16
 innerloop1:
-        mov     r14d, eax
+        चालय     r14d, eax
         or      eax, r12d
-        add     rdx, 64
-        cmp     rdx, r15
+        योजय     rdx, 64
+        तुलय     rdx, r15
         cmovne  eax, r14d
         vmovdqa xmm2, xmmword ptr [BLAKE3_IV]
         vmovdqa xmm3, xmm13
@@ -1715,7 +1715,7 @@ innerloop1:
         vshufps xmm7, xmm8, xmm9, 221
         vpshufd xmm6, xmm6, 93H
         vpshufd xmm7, xmm7, 93H
-        mov     al, 7
+        चालय     al, 7
 roundloop1:
         vpaddd  xmm0, xmm0, xmm4
         vpaddd  xmm0, xmm0, xmm1
@@ -1774,16 +1774,16 @@ roundloop1:
         vpshufd xmm7, xmm6, 1EH
         vmovdqa xmm5, xmm9
         vmovdqa xmm6, xmm8
-        jmp     roundloop1
+        कूर्द     roundloop1
 endroundloop1:
         vpxor   xmm0, xmm0, xmm2
         vpxor   xmm1, xmm1, xmm3
-        mov     eax, r13d
-        cmp     rdx, r15
+        चालय     eax, r13d
+        तुलय     rdx, r15
         jne     innerloop1
         vmovdqu xmmword ptr [rbx], xmm0
         vmovdqu xmmword ptr [rbx+10H], xmm1
-        jmp     unwind
+        कूर्द     unwind
 
 _llvm_blake3_hash_many_avx2 ENDP
 llvm_blake3_hash_many_avx2 ENDP
@@ -1825,4 +1825,4 @@ BLAKE3_IV:
         dd 6A09E667H, 0BB67AE85H, 3C6EF372H, 0A54FF53AH
 
 _RDATA ENDS
-END
+अन्त

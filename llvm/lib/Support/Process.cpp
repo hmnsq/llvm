@@ -10,20 +10,20 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Process.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Config/config.h"
-#include "llvm/Config/llvm-config.h"
-#include "llvm/Support/CrashRecoveryContext.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Path.h"
+#अन्तर्भाव "llvm/Support/Process.h"
+#अन्तर्भाव "llvm/ADT/STLExtras.h"
+#अन्तर्भाव "llvm/ADT/StringExtras.h"
+#अन्तर्भाव "llvm/Config/config.h"
+#अन्तर्भाव "llvm/Config/llvm-config.h"
+#अन्तर्भाव "llvm/Support/CrashRecoveryContext.h"
+#अन्तर्भाव "llvm/Support/FileSystem.h"
+#अन्तर्भाव "llvm/Support/Path.h"
 
-#include <optional>
-#include <stdlib.h> // for _Exit
+#अन्तर्भाव <optional>
+#अन्तर्भाव <stdlib.h> // for _Exit
 
-using namespace llvm;
-using namespace sys;
+उपयुज्य नामाकाश llvm;
+उपयुज्य नामाकाश sys;
 
 //===----------------------------------------------------------------------===//
 //=== WARNING: Implementation here must contain only TRULY operating system
@@ -31,45 +31,45 @@ using namespace sys;
 //===----------------------------------------------------------------------===//
 
 std::optional<std::string>
-Process::FindInEnvPath(StringRef EnvName, StringRef FileName, char Separator) {
-  return FindInEnvPath(EnvName, FileName, {}, Separator);
+Process::Find_अन्तर्_Env_मार्गः(StringRef EnvName, StringRef FileName, वर्ण Separator) {
+  प्रत्यागम Find_अन्तर्_Env_मार्गः(EnvName, FileName, {}, Separator);
 }
 
 std::optional<std::string>
-Process::FindInEnvPath(StringRef EnvName, StringRef FileName,
-                       ArrayRef<std::string> IgnoreList, char Separator) {
-  assert(!path::is_absolute(FileName));
-  std::optional<std::string> FoundPath;
-  std::optional<std::string> OptPath = Process::GetEnv(EnvName);
-  if (!OptPath)
-    return FoundPath;
+Process::Find_अन्तर्_Env_मार्गः(StringRef EnvName, StringRef FileName,
+                       ArrayRef<std::string> IgnoreList, वर्ण Separator) {
+  प्रतिज्ञा(!मार्गः_2::is_absolute(FileName));
+  std::optional<std::string> प्राप्तम्_मार्गः;
+  std::optional<std::string> Opt_मार्गः = Process::GetEnv(EnvName);
+  यदि (!Opt_मार्गः)
+    प्रत्यागम प्राप्तम्_मार्गः;
 
-  const char EnvPathSeparatorStr[] = {Separator, '\0'};
-  SmallVector<StringRef, 8> Dirs;
-  SplitString(*OptPath, Dirs, EnvPathSeparatorStr);
+  ध्रुव वर्ण Env_मार्गः_Separator_Str[] = {Separator, '\0'};
+  Small_सदिशम्<StringRef, 8> Dirs;
+  विभज_String(*Opt_मार्गः, Dirs, Env_मार्गः_Separator_Str);
 
-  for (StringRef Dir : Dirs) {
-    if (Dir.empty())
-      continue;
+  प्रति (StringRef Dir : Dirs) {
+    यदि (Dir.रिक्तानि())
+      अनुवर्त;
 
-    if (any_of(IgnoreList, [&](StringRef S) { return fs::equivalent(S, Dir); }))
-      continue;
+    यदि (any_सम्बन्धि(IgnoreList, [&](StringRef S) { प्रत्यागम fs::equivalent(S, Dir); }))
+      अनुवर्त;
 
-    SmallString<128> FilePath(Dir);
-    path::append(FilePath, FileName);
-    if (fs::exists(Twine(FilePath))) {
-      FoundPath = std::string(FilePath);
-      break;
+    SmallString<128> File_मार्गः(Dir);
+    मार्गः_2::append(File_मार्गः, FileName);
+    यदि (fs::exists(Twine(File_मार्गः))) {
+      प्राप्तम्_मार्गः = std::string(File_मार्गः);
+      भङ्ग;
     }
   }
 
-  return FoundPath;
+  प्रत्यागम प्राप्तम्_मार्गः;
 }
 
 // clang-format off
-#define COLOR(FGBG, CODE, BOLD) "\033[0;" BOLD FGBG CODE "m"
+#परिभाषय COLOR(FGBG, संहिता_3, BOLD) "\033[0;" BOLD FGBG संहिता_3 "m"
 
-#define ALLCOLORS(FGBG, BRIGHT, BOLD) \
+#परिभाषय ALLCOLORS(FGBG, BRIGHT, BOLD) \
   {                           \
     COLOR(FGBG, "0", BOLD),   \
     COLOR(FGBG, "1", BOLD),   \
@@ -95,7 +95,7 @@ Process::FindInEnvPath(StringRef EnvName, StringRef FileName,
 //                           |  |   codes
 //                           |  |   |
 //                           |  |   |
-static const char colorcodes[2][2][16][11] = {
+स्थिर ध्रुव वर्ण colorcodes[2][2][16][11] = {
     { ALLCOLORS("3", "9", ""), ALLCOLORS("3", "9", "1;"),},
     { ALLCOLORS("4", "10", ""), ALLCOLORS("4", "10", "1;")}
 };
@@ -103,24 +103,24 @@ static const char colorcodes[2][2][16][11] = {
 
 // A CMake option controls wheter we emit core dumps by default. An application
 // may disable core dumps by calling Process::PreventCoreFiles().
-static bool coreFilesPrevented = !LLVM_ENABLE_CRASH_DUMPS;
+स्थिर तार्किक coreFilesPrevented = !LLVM_ENABLE_CRASH_DUMPS;
 
-bool Process::AreCoreFilesPrevented() { return coreFilesPrevented; }
+तार्किक Process::AreCoreFilesPrevented() { प्रत्यागम coreFilesPrevented; }
 
-[[noreturn]] void Process::Exit(int RetCode, bool NoCleanup) {
-  if (CrashRecoveryContext *CRC = CrashRecoveryContext::GetCurrent())
-    CRC->HandleExit(RetCode);
+[[noreturn]] शून्य Process::Exit(पूर्णाङ्क Ret_संहिता, तार्किक NoCleanup) {
+  यदि (CrashRecoveryContext *CRC = CrashRecoveryContext::GetCurrent())
+    CRC->HandleExit(Ret_संहिता);
 
-  if (NoCleanup)
-    ExitNoCleanup(RetCode);
-  else
-    ::exit(RetCode);
+  यदि (NoCleanup)
+    ExitNoCleanup(Ret_संहिता);
+  अन्यथा
+    ::निर्गच्छ(Ret_संहिता);
 }
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Process.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Process.inc"
-#endif
+#यदि_परिभाषितम् LLVM_ON_UNIX
+#अन्तर्भाव "Unix/Process.inc"
+#यदि_अन्तः
+#यदि_परिभाषितम् _WIN32
+#अन्तर्भाव "Windows/Process.inc"
+#यदि_अन्तः

@@ -6,250 +6,250 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/SourceMgrDiagnosticVerifier.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/raw_ostream.h"
+#अन्तर्भाव "llvm/Support/SourceMgrDiagnosticVerifier.h"
+#अन्तर्भाव "llvm/Support/MemoryBuffer.h"
+#अन्तर्भाव "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
+उपयुज्य नामाकाश llvm;
 
 /// Given a diagnostic kind, return a human readable string for it.
-static StringRef getDiagKindStr(SourceMgr::DiagKind kind) {
-  switch (kind) {
-  case SourceMgr::DK_Note:
-    return "note";
-  case SourceMgr::DK_Warning:
-    return "warning";
-  case SourceMgr::DK_Error:
-    return "error";
-  case SourceMgr::DK_Remark:
-    return "remark";
+स्थिर StringRef get_Diag_विधा_Str(SourceMgr::Diag_विधा विधा) {
+  विकल्प (विधा) {
+  पक्ष SourceMgr::DK_Note:
+    प्रत्यागम "note";
+  पक्ष SourceMgr::DK_Warning:
+    प्रत्यागम "warning";
+  पक्ष SourceMgr::DK_Error:
+    प्रत्यागम "error";
+  पक्ष SourceMgr::DK_Remark:
+    प्रत्यागम "remark";
   }
   llvm_unreachable("Unknown SourceMgr::DiagKind");
 }
 
-bool SourceMgrDiagnosticVerifier::ExpectedDiag::emitError(
-    raw_ostream &os, SourceMgr &mgr, const Twine &msg) const {
-  if (fileLoc.isValid()) {
+तार्किक SourceMgrDiagnosticVerifier::ExpectedDiag::emitError(
+    raw_ostream &os, SourceMgr &mgr, ध्रुव Twine &सन्देशः) ध्रुव {
+  यदि (fileLoc.isValid()) {
     SMRange range(fileLoc, SMLoc::getFromPointer(fileLoc.getPointer() +
-                                                 substring.size()));
-    mgr.PrintMessage(os, fileLoc, SourceMgr::DK_Error, msg, range);
-  } else {
-    mgr.PrintMessage(os, fileLoc, SourceMgr::DK_Error, msg);
+                                                 substring.आकार_2()));
+    mgr.Print_सन्देशः(os, fileLoc, SourceMgr::DK_Error, सन्देशः, range);
+  } अन्यथा {
+    mgr.Print_सन्देशः(os, fileLoc, SourceMgr::DK_Error, सन्देशः);
   }
-  return false;
+  प्रत्यागम असत्य;
 }
 
-bool SourceMgrDiagnosticVerifier::ExpectedDiag::match(StringRef str) const {
+तार्किक SourceMgrDiagnosticVerifier::ExpectedDiag::मेलनम्(StringRef str) ध्रुव {
   // If this isn't a regex diagnostic, we simply check if the string was
   // contained.
-  if (substringRegex)
-    return substringRegex->match(str);
-  return str.contains(substring);
+  यदि (substringRegex)
+    प्रत्यागम substringRegex->मेलनम्(str);
+  प्रत्यागम str.अन्तर्भवति(substring);
 }
 
-bool SourceMgrDiagnosticVerifier::ExpectedDiag::computeRegex(raw_ostream &os,
+तार्किक SourceMgrDiagnosticVerifier::ExpectedDiag::computeRegex(raw_ostream &os,
                                                              SourceMgr &mgr) {
   std::string regexStr;
   raw_string_ostream regexOS(regexStr);
-  StringRef strToProcess = substring;
-  while (!strToProcess.empty()) {
+  StringRef str_गन्तव्यम्_Process = substring;
+  यावत् (!str_गन्तव्यम्_Process.रिक्तानि()) {
     // Find the next regex block.
-    size_t regexIt = strToProcess.find("{{");
-    if (regexIt == StringRef::npos) {
-      regexOS << Regex::escape(strToProcess);
-      break;
+    size_t regexIt = str_गन्तव्यम्_Process.find("{{");
+    यदि (regexIt == StringRef::npos) {
+      regexOS << Regex::escape(str_गन्तव्यम्_Process);
+      भङ्ग;
     }
-    regexOS << Regex::escape(strToProcess.take_front(regexIt));
-    strToProcess = strToProcess.drop_front(regexIt + 2);
+    regexOS << Regex::escape(str_गन्तव्यम्_Process.take_front(regexIt));
+    str_गन्तव्यम्_Process = str_गन्तव्यम्_Process.drop_front(regexIt + 2);
 
     // Find the end of the regex block.
-    size_t regexEndIt = strToProcess.find("}}");
-    if (regexEndIt == StringRef::npos)
-      return emitError(os, mgr, "found start of regex with no end '}}'");
-    StringRef regexBlock = strToProcess.take_front(regexEndIt);
+    size_t regex_अन्तः_It = str_गन्तव्यम्_Process.find("}}");
+    यदि (regex_अन्तः_It == StringRef::npos)
+      प्रत्यागम emitError(os, mgr, "found start of regex with no end '}}'");
+    StringRef regex_खण्डम् = str_गन्तव्यम्_Process.take_front(regex_अन्तः_It);
 
     // Validate that the regex is actually valid.
     std::string regexError;
-    if (!Regex(regexBlock).isValid(regexError))
-      return emitError(os, mgr, "invalid regex: " + regexError);
+    यदि (!Regex(regex_खण्डम्).isValid(regexError))
+      प्रत्यागम emitError(os, mgr, "invalid regex: " + regexError);
 
-    regexOS << '(' << regexBlock << ')';
-    strToProcess = strToProcess.drop_front(regexEndIt + 2);
+    regexOS << '(' << regex_खण्डम् << ')';
+    str_गन्तव्यम्_Process = str_गन्तव्यम्_Process.drop_front(regex_अन्तः_It + 2);
   }
   substringRegex = Regex(regexStr);
-  return true;
+  प्रत्यागम सत्य;
 }
 
 MutableArrayRef<SourceMgrDiagnosticVerifier::ExpectedDiag>
 SourceMgrDiagnosticVerifier::computeExpectedDiags(raw_ostream &os,
                                                   SourceMgr &mgr,
-                                                  const MemoryBuffer *buf) {
+                                                  ध्रुव स्मृतिः_बफर *buf) {
   // If the buffer is invalid, return an empty list.
-  if (!buf)
-    return {};
-  auto &expectedDiags = expectedDiagsPerFile[buf->getBufferIdentifier()];
+  यदि (!buf)
+    प्रत्यागम {};
+  स्वचालित &expectedDiags = expected_Diags_प्रत्येकम्_File[buf->get_बफर_Identifier()];
 
   // The number of the last line that did not correlate to a designator.
-  unsigned lastNonDesignatorLine = 0;
+  अचिह्नित चरमः_Non_Designator_पङ्क्तिः = 0;
 
   // The indices of designators that apply to the next non designator line.
-  SmallVector<unsigned, 1> designatorsForNextLine;
+  Small_सदिशम्<अचिह्नित, 1> designators_For_अग्र_पङ्क्तिः;
 
   // Scan the file for expected-* designators.
-  SmallVector<StringRef, 100> lines;
-  buf->getBuffer().split(lines, '\n');
-  for (unsigned lineNo = 0, e = lines.size(); lineNo < e; ++lineNo) {
-    SmallVector<StringRef, 4> matches;
-    if (!expected.match(lines[lineNo].rtrim(), &matches)) {
+  Small_सदिशम्<StringRef, 100> पङ्क्तयः_2;
+  buf->get_बफर().विभज(पङ्क्तयः_2, '\n');
+  प्रति (अचिह्नित पङ्क्तिः_No_2 = 0, e = पङ्क्तयः_2.आकार_2(); पङ्क्तिः_No_2 < e; ++पङ्क्तिः_No_2) {
+    Small_सदिशम्<StringRef, 4> matches;
+    यदि (!expected.मेलनम्(पङ्क्तयः_2[पङ्क्तिः_No_2].rtrim(), &matches)) {
       // Check for designators that apply to this line.
-      if (!designatorsForNextLine.empty()) {
-        for (unsigned diagIndex : designatorsForNextLine)
-          expectedDiags[diagIndex].lineNo = lineNo + 1;
-        designatorsForNextLine.clear();
+      यदि (!designators_For_अग्र_पङ्क्तिः.रिक्तानि()) {
+        प्रति (अचिह्नित diag_सूचकांक : designators_For_अग्र_पङ्क्तिः)
+          expectedDiags[diag_सूचकांक].पङ्क्तिः_No_2 = पङ्क्तिः_No_2 + 1;
+        designators_For_अग्र_पङ्क्तिः.clear();
       }
-      lastNonDesignatorLine = lineNo;
-      continue;
+      चरमः_Non_Designator_पङ्क्तिः = पङ्क्तिः_No_2;
+      अनुवर्त;
     }
 
     // Point to the start of expected-*.
-    SMLoc expectedStart = SMLoc::getFromPointer(matches[0].data());
+    SMLoc expectedStart = SMLoc::getFromPointer(matches[0].दत्त());
 
-    SourceMgr::DiagKind kind;
-    if (matches[1] == "error")
-      kind = SourceMgr::DK_Error;
-    else if (matches[1] == "warning")
-      kind = SourceMgr::DK_Warning;
-    else if (matches[1] == "remark")
-      kind = SourceMgr::DK_Remark;
-    else {
-      assert(matches[1] == "note");
-      kind = SourceMgr::DK_Note;
+    SourceMgr::Diag_विधा विधा;
+    यदि (matches[1] == "error")
+      विधा = SourceMgr::DK_Error;
+    अन्यथा यदि (matches[1] == "warning")
+      विधा = SourceMgr::DK_Warning;
+    अन्यथा यदि (matches[1] == "remark")
+      विधा = SourceMgr::DK_Remark;
+    अन्यथा {
+      प्रतिज्ञा(matches[1] == "note");
+      विधा = SourceMgr::DK_Note;
     }
-    ExpectedDiag record(kind, lineNo + 1, expectedStart, matches[5]);
+    ExpectedDiag लेखः_2(विधा, पङ्क्तिः_No_2 + 1, expectedStart, matches[5]);
 
     // Check to see if this is a regex match, i.e. it includes the `-re`.
-    if (!matches[2].empty() && !record.computeRegex(os, mgr)) {
-      ok = false;
-      continue;
+    यदि (!matches[2].रिक्तानि() && !लेखः_2.computeRegex(os, mgr)) {
+      ok = असत्य;
+      अनुवर्त;
     }
 
-    StringRef offsetMatch = matches[3];
-    if (!offsetMatch.empty()) {
-      offsetMatch = offsetMatch.drop_front(1);
+    StringRef विस्थापनम्_मेलनम् = matches[3];
+    यदि (!विस्थापनम्_मेलनम्.रिक्तानि()) {
+      विस्थापनम्_मेलनम् = विस्थापनम्_मेलनम्.drop_front(1);
 
       // Get the integer value without the @ and +/- prefix.
-      if (offsetMatch[0] == '+' || offsetMatch[0] == '-') {
-        int offset;
-        offsetMatch.drop_front().getAsInteger(0, offset);
+      यदि (विस्थापनम्_मेलनम्[0] == '+' || विस्थापनम्_मेलनम्[0] == '-') {
+        पूर्णाङ्क विस्थापनम्_2;
+        विस्थापनम्_मेलनम्.drop_front().getAsInteger(0, विस्थापनम्_2);
 
-        if (offsetMatch.front() == '+')
-          record.lineNo += offset;
-        else
-          record.lineNo -= offset;
-      } else if (offsetMatch.consume_front("unknown")) {
+        यदि (विस्थापनम्_मेलनम्.front() == '+')
+          लेखः_2.पङ्क्तिः_No_2 += विस्थापनम्_2;
+        अन्यथा
+          लेखः_2.पङ्क्तिः_No_2 -= विस्थापनम्_2;
+      } अन्यथा यदि (विस्थापनम्_मेलनम्.consume_front("unknown")) {
         // This is matching unknown locations.
-        record.fileLoc = SMLoc();
-        expectedUnknownLocDiags.emplace_back(std::move(record));
-        continue;
-      } else if (offsetMatch.consume_front("above")) {
+        लेखः_2.fileLoc = SMLoc();
+        expectedUnknownLocDiags.emplace_पृष्ठभागः(std::move(लेखः_2));
+        अनुवर्त;
+      } अन्यथा यदि (विस्थापनम्_मेलनम्.consume_front("above")) {
         // If the designator applies 'above' we add it to the last non
         // designator line.
-        record.lineNo = lastNonDesignatorLine + 1;
-      } else {
+        लेखः_2.पङ्क्तिः_No_2 = चरमः_Non_Designator_पङ्क्तिः + 1;
+      } अन्यथा {
         // Otherwise, this is a 'below' designator and applies to the next
         // non-designator line.
-        assert(offsetMatch.consume_front("below"));
-        designatorsForNextLine.push_back(expectedDiags.size());
+        प्रतिज्ञा(विस्थापनम्_मेलनम्.consume_front("below"));
+        designators_For_अग्र_पङ्क्तिः.प्रक्षिप_पृष्ठभागः(expectedDiags.आकार_2());
 
         // Set the line number to the last in the case that this designator
         // ends up dangling.
-        record.lineNo = e;
+        लेखः_2.पङ्क्तिः_No_2 = e;
       }
     }
-    expectedDiags.emplace_back(std::move(record));
+    expectedDiags.emplace_पृष्ठभागः(std::move(लेखः_2));
   }
-  return expectedDiags;
+  प्रत्यागम expectedDiags;
 }
 
 std::optional<MutableArrayRef<SourceMgrDiagnosticVerifier::ExpectedDiag>>
 SourceMgrDiagnosticVerifier::getExpectedDiags(StringRef bufName) {
-  auto expectedDiags = expectedDiagsPerFile.find(bufName);
-  if (expectedDiags != expectedDiagsPerFile.end())
-    return MutableArrayRef<ExpectedDiag>(expectedDiags->second);
-  return std::nullopt;
+  स्वचालित expectedDiags = expected_Diags_प्रत्येकम्_File.find(bufName);
+  यदि (expectedDiags != expected_Diags_प्रत्येकम्_File.अन्तः())
+    प्रत्यागम MutableArrayRef<ExpectedDiag>(expectedDiags->second);
+  प्रत्यागम std::nullopt;
 }
 
-SourceMgrDiagnosticVerifier::MatchResult
+SourceMgrDiagnosticVerifier::मेलनम्_परिणाम
 SourceMgrDiagnosticVerifier::process(raw_ostream &os, SourceMgr &mgr,
-                                     SourceMgr::DiagKind kind, bool hasLoc,
-                                     const MemoryBuffer *buf, unsigned lineNo,
-                                     StringRef message, bool reportUnexpected) {
+                                     SourceMgr::Diag_विधा विधा, तार्किक hasLoc,
+                                     ध्रुव स्मृतिः_बफर *buf, अचिह्नित पङ्क्तिः_No_2,
+                                     StringRef सन्देशः_2, तार्किक reportUnexpected) {
   MutableArrayRef<ExpectedDiag> diags;
-  if (hasLoc) {
+  यदि (hasLoc) {
     // If the buffer couldn't be resolved, `diags` stays empty: a diagnostic
     // with a location in an unknown file can never match anything.
-    if (buf) {
-      if (auto maybeDiags = getExpectedDiags(buf->getBufferIdentifier()))
+    यदि (buf) {
+      यदि (स्वचालित maybeDiags = getExpectedDiags(buf->get_बफर_Identifier()))
         diags = *maybeDiags;
-      else
+      अन्यथा
         diags = computeExpectedDiags(os, mgr, buf);
     }
-  } else {
+  } अन्यथा {
     diags = expectedUnknownLocDiags;
   }
 
   // Search for a matching expected diagnostic.
   // If we find something that is close then emit a more specific error.
-  ExpectedDiag *nearMiss = nullptr;
+  ExpectedDiag *near_अलब्धिः = शून्यसूचकः;
 
   // If this was an expected error, remember that we saw it and return.
-  for (auto &e : diags) {
+  प्रति (स्वचालित &e : diags) {
     // File line must match (unless it's an unknown location).
-    if (hasLoc && e.lineNo != lineNo)
-      continue;
-    if (e.match(message)) {
-      if (e.kind == kind) {
-        e.matched = true;
-        return MatchResult::Matched;
+    यदि (hasLoc && e.पङ्क्तिः_No_2 != पङ्क्तिः_No_2)
+      अनुवर्त;
+    यदि (e.मेलनम्(सन्देशः_2)) {
+      यदि (e.विधा == विधा) {
+        e.matched = सत्य;
+        प्रत्यागम मेलनम्_परिणाम::Matched;
       }
 
       // If this only differs based on the diagnostic kind, then consider it
       // to be a near miss.
-      nearMiss = &e;
+      near_अलब्धिः = &e;
     }
   }
 
-  if (!reportUnexpected)
-    return MatchResult::Ignored;
+  यदि (!reportUnexpected)
+    प्रत्यागम मेलनम्_परिणाम::Ignored;
 
-  ok = false;
+  ok = असत्य;
 
   // Otherwise, emit an error for the near miss.
-  if (nearMiss) {
-    mgr.PrintMessage(os, nearMiss->fileLoc, SourceMgr::DK_Error,
-                     "'" + getDiagKindStr(kind) +
+  यदि (near_अलब्धिः) {
+    mgr.Print_सन्देशः(os, near_अलब्धिः->fileLoc, SourceMgr::DK_Error,
+                     "'" + get_Diag_विधा_Str(विधा) +
                          "' diagnostic emitted when expecting a '" +
-                         getDiagKindStr(nearMiss->kind) + "'");
-    return MatchResult::NearMiss;
+                         get_Diag_विधा_Str(near_अलब्धिः->विधा) + "'");
+    प्रत्यागम मेलनम्_परिणाम::Near_अलब्धिः;
   }
-  return MatchResult::Unexpected;
+  प्रत्यागम मेलनम्_परिणाम::Unexpected;
 }
 
-bool SourceMgrDiagnosticVerifier::verify(raw_ostream &os, SourceMgr &mgr) {
+तार्किक SourceMgrDiagnosticVerifier::verify(raw_ostream &os, SourceMgr &mgr) {
   // Verify that all expected errors were seen.
-  auto checkExpectedDiags = [&](ExpectedDiag &diag) {
-    if (!diag.matched) {
+  स्वचालित checkExpectedDiags = [&](ExpectedDiag &diag) {
+    यदि (!diag.matched) {
       diag.emitError(os, mgr,
-                     "expected " + getDiagKindStr(diag.kind) + " \"" +
+                     "expected " + get_Diag_विधा_Str(diag.विधा) + " \"" +
                          diag.substring + "\" was not produced");
-      ok = false;
+      ok = असत्य;
     }
   };
-  for (auto &expectedDiagsPair : expectedDiagsPerFile)
-    for (auto &diag : expectedDiagsPair.second)
+  प्रति (स्वचालित &expectedDiagsPair : expected_Diags_प्रत्येकम्_File)
+    प्रति (स्वचालित &diag : expectedDiagsPair.second)
       checkExpectedDiags(diag);
-  for (auto &diag : expectedUnknownLocDiags)
+  प्रति (स्वचालित &diag : expectedUnknownLocDiags)
     checkExpectedDiags(diag);
-  expectedDiagsPerFile.clear();
-  return ok;
+  expected_Diags_प्रत्येकम्_File.clear();
+  प्रत्यागम ok;
 }

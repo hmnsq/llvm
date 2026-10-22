@@ -3,7 +3,7 @@
 #include "llvm_blake3_prefix.h"
 
 #if defined(__ELF__) && !(defined(__sun__) && defined(__svr4__))
-.section .note.GNU-stack,"",%progbits
+.खण्डः .note.GNU-stack,"",%progbits
 #endif
 
 #if defined(__ELF__) && defined(__CET__) && defined(__has_include)
@@ -25,25 +25,25 @@
 .intel_syntax noprefix
 HIDDEN _blake3_hash_many_avx2
 HIDDEN blake3_hash_many_avx2
-.global _blake3_hash_many_avx2
-.global blake3_hash_many_avx2
+.वैश्विक _blake3_hash_many_avx2
+.वैश्विक blake3_hash_many_avx2
 #ifdef __APPLE__
 .text
 #else
-.section .text
+.खण्डः .text
 #endif
         .p2align  6
 _blake3_hash_many_avx2:
 blake3_hash_many_avx2:
         _CET_ENDBR
-        push    r15
-        push    r14
-        push    r13
-        push    r12
-        push    rbx
-        push    rbp
-        mov     rbp, rsp
-        sub     rsp, 680
+        निक्षिप    r15
+        निक्षिप    r14
+        निक्षिप    r13
+        निक्षिप    r12
+        निक्षिप    rbx
+        निक्षिप    rbp
+        चालय     rbp, rsp
+        वियोजय     rsp, 680
         and     rsp, 0xFFFFFFFFFFFFFFC0
         neg     r9d
         vmovd   xmm0, r9d
@@ -65,8 +65,8 @@ blake3_hash_many_avx2:
         vpsubd  ymm3, ymm3, ymm2
         vmovdqa ymmword ptr [rsp+0x260], ymm3
         shl     rdx, 6
-        mov     qword ptr [rsp+0x2A0], rdx
-        cmp     rsi, 8
+        चालय     qword ptr [rsp+0x2A0], rdx
+        तुलय     rsi, 8
         jc      3f
 2:
         vpbroadcastd ymm0, dword ptr [rcx]
@@ -77,14 +77,14 @@ blake3_hash_many_avx2:
         vpbroadcastd ymm5, dword ptr [rcx+0x14]
         vpbroadcastd ymm6, dword ptr [rcx+0x18]
         vpbroadcastd ymm7, dword ptr [rcx+0x1C]
-        mov     r8, qword ptr [rdi]
-        mov     r9, qword ptr [rdi+0x8]
-        mov     r10, qword ptr [rdi+0x10]
-        mov     r11, qword ptr [rdi+0x18]
-        mov     r12, qword ptr [rdi+0x20]
-        mov     r13, qword ptr [rdi+0x28]
-        mov     r14, qword ptr [rdi+0x30]
-        mov     r15, qword ptr [rdi+0x38]
+        चालय     r8, qword ptr [rdi]
+        चालय     r9, qword ptr [rdi+0x8]
+        चालय     r10, qword ptr [rdi+0x10]
+        चालय     r11, qword ptr [rdi+0x18]
+        चालय     r12, qword ptr [rdi+0x20]
+        चालय     r13, qword ptr [rdi+0x28]
+        चालय     r14, qword ptr [rdi+0x30]
+        चालय     r15, qword ptr [rdi+0x38]
         movzx   eax, byte ptr [rbp+0x38]
         movzx   ebx, byte ptr [rbp+0x40]
         or      eax, ebx
@@ -93,10 +93,10 @@ blake3_hash_many_avx2:
 9:
         movzx   ebx, byte ptr [rbp+0x48]
         or      ebx, eax
-        add     rdx, 64
-        cmp     rdx, qword ptr [rsp+0x2A0]
+        योजय     rdx, 64
+        तुलय     rdx, qword ptr [rsp+0x2A0]
         cmove   eax, ebx
-        mov     dword ptr [rsp+0x200], eax
+        चालय     dword ptr [rsp+0x200], eax
         vmovups xmm8, xmmword ptr [r8+rdx-0x40]
         vinsertf128 ymm8, ymm8, xmmword ptr [r12+rdx-0x40], 0x01
         vmovups xmm9, xmmword ptr [r9+rdx-0x40]
@@ -1259,7 +1259,7 @@ blake3_hash_many_avx2:
         vpxor   ymm7, ymm7, ymm15
         movzx   eax, byte ptr [rbp+0x38]
         jne     9b
-        mov     rbx, qword ptr [rbp+0x50]
+        चालय     rbx, qword ptr [rbp+0x50]
         vunpcklps ymm8, ymm0, ymm1
         vunpcklps ymm9, ymm2, ymm3
         vunpckhps ymm10, ymm0, ymm1
@@ -1305,28 +1305,28 @@ blake3_hash_many_avx2:
         vmovdqa ymm0, ymmword ptr [rsp+0x260]
         vpsubd  ymm2, ymm0, ymm2
         vmovdqa ymmword ptr [rsp+0x260], ymm2
-        add     rdi, 64
-        add     rbx, 256
-        mov     qword ptr [rbp+0x50], rbx
-        sub     rsi, 8
-        cmp     rsi, 8
+        योजय     rdi, 64
+        योजय     rbx, 256
+        चालय     qword ptr [rbp+0x50], rbx
+        वियोजय     rsi, 8
+        तुलय     rsi, 8
         jnc     2b
         test    rsi, rsi
         jnz     3f
 4:
         vzeroupper
-        mov     rsp, rbp
-        pop     rbp
-        pop     rbx
-        pop     r12
-        pop     r13
-        pop     r14
-        pop     r15
-        ret
+        चालय     rsp, rbp
+        उद्धर     rbp
+        उद्धर     rbx
+        उद्धर     r12
+        उद्धर     r13
+        उद्धर     r14
+        उद्धर     r15
+        प्रत्यागच्छ
 .p2align  5
 3:
-        mov     rbx, qword ptr [rbp+0x50]
-        mov     r15, qword ptr [rsp+0x2A0]
+        चालय     rbx, qword ptr [rbp+0x50]
+        चालय     r15, qword ptr [rsp+0x2A0]
         movzx   r13d, byte ptr [rbp+0x38]
         movzx   r12d, byte ptr [rbp+0x48]
         test    rsi, 0x4
@@ -1346,21 +1346,21 @@ blake3_hash_many_avx2:
         vpblendd ymm15, ymm15, ymm12, 0x44
         vmovdqa ymmword ptr [rsp], ymm14
         vmovdqa ymmword ptr [rsp+0x20], ymm15
-        mov     r8, qword ptr [rdi]
-        mov     r9, qword ptr [rdi+0x8]
-        mov     r10, qword ptr [rdi+0x10]
-        mov     r11, qword ptr [rdi+0x18]
+        चालय     r8, qword ptr [rdi]
+        चालय     r9, qword ptr [rdi+0x8]
+        चालय     r10, qword ptr [rdi+0x10]
+        चालय     r11, qword ptr [rdi+0x18]
         movzx   eax, byte ptr [rbp+0x40]
         or      eax, r13d
         xor     edx, edx
 .p2align  5
 2:
-        mov     r14d, eax
+        चालय     r14d, eax
         or      eax, r12d
-        add     rdx, 64
-        cmp     rdx, r15
+        योजय     rdx, 64
+        तुलय     rdx, r15
         cmovne  eax, r14d
-        mov     dword ptr [rsp+0x200], eax
+        चालय     dword ptr [rsp+0x200], eax
         vmovups ymm2, ymmword ptr [r8+rdx-0x40]
         vinsertf128 ymm2, ymm2, xmmword ptr [r9+rdx-0x40], 0x01
         vmovups ymm3, ymmword ptr [r8+rdx-0x30]
@@ -1400,7 +1400,7 @@ blake3_hash_many_avx2:
         vpblendd ymm11, ymm11, ymm2, 0x88
         vbroadcasti128 ymm2, xmmword ptr [BLAKE3_IV+rip]
         vmovdqa ymm10, ymm2
-        mov     al, 7
+        चालय     al, 7
 9:
         vpaddd  ymm0, ymm0, ymm4
         vpaddd  ymm8, ymm8, ymm12
@@ -1530,14 +1530,14 @@ blake3_hash_many_avx2:
         vmovdqa ymm14, ymm5
         vmovdqa ymm5, ymmword ptr [rsp+0x40]
         vmovdqa ymm6, ymmword ptr [rsp+0x80]
-        jmp     9b
+        कूर्द     9b
 9:
         vpxor   ymm0, ymm0, ymm2
         vpxor   ymm1, ymm1, ymm3
         vpxor   ymm8, ymm8, ymm10
         vpxor   ymm9, ymm9, ymm11
-        mov     eax, r13d
-        cmp     rdx, r15
+        चालय     eax, r13d
+        तुलय     rdx, r15
         jne     2b
         vmovdqu xmmword ptr [rbx], xmm0
         vmovdqu xmmword ptr [rbx+0x10], xmm1
@@ -1556,9 +1556,9 @@ blake3_hash_many_avx2:
         vblendvps xmm2, xmm2, xmm3, xmm8
         vmovaps xmmword ptr [rsp+0x240], xmm0
         vmovaps xmmword ptr [rsp+0x260], xmm2
-        add     rbx, 128
-        add     rdi, 32
-        sub     rsi, 4
+        योजय     rbx, 128
+        योजय     rdi, 32
+        वियोजय     rsi, 4
 3:
         test    rsi, 0x2
         je      3f
@@ -1573,19 +1573,19 @@ blake3_hash_many_avx2:
         vinserti128 ymm13, ymm13, xmm14, 0x01
         vbroadcasti128 ymm14, xmmword ptr [ROT16+rip]
         vbroadcasti128 ymm15, xmmword ptr [ROT8+rip]
-        mov     r8, qword ptr [rdi]
-        mov     r9, qword ptr [rdi+0x8]
+        चालय     r8, qword ptr [rdi]
+        चालय     r9, qword ptr [rdi+0x8]
         movzx   eax, byte ptr [rbp+0x40]
         or      eax, r13d
         xor     edx, edx
 .p2align  5
 2:
-        mov     r14d, eax
+        चालय     r14d, eax
         or      eax, r12d
-        add     rdx, 64
-        cmp     rdx, r15
+        योजय     rdx, 64
+        तुलय     rdx, r15
         cmovne  eax, r14d
-        mov     dword ptr [rsp+0x200], eax
+        चालय     dword ptr [rsp+0x200], eax
         vbroadcasti128 ymm2, xmmword ptr [BLAKE3_IV+rip]
         vpbroadcastd ymm8, dword ptr [rsp+0x200]
         vpblendd ymm3, ymm13, ymm8, 0x88
@@ -1603,7 +1603,7 @@ blake3_hash_many_avx2:
         vshufps ymm7, ymm8, ymm9, 221
         vpshufd ymm6, ymm6, 0x93
         vpshufd ymm7, ymm7, 0x93
-        mov     al, 7
+        चालय     al, 7
 9:
         vpaddd  ymm0, ymm0, ymm4
         vpaddd  ymm0, ymm0, ymm1
@@ -1662,12 +1662,12 @@ blake3_hash_many_avx2:
         vpshufd ymm7, ymm6, 0x1E
         vmovdqa ymm5, ymm9
         vmovdqa ymm6, ymm8
-        jmp     9b
+        कूर्द     9b
 9:
         vpxor   ymm0, ymm0, ymm2
         vpxor   ymm1, ymm1, ymm3
-        mov     eax, r13d
-        cmp     rdx, r15
+        चालय     eax, r13d
+        तुलय     rdx, r15
         jne     2b
         vmovdqu xmmword ptr [rbx], xmm0
         vmovdqu xmmword ptr [rbx+0x10], xmm1
@@ -1682,9 +1682,9 @@ blake3_hash_many_avx2:
         vblendvps ymm2, ymm2, ymm3, ymm8
         vmovaps ymmword ptr [rsp+0x240], ymm0
         vmovaps ymmword ptr [rsp+0x260], ymm2
-        add     rbx, 64
-        add     rdi, 16
-        sub     rsi, 2
+        योजय     rbx, 64
+        योजय     rdi, 16
+        वियोजय     rsi, 2
 3:
         test    rsi, 0x1
         je      4b
@@ -1695,16 +1695,16 @@ blake3_hash_many_avx2:
         vpinsrd xmm13, xmm3, dword ptr [BLAKE3_BLOCK_LEN+rip], 2
         vmovdqa xmm14, xmmword ptr [ROT16+rip]
         vmovdqa xmm15, xmmword ptr [ROT8+rip]
-        mov     r8, qword ptr [rdi]
+        चालय     r8, qword ptr [rdi]
         movzx   eax, byte ptr [rbp+0x40]
         or      eax, r13d
         xor     edx, edx
 .p2align  5
 2:
-        mov     r14d, eax
+        चालय     r14d, eax
         or      eax, r12d
-        add     rdx, 64
-        cmp     rdx, r15
+        योजय     rdx, 64
+        तुलय     rdx, r15
         cmovne  eax, r14d
         vmovdqa xmm2, xmmword ptr [BLAKE3_IV+rip]
         vmovdqa xmm3, xmm13
@@ -1719,7 +1719,7 @@ blake3_hash_many_avx2:
         vshufps xmm7, xmm8, xmm9, 221
         vpshufd xmm6, xmm6, 0x93
         vpshufd xmm7, xmm7, 0x93
-        mov     al, 7
+        चालय     al, 7
 9:
         vpaddd  xmm0, xmm0, xmm4
         vpaddd  xmm0, xmm0, xmm1
@@ -1778,22 +1778,22 @@ blake3_hash_many_avx2:
         vpshufd xmm7, xmm6, 0x1E
         vmovdqa xmm5, xmm9
         vmovdqa xmm6, xmm8
-        jmp     9b
+        कूर्द     9b
 9:
         vpxor   xmm0, xmm0, xmm2
         vpxor   xmm1, xmm1, xmm3
-        mov     eax, r13d
-        cmp     rdx, r15
+        चालय     eax, r13d
+        तुलय     rdx, r15
         jne     2b
         vmovdqu xmmword ptr [rbx], xmm0
         vmovdqu xmmword ptr [rbx+0x10], xmm1
-        jmp     4b
+        कूर्द     4b
 
 
 #ifdef __APPLE__
 .static_data
 #else
-.section .rodata
+.खण्डः .rodata
 #endif
 .p2align  6
 ADD0:

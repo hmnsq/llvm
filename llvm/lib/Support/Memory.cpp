@@ -11,42 +11,42 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Memory.h"
-#include "llvm/Config/llvm-config.h"
+#अन्तर्भाव "llvm/Support/Memory.h"
+#अन्तर्भाव "llvm/Config/llvm-config.h"
 
-#ifndef NDEBUG
-#include "llvm/Support/raw_ostream.h"
-#endif // ifndef NDEBUG
+#यदि_अपरिभाषितम् NDEBUG
+#अन्तर्भाव "llvm/Support/raw_ostream.h"
+#यदि_अन्तः // ifndef NDEBUG
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Memory.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Memory.inc"
-#endif
+#यदि_परिभाषितम् LLVM_ON_UNIX
+#अन्तर्भाव "Unix/Memory.inc"
+#यदि_अन्तः
+#यदि_परिभाषितम् _WIN32
+#अन्तर्भाव "Windows/Memory.inc"
+#यदि_अन्तः
 
-#ifndef NDEBUG
+#यदि_अपरिभाषितम् NDEBUG
 
-namespace llvm {
-namespace sys {
+नामाकाश llvm {
+नामाकाश sys {
 
-raw_ostream &operator<<(raw_ostream &OS, const Memory::ProtectionFlags &PF) {
-  assert((PF & ~(Memory::MF_READ | Memory::MF_WRITE | Memory::MF_EXEC)) == 0 &&
+raw_ostream &संक्रियकः<<(raw_ostream &OS, ध्रुव स्मृतिः_2::ProtectionFlags &PF) {
+  प्रतिज्ञा((PF & ~(स्मृतिः_2::MF_READ | स्मृतिः_2::MF_WRITE | स्मृतिः_2::MF_EXEC)) == 0 &&
          "Unrecognized flags");
 
-  return OS << (PF & Memory::MF_READ ? 'R' : '-')
-            << (PF & Memory::MF_WRITE ? 'W' : '-')
-            << (PF & Memory::MF_EXEC ? 'X' : '-');
+  प्रत्यागम OS << (PF & स्मृतिः_2::MF_READ ? 'R' : '-')
+            << (PF & स्मृतिः_2::MF_WRITE ? 'W' : '-')
+            << (PF & स्मृतिः_2::MF_EXEC ? 'X' : '-');
 }
 
-raw_ostream &operator<<(raw_ostream &OS, const MemoryBlock &MB) {
-  return OS << "[ " << MB.base() << " .. "
-            << (void *)((char *)MB.base() + MB.allocatedSize()) << " ] ("
-            << MB.allocatedSize() << " bytes)";
+raw_ostream &संक्रियकः<<(raw_ostream &OS, ध्रुव स्मृतिः_खण्डम् &MB) {
+  प्रत्यागम OS << "[ " << MB.आधारः_2() << " .. "
+            << (शून्य *)((वर्ण *)MB.आधारः_2() + MB.allocated_आकार()) << " ] ("
+            << MB.allocated_आकार() << " bytes)";
 }
 
 } // end namespace sys
 } // end namespace llvm
 
-#endif // ifndef NDEBUG
+#यदि_अन्तः // ifndef NDEBUG

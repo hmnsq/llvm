@@ -12,38 +12,38 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/RandomNumberGenerator.h"
+#अन्तर्भाव "llvm/Support/RandomNumberGenerator.h"
 
-#include "DebugOptions.h"
+#अन्तर्भाव "DebugOptions.h"
 
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/raw_ostream.h"
-#ifdef _WIN32
-#include "llvm/Support/Windows/WindowsSupport.h"
-#else
-#include "Unix/Unix.h"
-#endif
+#अन्तर्भाव "llvm/Support/CommandLine.h"
+#अन्तर्भाव "llvm/Support/Debug.h"
+#अन्तर्भाव "llvm/Support/Error.h"
+#अन्तर्भाव "llvm/Support/ManagedStatic.h"
+#अन्तर्भाव "llvm/Support/raw_ostream.h"
+#यदि_परिभाषितम् _WIN32
+#अन्तर्भाव "llvm/Support/Windows/WindowsSupport.h"
+#अन्यथा
+#अन्तर्भाव "Unix/Unix.h"
+#यदि_अन्तः
 
-using namespace llvm;
+उपयुज्य नामाकाश llvm;
 
-#define DEBUG_TYPE "rng"
-namespace {
-struct CreateSeed {
-  static void *call() {
-    return new cl::opt<uint64_t>(
-        "rng-seed", cl::value_desc("seed"), cl::Hidden,
+#परिभाषय DEBUG_TYPE "rng"
+नामाकाश {
+संरचना Create_बीजम् {
+  स्थिर शून्य *call() {
+    प्रत्यागम नूतन cl::opt<uint64_t>(
+        "rng-seed", cl::मानम्_desc("seed"), cl::Hidden,
         cl::desc("Seed for the random number generator"), cl::init(0));
   }
 };
 } // namespace
-static ManagedStatic<cl::opt<uint64_t>, CreateSeed> Seed;
-void llvm::initRandomSeedOptions() { *Seed; }
+स्थिर ManagedStatic<cl::opt<uint64_t>, Create_बीजम्> बीजम्;
+शून्य llvm::init_Random_बीजम्_Options() { *बीजम्; }
 
-RandomNumberGenerator::RandomNumberGenerator(StringRef Salt) {
-  LLVM_DEBUG(if (*Seed == 0) dbgs()
+Random_सङ्ख्या_Generator::Random_सङ्ख्या_Generator(StringRef Salt) {
+  LLVM_DEBUG(यदि (*बीजम् == 0) dbgs()
              << "Warning! Using unseeded random number generator.\n");
 
   // Combine seed and salts using std::seed_seq.
@@ -51,46 +51,46 @@ RandomNumberGenerator::RandomNumberGenerator(StringRef Salt) {
   // Note: std::seed_seq can only store 32-bit values, even though we
   // are using a 64-bit RNG. This isn't a problem since the Mersenne
   // twister constructor copies these correctly into its initial state.
-  std::vector<uint32_t> Data;
-  Data.resize(2 + Salt.size());
-  Data[0] = *Seed;
-  Data[1] = *Seed >> 32;
+  std::सदिशम्<uint32_t> दत्त_2;
+  दत्त_2.resize(2 + Salt.आकार_2());
+  दत्त_2[0] = *बीजम्;
+  दत्त_2[1] = *बीजम् >> 32;
 
-  llvm::copy(Salt, Data.begin() + 2);
+  llvm::copy(Salt, दत्त_2.begin() + 2);
 
-  std::seed_seq SeedSeq(Data.begin(), Data.end());
-  Generator.seed(SeedSeq);
+  std::बीजम्_seq बीजम्_Seq(दत्त_2.begin(), दत्त_2.अन्तः());
+  Generator.बीजम्_2(बीजम्_Seq);
 }
 
-RandomNumberGenerator::result_type RandomNumberGenerator::operator()() {
-  return Generator();
+Random_सङ्ख्या_Generator::परिणाम_type Random_सङ्ख्या_Generator::संक्रियकः()() {
+  प्रत्यागम Generator();
 }
 
 // Get random vector of specified size
-std::error_code llvm::getRandomBytes(void *Buffer, size_t Size) {
-#ifdef _WIN32
+std::error_संहिता llvm::get_Random_अष्टकानि(शून्य *बफर, size_t आकार) {
+#यदि_परिभाषितम् _WIN32
   HCRYPTPROV hProvider;
-  if (CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_FULL,
+  यदि (CryptAcquireContext(&hProvider, 0, 0, PROV_RSA_पूर्णम्,
                            CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
     ScopedCryptContext ScopedHandle(hProvider);
-    if (CryptGenRandom(hProvider, Size, static_cast<BYTE *>(Buffer)))
-      return std::error_code();
+    यदि (CryptGenRandom(hProvider, आकार, static_cast<BYTE *>(बफर)))
+      प्रत्यागम std::error_संहिता();
   }
-  return std::error_code(GetLastError(), std::system_category());
-#else
-  int Fd = open("/dev/urandom", O_RDONLY);
-  if (Fd != -1) {
-    std::error_code Ret;
-    ssize_t BytesRead = read(Fd, Buffer, Size);
-    if (BytesRead == -1)
-      Ret = errnoAsErrorCode();
-    else if (BytesRead != static_cast<ssize_t>(Size))
-      Ret = std::error_code(EIO, std::system_category());
-    if (close(Fd) == -1)
-      Ret = errnoAsErrorCode();
+  प्रत्यागम std::error_संहिता(Get_चरमः_Error(), std::system_category());
+#अन्यथा
+  पूर्णाङ्क Fd = उद्घाटय("/dev/urandom", O_RDONLY);
+  यदि (Fd != -1) {
+    std::error_संहिता Ret;
+    ssize_t अष्टकानि_Read = पठ(Fd, बफर, आकार);
+    यदि (अष्टकानि_Read == -1)
+      Ret = errno_As_Error_संहिता();
+    अन्यथा यदि (अष्टकानि_Read != static_cast<ssize_t>(आकार))
+      Ret = std::error_संहिता(EIO, std::system_category());
+    यदि (close(Fd) == -1)
+      Ret = errno_As_Error_संहिता();
 
-    return Ret;
+    प्रत्यागम Ret;
   }
-  return errnoAsErrorCode();
-#endif
+  प्रत्यागम errno_As_Error_संहिता();
+#यदि_अन्तः
 }

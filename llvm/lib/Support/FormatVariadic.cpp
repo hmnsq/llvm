@@ -5,116 +5,116 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/FormatVariadic.h"
-#include <cassert>
-#include <optional>
+#अन्तर्भाव "llvm/Support/FormatVariadic.h"
+#अन्तर्भाव <cassert>
+#अन्तर्भाव <optional>
 
-using namespace llvm;
+उपयुज्य नामाकाश llvm;
 
-static std::optional<AlignStyle> translateLocChar(char C) {
-  switch (C) {
-  case '-':
-    return AlignStyle::Left;
-  case '=':
-    return AlignStyle::Center;
-  case '+':
-    return AlignStyle::Right;
-  default:
-    return std::nullopt;
+स्थिर std::optional<AlignStyle> translateLocChar(वर्ण C) {
+  विकल्प (C) {
+  पक्ष '-':
+    प्रत्यागम AlignStyle::वामः;
+  पक्ष '=':
+    प्रत्यागम AlignStyle::Center;
+  पक्ष '+':
+    प्रत्यागम AlignStyle::दक्षिणः;
+  स्वभाव:
+    प्रत्यागम std::nullopt;
   }
   LLVM_BUILTIN_UNREACHABLE;
 }
 
-static bool consumeFieldLayout(StringRef &Spec, AlignStyle &Where,
-                               unsigned &Align, char &Pad) {
-  Where = AlignStyle::Right;
+स्थिर तार्किक consume_क्षेत्रम्_Layout(StringRef &Spec, AlignStyle &Where,
+                               अचिह्नित &Align, वर्ण &Pad) {
+  Where = AlignStyle::दक्षिणः;
   Align = 0;
   Pad = ' ';
-  if (Spec.empty())
-    return true;
+  यदि (Spec.रिक्तानि())
+    प्रत्यागम सत्य;
 
-  if (Spec.size() > 1) {
+  यदि (Spec.आकार_2() > 1) {
     // A maximum of 2 characters at the beginning can be used for something
     // other than the width.
     // If Spec[1] is a loc char, then Spec[0] is a pad char and Spec[2:...]
     // contains the width.
     // Otherwise, if Spec[0] is a loc char, then Spec[1:...] contains the width.
     // Otherwise, Spec[0:...] contains the width.
-    if (auto Loc = translateLocChar(Spec[1])) {
+    यदि (स्वचालित Loc = translateLocChar(Spec[1])) {
       Pad = Spec[0];
       Where = *Loc;
       Spec = Spec.drop_front(2);
-    } else if (auto Loc = translateLocChar(Spec[0])) {
+    } अन्यथा यदि (स्वचालित Loc = translateLocChar(Spec[0])) {
       Where = *Loc;
       Spec = Spec.drop_front(1);
     }
   }
 
-  bool Failed = Spec.consumeInteger(0, Align);
-  return !Failed;
+  तार्किक Failed = Spec.consumeInteger(0, Align);
+  प्रत्यागम !Failed;
 }
 
-static std::optional<ReplacementItem> parseReplacementItem(StringRef Spec) {
+स्थिर std::optional<ReplacementItem> parseReplacementItem(StringRef Spec) {
   StringRef RepString = Spec.trim("{}");
 
   // If the replacement sequence does not start with a non-negative integer,
   // this is an error.
-  char Pad = ' ';
-  unsigned Align = 0;
-  AlignStyle Where = AlignStyle::Right;
+  वर्ण Pad = ' ';
+  अचिह्नित Align = 0;
+  AlignStyle Where = AlignStyle::दक्षिणः;
   StringRef Options;
-  unsigned Index = ~0U;
+  अचिह्नित सूचकांक_2 = ~0U;
   RepString = RepString.ltrim();
 
   // If index is not specified, keep it ~0U to indicate unresolved index.
-  RepString.consumeInteger(0, Index);
+  RepString.consumeInteger(0, सूचकांक_2);
 
-  if (RepString.consume_front(",")) {
-    if (!consumeFieldLayout(RepString, Where, Align, Pad)) {
-      assert(false && "Invalid replacement field layout specification!");
-      return std::nullopt;
+  यदि (RepString.consume_front(",")) {
+    यदि (!consume_क्षेत्रम्_Layout(RepString, Where, Align, Pad)) {
+      प्रतिज्ञा(असत्य && "Invalid replacement field layout specification!");
+      प्रत्यागम std::nullopt;
     }
   }
   RepString = RepString.ltrim();
-  if (RepString.consume_front(":")) {
+  यदि (RepString.consume_front(":")) {
     Options = RepString;
     RepString = StringRef();
   }
   RepString = RepString.trim();
-  if (!RepString.empty()) {
-    assert(0 && "Unexpected characters found in replacement string!");
-    return std::nullopt;
+  यदि (!RepString.रिक्तानि()) {
+    प्रतिज्ञा(0 && "Unexpected characters found in replacement string!");
+    प्रत्यागम std::nullopt;
   }
 
-  return ReplacementItem(Spec, Index, Align, Where, Pad, Options);
+  प्रत्यागम ReplacementItem(Spec, सूचकांक_2, Align, Where, Pad, Options);
 }
 
-static std::pair<std::optional<ReplacementItem>, StringRef>
-splitLiteralAndReplacement(StringRef Fmt) {
-  assert(!Fmt.empty());
+स्थिर std::pair<std::optional<ReplacementItem>, StringRef>
+विभज_Literal_And_Replacement(StringRef Fmt) {
+  प्रतिज्ञा(!Fmt.रिक्तानि());
   // Everything up until the first brace is a literal.
-  if (Fmt.front() != '{') {
-    size_t BO = Fmt.find_first_of('{');
-    return {ReplacementItem{Fmt.substr(0, BO)}, Fmt.substr(BO)};
+  यदि (Fmt.front() != '{') {
+    size_t BO = Fmt.find_first_सम्बन्धि('{');
+    प्रत्यागम {ReplacementItem{Fmt.substr(0, BO)}, Fmt.substr(BO)};
   }
 
-  StringRef Braces = Fmt.take_while([](char C) { return C == '{'; });
+  StringRef Braces = Fmt.take_while([](वर्ण C) { प्रत्यागम C == '{'; });
   // If there is more than one brace, then some of them are escaped.  Treat
   // these as replacements.
-  if (Braces.size() > 1) {
-    size_t NumEscapedBraces = Braces.size() / 2;
-    StringRef Middle = Fmt.take_front(NumEscapedBraces);
-    StringRef Right = Fmt.drop_front(NumEscapedBraces * 2);
-    return {ReplacementItem(Middle), Right};
+  यदि (Braces.आकार_2() > 1) {
+    size_t अङ्कः_Escaped_Braces = Braces.आकार_2() / 2;
+    StringRef मध्यः = Fmt.take_front(अङ्कः_Escaped_Braces);
+    StringRef दक्षिणः = Fmt.drop_front(अङ्कः_Escaped_Braces * 2);
+    प्रत्यागम {ReplacementItem(मध्यः), दक्षिणः};
   }
   // An unterminated open brace is undefined. Assert to indicate that this is
   // undefined and that we consider it an error. When asserts are disabled,
   // build a replacement item with an error message.
-  size_t BC = Fmt.find_first_of('}');
-  if (BC == StringRef::npos) {
-    assert(false &&
+  size_t BC = Fmt.find_first_सम्बन्धि('}');
+  यदि (BC == StringRef::npos) {
+    प्रतिज्ञा(असत्य &&
            "Unterminated brace sequence. Escape with {{ for a literal brace.");
-    return {ReplacementItem("Unterminated brace sequence. Escape with {{ for a "
+    प्रत्यागम {ReplacementItem("Unterminated brace sequence. Escape with {{ for a "
                             "literal brace."),
             StringRef()};
   }
@@ -122,55 +122,55 @@ splitLiteralAndReplacement(StringRef Fmt) {
   // Even if there is a closing brace, if there is another open brace before
   // this closing brace, treat this portion as literal, and try again with the
   // next one.
-  size_t BO2 = Fmt.find_first_of('{', 1);
-  if (BO2 < BC)
-    return {ReplacementItem(Fmt.substr(0, BO2)), Fmt.substr(BO2)};
+  size_t BO2 = Fmt.find_first_सम्बन्धि('{', 1);
+  यदि (BO2 < BC)
+    प्रत्यागम {ReplacementItem(Fmt.substr(0, BO2)), Fmt.substr(BO2)};
 
-  StringRef Spec = Fmt.slice(1, BC);
-  StringRef Right = Fmt.substr(BC + 1);
+  StringRef Spec = Fmt.खण्डिका(1, BC);
+  StringRef दक्षिणः = Fmt.substr(BC + 1);
 
-  return {parseReplacementItem(Spec), Right};
+  प्रत्यागम {parseReplacementItem(Spec), दक्षिणः};
 }
 
-#ifndef NDEBUG
-#define ENABLE_VALIDATION 1
-#else
-#define ENABLE_VALIDATION 0 // Conveniently enable validation in release mode.
-#endif
+#यदि_अपरिभाषितम् NDEBUG
+#परिभाषय ENABLE_VALIDATION 1
+#अन्यथा
+#परिभाषय ENABLE_VALIDATION 0 // Conveniently enable validation in release mode.
+#यदि_अन्तः
 
-SmallVector<ReplacementItem, 2>
-formatv_object_base::parseFormatString(StringRef Fmt, size_t NumArgs,
-                                       bool Validate) {
-  SmallVector<ReplacementItem, 2> Replacements;
-  unsigned NextAutomaticIndex = 0;
+Small_सदिशम्<ReplacementItem, 2>
+formatv_object_आधारः::parseFormatString(StringRef Fmt, size_t अङ्कः_तर्काः,
+                                       तार्किक Validate) {
+  Small_सदिशम्<ReplacementItem, 2> Replacements;
+  अचिह्नित अग्र_Automatic_सूचकांक = 0;
 
-#if ENABLE_VALIDATION
-  const StringRef SavedFmtStr = Fmt;
-  unsigned NumExpectedArgs = 0;
-  bool HasExplicitIndex = false;
-#endif
+#यदि ENABLE_VALIDATION
+  ध्रुव StringRef SavedFmtStr = Fmt;
+  अचिह्नित अङ्कः_Expected_तर्काः = 0;
+  तार्किक Has_Explicit_सूचकांक = असत्य;
+#यदि_अन्तः
 
-  while (!Fmt.empty()) {
+  यावत् (!Fmt.रिक्तानि()) {
     std::optional<ReplacementItem> I;
-    std::tie(I, Fmt) = splitLiteralAndReplacement(Fmt);
-    if (!I)
-      continue;
-    if (I->Type == ReplacementType::Format) {
-      if (I->Index == ~0U)
-        I->Index = NextAutomaticIndex++;
-#if ENABLE_VALIDATION
-      else
-        HasExplicitIndex = true;
-      NumExpectedArgs = std::max(NumExpectedArgs, I->Index + 1);
-#endif
+    std::tie(I, Fmt) = विभज_Literal_And_Replacement(Fmt);
+    यदि (!I)
+      अनुवर्त;
+    यदि (I->Type == ReplacementType::Format) {
+      यदि (I->सूचकांक_2 == ~0U)
+        I->सूचकांक_2 = अग्र_Automatic_सूचकांक++;
+#यदि ENABLE_VALIDATION
+      अन्यथा
+        Has_Explicit_सूचकांक = सत्य;
+      अङ्कः_Expected_तर्काः = std::max(अङ्कः_Expected_तर्काः, I->सूचकांक_2 + 1);
+#यदि_अन्तः
     }
 
-    Replacements.emplace_back(*I);
+    Replacements.emplace_पृष्ठभागः(*I);
   }
 
-#if ENABLE_VALIDATION
-  if (!Validate)
-    return Replacements;
+#यदि ENABLE_VALIDATION
+  यदि (!Validate)
+    प्रत्यागम Replacements;
 
   // Perform additional validation. Verify that the number of arguments matches
   // the number of replacement indices and that there are no holes in the
@@ -179,46 +179,46 @@ formatv_object_base::parseFormatString(StringRef Fmt, size_t NumArgs,
   // When validation fails, return an array of replacement items that
   // will print an error message as the outout of this formatv() (used when
   // validation is enabled in release mode).
-  auto getErrorReplacements = [SavedFmtStr](StringLiteral ErrorMsg) {
-    return SmallVector<ReplacementItem, 2>{
-        ReplacementItem("Invalid formatv() call: "), ReplacementItem(ErrorMsg),
+  स्वचालित getErrorReplacements = [SavedFmtStr](StringLiteral Error_सन्देशः) {
+    प्रत्यागम Small_सदिशम्<ReplacementItem, 2>{
+        ReplacementItem("Invalid formatv() call: "), ReplacementItem(Error_सन्देशः),
         ReplacementItem(" for format string: "), ReplacementItem(SavedFmtStr)};
   };
 
-  if (NumExpectedArgs != NumArgs) {
+  यदि (अङ्कः_Expected_तर्काः != अङ्कः_तर्काः) {
     errs() << formatv("Expected {} Args, but got {} for format string '{}'\n",
-                      NumExpectedArgs, NumArgs, SavedFmtStr);
-    assert(0 && "Invalid formatv() call");
-    return getErrorReplacements("Unexpected number of arguments");
+                      अङ्कः_Expected_तर्काः, अङ्कः_तर्काः, SavedFmtStr);
+    प्रतिज्ञा(0 && "Invalid formatv() call");
+    प्रत्यागम getErrorReplacements("Unexpected number of arguments");
   }
 
   // Find the number of unique indices seen. All replacement indices
   // are < NumExpectedArgs.
-  SmallVector<bool> Indices(NumExpectedArgs);
-  unsigned Count = 0;
-  for (const ReplacementItem &I : Replacements) {
-    if (I.Type != ReplacementType::Format || Indices[I.Index])
-      continue;
-    Indices[I.Index] = true;
-    ++Count;
+  Small_सदिशम्<तार्किक> Indices(अङ्कः_Expected_तर्काः);
+  अचिह्नित गणनम्_2 = 0;
+  प्रति (ध्रुव ReplacementItem &I : Replacements) {
+    यदि (I.Type != ReplacementType::Format || Indices[I.सूचकांक_2])
+      अनुवर्त;
+    Indices[I.सूचकांक_2] = सत्य;
+    ++गणनम्_2;
   }
 
-  if (Count != NumExpectedArgs) {
+  यदि (गणनम्_2 != अङ्कः_Expected_तर्काः) {
     errs() << formatv(
         "Replacement field indices cannot have holes for format string '{}'\n",
         SavedFmtStr);
-    assert(0 && "Invalid format string");
-    return getErrorReplacements("Replacement indices have holes");
+    प्रतिज्ञा(0 && "Invalid format string");
+    प्रत्यागम getErrorReplacements("Replacement indices have holes");
   }
 
   // Fail validation if we see both automatic index and explicit index.
-  if (NextAutomaticIndex != 0 && HasExplicitIndex) {
+  यदि (अग्र_Automatic_सूचकांक != 0 && Has_Explicit_सूचकांक) {
     errs() << formatv(
         "Cannot mix automatic and explicit indices for format string '{}'\n",
         SavedFmtStr);
-    assert(0 && "Invalid format string");
-    return getErrorReplacements("Cannot mix automatic and explicit indices");
+    प्रतिज्ञा(0 && "Invalid format string");
+    प्रत्यागम getErrorReplacements("Cannot mix automatic and explicit indices");
   }
-#endif // ENABLE_VALIDATION
-  return Replacements;
+#यदि_अन्तः // ENABLE_VALIDATION
+  प्रत्यागम Replacements;
 }

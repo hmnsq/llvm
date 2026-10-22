@@ -10,156 +10,156 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/FormattedStream.h"
-#include "llvm/Support/ConvertUTF.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Unicode.h"
-#include "llvm/Support/raw_ostream.h"
-#include <algorithm>
+#अन्तर्भाव "llvm/Support/FormattedStream.h"
+#अन्तर्भाव "llvm/Support/ConvertUTF.h"
+#अन्तर्भाव "llvm/Support/Debug.h"
+#अन्तर्भाव "llvm/Support/Unicode.h"
+#अन्तर्भाव "llvm/Support/raw_ostream.h"
+#अन्तर्भाव <algorithm>
 
-using namespace llvm;
+उपयुज्य नामाकाश llvm;
 
 /// UpdatePosition - Examine the given char sequence and figure out which
 /// column we end up in after output, and how many line breaks are contained.
 /// This assumes that the input string is well-formed UTF-8, and takes into
 /// account Unicode characters which render as multiple columns wide.
-void formatted_raw_ostream::UpdatePosition(const char *Ptr, size_t Size) {
-  unsigned &Column = Position.first;
-  unsigned &Line = Position.second;
+शून्य formatted_raw_ostream::UpdatePosition(ध्रुव वर्ण *Ptr, size_t आकार) {
+  अचिह्नित &Column = Position.first;
+  अचिह्नित &पङ्क्तिः = Position.second;
 
-  auto ProcessUTF8CodePoint = [&Line, &Column](StringRef CP) {
-    int Width = sys::unicode::columnWidthUTF8(CP);
-    if (Width != sys::unicode::ErrorNonPrintableCharacter)
-      Column += Width;
+  स्वचालित Process_UTF8_संहिता_Point = [&पङ्क्तिः, &Column](StringRef CP) {
+    पूर्णाङ्क विस्तारः = sys::unicode::column_विस्तारः_UTF8(CP);
+    यदि (विस्तारः != sys::unicode::ErrorNonPrintableCharacter)
+      Column += विस्तारः;
 
     // The only special whitespace characters we care about are single-byte.
-    if (CP.size() > 1)
-      return;
+    यदि (CP.आकार_2() > 1)
+      प्रत्यागम;
 
-    switch (CP[0]) {
-    case '\n':
-      Line += 1;
+    विकल्प (CP[0]) {
+    पक्ष '\n':
+      पङ्क्तिः += 1;
       [[fallthrough]];
-    case '\r':
+    पक्ष '\r':
       Column = 0;
-      break;
-    case '\t':
+      भङ्ग;
+    पक्ष '\t':
       // Assumes tab stop = 8 characters.
       Column += (8 - (Column & 0x7)) & 0x7;
-      break;
+      भङ्ग;
     }
   };
 
   // If we have a partial UTF-8 sequence from the previous buffer, check that
   // first.
-  if (PartialUTF8Char.size()) {
-    size_t BytesFromBuffer =
-        getNumBytesForUTF8(PartialUTF8Char[0]) - PartialUTF8Char.size();
-    if (Size < BytesFromBuffer) {
+  यदि (PartialUTF8Char.आकार_2()) {
+    size_t अष्टकानि_From_बफर =
+        get_अङ्कः_अष्टकानि_For_UTF8(PartialUTF8Char[0]) - PartialUTF8Char.आकार_2();
+    यदि (आकार < अष्टकानि_From_बफर) {
       // If we still don't have enough bytes for a complete code point, just
       // append what we have.
-      PartialUTF8Char.append(StringRef(Ptr, Size));
-      return;
-    } else {
+      PartialUTF8Char.append(StringRef(Ptr, आकार));
+      प्रत्यागम;
+    } अन्यथा {
       // The first few bytes from the buffer will complete the code point.
       // Concatenate them and process their effect on the line and column
       // numbers.
-      PartialUTF8Char.append(StringRef(Ptr, BytesFromBuffer));
-      ProcessUTF8CodePoint(PartialUTF8Char);
+      PartialUTF8Char.append(StringRef(Ptr, अष्टकानि_From_बफर));
+      Process_UTF8_संहिता_Point(PartialUTF8Char);
       PartialUTF8Char.clear();
-      Ptr += BytesFromBuffer;
-      Size -= BytesFromBuffer;
+      Ptr += अष्टकानि_From_बफर;
+      आकार -= अष्टकानि_From_बफर;
     }
   }
 
   // Now scan the rest of the buffer.
-  unsigned NumBytes;
-  for (const char *End = Ptr + Size; Ptr < End; Ptr += NumBytes) {
+  अचिह्नित अङ्कः_अष्टकानि;
+  प्रति (ध्रुव वर्ण *अन्तः_2 = Ptr + आकार; Ptr < अन्तः_2; Ptr += अङ्कः_अष्टकानि) {
     // Fast path for printable ASCII characters without special handling.
-    if (*Ptr >= 0x20 && *Ptr <= 0x7e) {
-      NumBytes = 1;
+    यदि (*Ptr >= 0x20 && *Ptr <= 0x7e) {
+      अङ्कः_अष्टकानि = 1;
       ++Column;
-      continue;
+      अनुवर्त;
     }
 
-    NumBytes = getNumBytesForUTF8(*Ptr);
+    अङ्कः_अष्टकानि = get_अङ्कः_अष्टकानि_For_UTF8(*Ptr);
 
     // The buffer might end part way through a UTF-8 code unit sequence for a
     // Unicode scalar value if it got flushed. If this happens, we can't know
     // the display width until we see the rest of the code point. Stash the
     // bytes we do have, so that we can reconstruct the whole code point later,
     // even if the buffer is being flushed.
-    if ((unsigned)(End - Ptr) < NumBytes) {
-      PartialUTF8Char = StringRef(Ptr, End - Ptr);
-      return;
+    यदि ((अचिह्नित)(अन्तः_2 - Ptr) < अङ्कः_अष्टकानि) {
+      PartialUTF8Char = StringRef(Ptr, अन्तः_2 - Ptr);
+      प्रत्यागम;
     }
 
-    ProcessUTF8CodePoint(StringRef(Ptr, NumBytes));
+    Process_UTF8_संहिता_Point(StringRef(Ptr, अङ्कः_अष्टकानि));
   }
 }
 
 /// ComputePosition - Examine the current output and update line and column
 /// counts.
-void formatted_raw_ostream::ComputePosition(const char *Ptr, size_t Size) {
-  if (DisableScan)
-    return;
+शून्य formatted_raw_ostream::ComputePosition(ध्रुव वर्ण *Ptr, size_t आकार) {
+  यदि (Disable_अवलोकनम्)
+    प्रत्यागम;
 
   // If our previous scan pointer is inside the buffer, assume we already
   // scanned those bytes. This depends on raw_ostream to not change our buffer
   // in unexpected ways.
-  if (Ptr <= Scanned && Scanned <= Ptr + Size)
+  यदि (Ptr <= Scanned && Scanned <= Ptr + आकार)
     // Scan all characters added since our last scan to determine the new
     // column.
-    UpdatePosition(Scanned, Size - (Scanned - Ptr));
-  else
-    UpdatePosition(Ptr, Size);
+    UpdatePosition(Scanned, आकार - (Scanned - Ptr));
+  अन्यथा
+    UpdatePosition(Ptr, आकार);
 
   // Update the scanning pointer.
-  Scanned = Ptr + Size;
+  Scanned = Ptr + आकार;
 }
 
 /// PadToColumn - Align the output to some column number.
 ///
 /// \param NewCol - The column to move to.
 ///
-formatted_raw_ostream &formatted_raw_ostream::PadToColumn(unsigned NewCol) {
+formatted_raw_ostream &formatted_raw_ostream::Pad_गन्तव्यम्_Column(अचिह्नित NewCol) {
   // Figure out what's in the buffer and add it to the column count.
-  ComputePosition(getBufferStart(), GetNumBytesInBuffer());
+  ComputePosition(get_बफर_Start(), Get_अङ्कः_अष्टकानि_अन्तर्_बफर());
 
   // Output spaces until we reach the desired column.
-  indent(std::max(int(NewCol - getColumn()), 1));
-  return *this;
+  indent(std::max(पूर्णाङ्क(NewCol - getColumn()), 1));
+  प्रत्यागम *एतत्;
 }
 
-void formatted_raw_ostream::write_impl(const char *Ptr, size_t Size) {
+शून्य formatted_raw_ostream::write_impl(ध्रुव वर्ण *Ptr, size_t आकार) {
   // Figure out what's in the buffer and add it to the column count.
-  ComputePosition(Ptr, Size);
+  ComputePosition(Ptr, आकार);
 
   // Write the data to the underlying stream (which is unbuffered, so
   // the data will be immediately written out).
-  TheStream->write(Ptr, Size);
+  The_प्रवाहः->लिख(Ptr, आकार);
 
   // Reset the scanning pointer.
-  Scanned = nullptr;
+  Scanned = शून्यसूचकः;
 }
 
 /// fouts() - This returns a reference to a formatted_raw_ostream for
 /// standard output.  Use it like: fouts() << "foo" << "bar";
 formatted_raw_ostream &llvm::fouts() {
-  static formatted_raw_ostream S(outs());
-  return S;
+  स्थिर formatted_raw_ostream S(outs());
+  प्रत्यागम S;
 }
 
 /// ferrs() - This returns a reference to a formatted_raw_ostream for
 /// standard error.  Use it like: ferrs() << "foo" << "bar";
 formatted_raw_ostream &llvm::ferrs() {
-  static formatted_raw_ostream S(errs());
-  return S;
+  स्थिर formatted_raw_ostream S(errs());
+  प्रत्यागम S;
 }
 
 /// fdbgs() - This returns a reference to a formatted_raw_ostream for
 /// the debug stream.  Use it like: fdbgs() << "foo" << "bar";
 formatted_raw_ostream &llvm::fdbgs() {
-  static formatted_raw_ostream S(dbgs());
-  return S;
+  स्थिर formatted_raw_ostream S(dbgs());
+  प्रत्यागम S;
 }

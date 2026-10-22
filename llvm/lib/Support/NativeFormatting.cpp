@@ -6,229 +6,229 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/NativeFormatting.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/raw_ostream.h"
+#अन्तर्भाव "llvm/Support/NativeFormatting.h"
+#अन्तर्भाव "llvm/ADT/ArrayRef.h"
+#अन्तर्भाव "llvm/ADT/SmallString.h"
+#अन्तर्भाव "llvm/ADT/StringExtras.h"
+#अन्तर्भाव "llvm/Support/Format.h"
+#अन्तर्भाव "llvm/Support/raw_ostream.h"
 
-#include <cmath>
+#अन्तर्भाव <cmath>
 
-#if defined(_WIN32) && !defined(__MINGW32__)
-#include <float.h> // For _fpclass in llvm::write_double.
-#endif
+#यदि defined(_WIN32) && !defined(__MINGW32__)
+#अन्तर्भाव <float.h> // For _fpclass in llvm::write_double.
+#यदि_अन्तः
 
-using namespace llvm;
+उपयुज्य नामाकाश llvm;
 
-template<typename T, std::size_t N>
-static int format_to_buffer(T Value, char (&Buffer)[N]) {
-  char *EndPtr = std::end(Buffer);
-  char *CurPtr = EndPtr;
+प्रतिरूपम्<प्रकारनाम T, std::size_t N>
+स्थिर पूर्णाङ्क format_गन्तव्यम्_बफर(T मानम्, वर्ण (&बफर)[N]) {
+  वर्ण *अन्तः_Ptr = std::अन्तः(बफर);
+  वर्ण *CurPtr = अन्तः_Ptr;
 
-  do {
-    *--CurPtr = '0' + char(Value % 10);
-    Value /= 10;
-  } while (Value);
-  return EndPtr - CurPtr;
+  कुरु {
+    *--CurPtr = '0' + वर्ण(मानम् % 10);
+    मानम् /= 10;
+  } यावत् (मानम्);
+  प्रत्यागम अन्तः_Ptr - CurPtr;
 }
 
-static void writeWithCommas(raw_ostream &S, ArrayRef<char> Buffer) {
-  assert(!Buffer.empty());
+स्थिर शून्य writeWithCommas(raw_ostream &S, ArrayRef<वर्ण> बफर) {
+  प्रतिज्ञा(!बफर.रिक्तानि());
 
-  ArrayRef<char> ThisGroup;
-  int InitialDigits = ((Buffer.size() - 1) % 3) + 1;
-  ThisGroup = Buffer.take_front(InitialDigits);
-  S.write(ThisGroup.data(), ThisGroup.size());
+  ArrayRef<वर्ण> This_गणः;
+  पूर्णाङ्क InitialDigits = ((बफर.आकार_2() - 1) % 3) + 1;
+  This_गणः = बफर.take_front(InitialDigits);
+  S.लिख(This_गणः.दत्त(), This_गणः.आकार_2());
 
-  Buffer = Buffer.drop_front(InitialDigits);
-  assert(Buffer.size() % 3 == 0);
-  while (!Buffer.empty()) {
+  बफर = बफर.drop_front(InitialDigits);
+  प्रतिज्ञा(बफर.आकार_2() % 3 == 0);
+  यावत् (!बफर.रिक्तानि()) {
     S << ',';
-    ThisGroup = Buffer.take_front(3);
-    S.write(ThisGroup.data(), 3);
-    Buffer = Buffer.drop_front(3);
+    This_गणः = बफर.take_front(3);
+    S.लिख(This_गणः.दत्त(), 3);
+    बफर = बफर.drop_front(3);
   }
 }
 
-template <typename T>
-static void write_unsigned_impl(raw_ostream &S, T N, size_t MinDigits,
-                                IntegerStyle Style, bool IsNegative,
-                                bool NonNegativePlus) {
+प्रतिरूपम् <प्रकारनाम T>
+स्थिर शून्य write_unsigned_impl(raw_ostream &S, T N, size_t MinDigits,
+                                IntegerStyle Style, तार्किक IsNegative,
+                                तार्किक NonNegativePlus) {
   static_assert(std::is_unsigned_v<T>, "Value is not unsigned!");
 
-  char NumberBuffer[128];
-  size_t Len = format_to_buffer(N, NumberBuffer);
+  वर्ण सङ्ख्या_बफर[128];
+  size_t Len = format_गन्तव्यम्_बफर(N, सङ्ख्या_बफर);
 
-  if (IsNegative)
+  यदि (IsNegative)
     S << '-';
-  else if (NonNegativePlus)
+  अन्यथा यदि (NonNegativePlus)
     S << '+';
 
-  if (Len < MinDigits && Style != IntegerStyle::Number) {
-    for (size_t I = Len; I < MinDigits; ++I)
+  यदि (Len < MinDigits && Style != IntegerStyle::सङ्ख्या) {
+    प्रति (size_t I = Len; I < MinDigits; ++I)
       S << '0';
   }
 
-  if (Style == IntegerStyle::Number) {
-    writeWithCommas(S, ArrayRef<char>(std::end(NumberBuffer) - Len, Len));
-  } else {
-    S.write(std::end(NumberBuffer) - Len, Len);
+  यदि (Style == IntegerStyle::सङ्ख्या) {
+    writeWithCommas(S, ArrayRef<वर्ण>(std::अन्तः(सङ्ख्या_बफर) - Len, Len));
+  } अन्यथा {
+    S.लिख(std::अन्तः(सङ्ख्या_बफर) - Len, Len);
   }
 }
 
-template <typename T>
-static void write_unsigned(raw_ostream &S, T N, size_t MinDigits,
-                           IntegerStyle Style, bool IsNegative = false,
-                           bool NonNegativePlus = false) {
+प्रतिरूपम् <प्रकारनाम T>
+स्थिर शून्य write_unsigned(raw_ostream &S, T N, size_t MinDigits,
+                           IntegerStyle Style, तार्किक IsNegative = असत्य,
+                           तार्किक NonNegativePlus = असत्य) {
   // Output using 32-bit div/mod if possible.
-  if (N == static_cast<uint32_t>(N))
+  यदि (N == static_cast<uint32_t>(N))
     write_unsigned_impl(S, static_cast<uint32_t>(N), MinDigits, Style,
                         IsNegative, NonNegativePlus);
-  else
+  अन्यथा
     write_unsigned_impl(S, N, MinDigits, Style, IsNegative, NonNegativePlus);
 }
 
-template <typename T>
-static void write_signed(raw_ostream &S, T N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus = false) {
+प्रतिरूपम् <प्रकारनाम T>
+स्थिर शून्य write_signed(raw_ostream &S, T N, size_t MinDigits,
+                         IntegerStyle Style, तार्किक NonNegativePlus = असत्य) {
   static_assert(std::is_signed_v<T>, "Value is not signed!");
 
-  using UnsignedT = std::make_unsigned_t<T>;
+  उपयुज्य UnsignedT = std::make_unsigned_t<T>;
 
-  if (N >= 0) {
-    write_unsigned(S, static_cast<UnsignedT>(N), MinDigits, Style, false,
+  यदि (N >= 0) {
+    write_unsigned(S, static_cast<UnsignedT>(N), MinDigits, Style, असत्य,
                    NonNegativePlus);
-    return;
+    प्रत्यागम;
   }
 
   UnsignedT UN = -(UnsignedT)N;
-  write_unsigned(S, UN, MinDigits, Style, true, NonNegativePlus);
+  write_unsigned(S, UN, MinDigits, Style, सत्य, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, unsigned int N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
-  write_unsigned(S, N, MinDigits, Style, false, NonNegativePlus);
+शून्य llvm::write_integer(raw_ostream &S, अचिह्नित पूर्णाङ्क N, size_t MinDigits,
+                         IntegerStyle Style, तार्किक NonNegativePlus) {
+  write_unsigned(S, N, MinDigits, Style, असत्य, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, int N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
+शून्य llvm::write_integer(raw_ostream &S, पूर्णाङ्क N, size_t MinDigits,
+                         IntegerStyle Style, तार्किक NonNegativePlus) {
   write_signed(S, N, MinDigits, Style, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, unsigned long N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
-  write_unsigned(S, N, MinDigits, Style, false, NonNegativePlus);
+शून्य llvm::write_integer(raw_ostream &S, अचिह्नित दीर्घ N, size_t MinDigits,
+                         IntegerStyle Style, तार्किक NonNegativePlus) {
+  write_unsigned(S, N, MinDigits, Style, असत्य, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, long N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
+शून्य llvm::write_integer(raw_ostream &S, दीर्घ N, size_t MinDigits,
+                         IntegerStyle Style, तार्किक NonNegativePlus) {
   write_signed(S, N, MinDigits, Style, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, unsigned long long N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
-  write_unsigned(S, N, MinDigits, Style, false, NonNegativePlus);
+शून्य llvm::write_integer(raw_ostream &S, अचिह्नित दीर्घ दीर्घ N, size_t MinDigits,
+                         IntegerStyle Style, तार्किक NonNegativePlus) {
+  write_unsigned(S, N, MinDigits, Style, असत्य, NonNegativePlus);
 }
 
-void llvm::write_integer(raw_ostream &S, long long N, size_t MinDigits,
-                         IntegerStyle Style, bool NonNegativePlus) {
+शून्य llvm::write_integer(raw_ostream &S, दीर्घ दीर्घ N, size_t MinDigits,
+                         IntegerStyle Style, तार्किक NonNegativePlus) {
   write_signed(S, N, MinDigits, Style, NonNegativePlus);
 }
 
-void llvm::write_hex(raw_ostream &S, uint64_t N, HexPrintStyle Style,
-                     std::optional<size_t> Width) {
-  const size_t kMaxWidth = 128u;
+शून्य llvm::write_hex(raw_ostream &S, uint64_t N, HexPrintStyle Style,
+                     std::optional<size_t> विस्तारः) {
+  ध्रुव size_t k_Max_विस्तारः = 128u;
 
-  size_t W = std::min(kMaxWidth, Width.value_or(0u));
+  size_t W = std::min(k_Max_विस्तारः, विस्तारः.मानम्_or(0u));
 
-  unsigned Nibbles = (llvm::bit_width(N) + 3) / 4;
-  bool Prefix = (Style == HexPrintStyle::PrefixLower ||
-                 Style == HexPrintStyle::PrefixUpper);
-  bool Upper =
-      (Style == HexPrintStyle::Upper || Style == HexPrintStyle::PrefixUpper);
-  unsigned PrefixChars = Prefix ? 2 : 0;
-  unsigned NumChars =
-      std::max(static_cast<unsigned>(W), std::max(1u, Nibbles) + PrefixChars);
+  अचिह्नित Nibbles = (llvm::bit_विस्तारः_2(N) + 3) / 4;
+  तार्किक उपसर्गः = (Style == HexPrintStyle::उपसर्गः_अधस्तनम् ||
+                 Style == HexPrintStyle::उपसर्गः_ऊर्ध्वस्थम्);
+  तार्किक ऊर्ध्वस्थम्_2 =
+      (Style == HexPrintStyle::ऊर्ध्वस्थम्_2 || Style == HexPrintStyle::उपसर्गः_ऊर्ध्वस्थम्);
+  अचिह्नित उपसर्गः_Chars = उपसर्गः ? 2 : 0;
+  अचिह्नित अङ्कः_Chars =
+      std::max(static_cast<अचिह्नित>(W), std::max(1u, Nibbles) + उपसर्गः_Chars);
 
-  char NumberBuffer[kMaxWidth];
-  ::memset(NumberBuffer, '0', std::size(NumberBuffer));
-  if (Prefix)
-    NumberBuffer[1] = 'x';
-  char *EndPtr = NumberBuffer + NumChars;
-  char *CurPtr = EndPtr;
-  while (N) {
-    unsigned char x = static_cast<unsigned char>(N) % 16;
-    *--CurPtr = hexdigit(x, !Upper);
+  वर्ण सङ्ख्या_बफर[k_Max_विस्तारः];
+  ::स्मृतिं_पूरय(सङ्ख्या_बफर, '0', std::आकार_2(सङ्ख्या_बफर));
+  यदि (उपसर्गः)
+    सङ्ख्या_बफर[1] = 'x';
+  वर्ण *अन्तः_Ptr = सङ्ख्या_बफर + अङ्कः_Chars;
+  वर्ण *CurPtr = अन्तः_Ptr;
+  यावत् (N) {
+    अचिह्नित वर्ण x = static_cast<अचिह्नित वर्ण>(N) % 16;
+    *--CurPtr = hexdigit(x, !ऊर्ध्वस्थम्_2);
     N /= 16;
   }
 
-  S.write(NumberBuffer, NumChars);
+  S.लिख(सङ्ख्या_बफर, अङ्कः_Chars);
 }
 
-void llvm::write_double(raw_ostream &S, double N, FloatStyle Style,
+शून्य llvm::write_double(raw_ostream &S, द्विगुण N, FloatStyle Style,
                         std::optional<size_t> Precision) {
-  size_t Prec = Precision.value_or(getDefaultPrecision(Style));
+  size_t Prec = Precision.मानम्_or(getDefaultPrecision(Style));
 
-  if (std::isnan(N)) {
+  यदि (std::isnan(N)) {
     S << "nan";
-    return;
-  } else if (std::isinf(N)) {
+    प्रत्यागम;
+  } अन्यथा यदि (std::isinf(N)) {
     S << (std::signbit(N) ? "-INF" : "INF");
-    return;
+    प्रत्यागम;
   }
 
-  char Letter;
-  if (Style == FloatStyle::Exponent)
+  वर्ण Letter;
+  यदि (Style == FloatStyle::Exponent)
     Letter = 'e';
-  else if (Style == FloatStyle::ExponentUpper)
+  अन्यथा यदि (Style == FloatStyle::Exponent_ऊर्ध्वस्थम्)
     Letter = 'E';
-  else
+  अन्यथा
     Letter = 'f';
 
   SmallString<8> Spec;
-  llvm::raw_svector_ostream Out(Spec);
-  Out << "%." << Prec << Letter;
+  llvm::raw_svector_ostream बहिर्गमनम्(Spec);
+  बहिर्गमनम् << "%." << Prec << Letter;
 
-  if (Style == FloatStyle::Exponent || Style == FloatStyle::ExponentUpper) {
-#ifdef _WIN32
+  यदि (Style == FloatStyle::Exponent || Style == FloatStyle::Exponent_ऊर्ध्वस्थम्) {
+#यदि_परिभाषितम् _WIN32
 // On MSVCRT and compatible, output of %e is incompatible to Posix
 // by default. Number of exponent digits should be at least 2. "%+03d"
 // FIXME: Implement our formatter to here or Support/Format.h!
-#if defined(__MINGW32__)
+#यदि defined(__MINGW32__)
     // FIXME: It should be generic to C++11.
-    if (N == 0.0 && std::signbit(N)) {
-      char NegativeZero[] = "-0.000000e+00";
-      if (Style == FloatStyle::ExponentUpper)
-        NegativeZero[strlen(NegativeZero) - 4] = 'E';
+    यदि (N == 0.0 && std::signbit(N)) {
+      वर्ण NegativeZero[] = "-0.000000e+00";
+      यदि (Style == FloatStyle::Exponent_ऊर्ध्वस्थम्)
+        NegativeZero[वाक्यदैर्घ्यम्(NegativeZero) - 4] = 'E';
       S << NegativeZero;
-      return;
+      प्रत्यागम;
     }
-#else
-    int fpcl = _fpclass(N);
+#अन्यथा
+    पूर्णाङ्क fpcl = _fpclass(N);
 
     // negative zero
-    if (fpcl == _FPCLASS_NZ) {
-      char NegativeZero[] = "-0.000000e+00";
-      if (Style == FloatStyle::ExponentUpper)
-        NegativeZero[strlen(NegativeZero) - 4] = 'E';
+    यदि (fpcl == _FPCLASS_NZ) {
+      वर्ण NegativeZero[] = "-0.000000e+00";
+      यदि (Style == FloatStyle::Exponent_ऊर्ध्वस्थम्)
+        NegativeZero[वाक्यदैर्घ्यम्(NegativeZero) - 4] = 'E';
       S << NegativeZero;
-      return;
+      प्रत्यागम;
     }
-#endif
+#यदि_अन्तः
 
-    char buf[32];
-    unsigned len;
-    len = format(Spec.c_str(), N).snprint(buf, sizeof(buf));
-    if (len <= sizeof(buf) - 2) {
-      if (len >= 5 && (buf[len - 5] == 'e' || buf[len - 5] == 'E') &&
+    वर्ण buf[32];
+    अचिह्नित len;
+    len = format(Spec.c_str(), N).snprint(buf, परिमाण(buf));
+    यदि (len <= परिमाण(buf) - 2) {
+      यदि (len >= 5 && (buf[len - 5] == 'e' || buf[len - 5] == 'E') &&
           buf[len - 3] == '0') {
-        int cs = buf[len - 4];
-        if (cs == '+' || cs == '-') {
-          int c1 = buf[len - 2];
-          int c0 = buf[len - 1];
-          if (isdigit(static_cast<unsigned char>(c1)) &&
-              isdigit(static_cast<unsigned char>(c0))) {
+        पूर्णाङ्क cs = buf[len - 4];
+        यदि (cs == '+' || cs == '-') {
+          पूर्णाङ्क c1 = buf[len - 2];
+          पूर्णाङ्क c0 = buf[len - 1];
+          यदि (अङ्कः_वा(static_cast<अचिह्नित वर्ण>(c1)) &&
+              अङ्कः_वा(static_cast<अचिह्नित वर्ण>(c0))) {
             // Trim leading '0': "...e+012" -> "...e+12\0"
             buf[len - 3] = c1;
             buf[len - 2] = c0;
@@ -237,33 +237,33 @@ void llvm::write_double(raw_ostream &S, double N, FloatStyle Style,
         }
       }
       S << buf;
-      return;
+      प्रत्यागम;
     }
-#endif
+#यदि_अन्तः
   }
 
-  if (Style == FloatStyle::Percent)
+  यदि (Style == FloatStyle::Percent)
     N *= 100.0;
 
-  char Buf[32];
-  format(Spec.c_str(), N).snprint(Buf, sizeof(Buf));
+  वर्ण Buf[32];
+  format(Spec.c_str(), N).snprint(Buf, परिमाण(Buf));
   S << Buf;
-  if (Style == FloatStyle::Percent)
+  यदि (Style == FloatStyle::Percent)
     S << '%';
 }
 
-bool llvm::isPrefixedHexStyle(HexPrintStyle S) {
-  return (S == HexPrintStyle::PrefixLower || S == HexPrintStyle::PrefixUpper);
+तार्किक llvm::isPrefixedHexStyle(HexPrintStyle S) {
+  प्रत्यागम (S == HexPrintStyle::उपसर्गः_अधस्तनम् || S == HexPrintStyle::उपसर्गः_ऊर्ध्वस्थम्);
 }
 
 size_t llvm::getDefaultPrecision(FloatStyle Style) {
-  switch (Style) {
-  case FloatStyle::Exponent:
-  case FloatStyle::ExponentUpper:
-    return 6; // Number of decimal places.
-  case FloatStyle::Fixed:
-  case FloatStyle::Percent:
-    return 2; // Number of decimal places.
+  विकल्प (Style) {
+  पक्ष FloatStyle::Exponent:
+  पक्ष FloatStyle::Exponent_ऊर्ध्वस्थम्:
+    प्रत्यागम 6; // Number of decimal places.
+  पक्ष FloatStyle::Fixed:
+  पक्ष FloatStyle::Percent:
+    प्रत्यागम 2; // Number of decimal places.
   }
   llvm_unreachable("Unknown FloatStyle enum");
 }

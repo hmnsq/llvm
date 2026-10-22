@@ -20,82 +20,82 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/ADT/Statistic.h"
+#अन्तर्भाव "llvm/ADT/Statistic.h"
 
-#include "DebugOptions.h"
+#अन्तर्भाव "DebugOptions.h"
 
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Compiler.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/Mutex.h"
-#include "llvm/Support/Timer.h"
-#include "llvm/Support/YAMLTraits.h"
-#include "llvm/Support/raw_ostream.h"
-#include <algorithm>
-#include <cstring>
-using namespace llvm;
+#अन्तर्भाव "llvm/ADT/StringExtras.h"
+#अन्तर्भाव "llvm/Support/CommandLine.h"
+#अन्तर्भाव "llvm/Support/Compiler.h"
+#अन्तर्भाव "llvm/Support/Debug.h"
+#अन्तर्भाव "llvm/Support/Format.h"
+#अन्तर्भाव "llvm/Support/ManagedStatic.h"
+#अन्तर्भाव "llvm/Support/Mutex.h"
+#अन्तर्भाव "llvm/Support/Timer.h"
+#अन्तर्भाव "llvm/Support/YAMLTraits.h"
+#अन्तर्भाव "llvm/Support/raw_ostream.h"
+#अन्तर्भाव <algorithm>
+#अन्तर्भाव <cstring>
+उपयुज्य नामाकाश llvm;
 
 /// -stats - Command line option to cause transformations to emit stats about
 /// what they did.
 ///
-static bool EnableStats;
-static bool StatsAsJSON;
-static bool Enabled;
-static bool PrintOnExit;
+स्थिर तार्किक EnableStats;
+स्थिर तार्किक StatsAsJSON;
+स्थिर तार्किक Enabled;
+स्थिर तार्किक PrintOnExit;
 
-void llvm::initStatisticOptions() {
-  static cl::opt<bool, true> registerEnableStats{
+शून्य llvm::initStatisticOptions() {
+  स्थिर cl::opt<तार्किक, सत्य> पञ्जिकाकोशः_Enable_Stats{
       "stats",
       cl::desc(
           "Enable statistics output from program (available with Asserts)"),
       cl::location(EnableStats), cl::Hidden};
-  static cl::opt<bool, true> registerStatsAsJson{
+  स्थिर cl::opt<तार्किक, सत्य> पञ्जिकाकोशः_Stats_As_Json{
       "stats-json", cl::desc("Display statistics as json data"),
       cl::location(StatsAsJSON), cl::Hidden};
 }
 
-namespace {
+नामाकाश {
 /// This class is used in a ManagedStatic so that it is created on demand (when
 /// the first statistic is bumped) and destroyed only when llvm_shutdown is
 /// called. We print statistics from the destructor.
 /// This class is also used to look up statistic values from applications that
 /// use LLVM.
-class StatisticInfo {
-  std::vector<TrackingStatistic *> Stats;
+वर्ग StatisticInfo {
+  std::सदिशम्<TrackingStatistic *> Stats;
 
-  friend void llvm::PrintStatistics();
-  friend void llvm::PrintStatistics(raw_ostream &OS);
-  friend void llvm::PrintStatisticsJSON(raw_ostream &OS);
+  मित्रम् शून्य llvm::PrintStatistics();
+  मित्रम् शून्य llvm::PrintStatistics(raw_ostream &OS);
+  मित्रम् शून्य llvm::PrintStatisticsJSON(raw_ostream &OS);
 
   /// Sort statistics by debugtype,name,description.
-  void sort();
-public:
-  using const_iterator = std::vector<TrackingStatistic *>::const_iterator;
+  शून्य क्रमय();
+सार्वजनिक:
+  उपयुज्य const_iterator = std::सदिशम्<TrackingStatistic *>::const_iterator;
 
   StatisticInfo();
   ~StatisticInfo();
 
-  void addStatistic(TrackingStatistic *S) { Stats.push_back(S); }
+  शून्य सङ्कलय_Statistic(TrackingStatistic *S) { Stats.प्रक्षिप_पृष्ठभागः(S); }
 
-  const_iterator begin() const { return Stats.begin(); }
-  const_iterator end() const { return Stats.end(); }
-  iterator_range<const_iterator> statistics() const {
-    return {begin(), end()};
+  const_iterator begin() ध्रुव { प्रत्यागम Stats.begin(); }
+  const_iterator अन्तः() ध्रुव { प्रत्यागम Stats.अन्तः(); }
+  iterator_range<const_iterator> statistics() ध्रुव {
+    प्रत्यागम {begin(), अन्तः()};
   }
 
-  void reset();
+  शून्य reset();
 };
 } // end anonymous namespace
 
-static ManagedStatic<StatisticInfo> StatInfo;
-static ManagedStatic<sys::SmartMutex<true> > StatLock;
+स्थिर ManagedStatic<StatisticInfo> StatInfo;
+स्थिर ManagedStatic<sys::SmartMutex<सत्य> > Stat_तालकम्;
 
 /// RegisterStatistic - The first time a statistic is bumped, this method is
 /// called.
-void TrackingStatistic::RegisterStatistic() {
+शून्य TrackingStatistic::पञ्जिकाकोशः_Statistic() {
   // If stats are enabled, inform StatInfo that this statistic should be
   // printed.
   // llvm_shutdown calls destructors while holding the ManagedStatic mutex.
@@ -104,65 +104,65 @@ void TrackingStatistic::RegisterStatistic() {
   // ManagedStatic mutex, doing so with StatLock held would lead to a lock
   // order inversion. To avoid that, we dereference the ManagedStatics first,
   // and only take StatLock afterwards.
-  if (!Initialized.load(std::memory_order_relaxed)) {
-    sys::SmartMutex<true> &Lock = *StatLock;
+  यदि (!Initialized.आरोपय(std::memory_order_relaxed)) {
+    sys::SmartMutex<सत्य> &तालकम्_2 = *Stat_तालकम्;
     StatisticInfo &SI = *StatInfo;
-    sys::SmartScopedLock<true> Writer(Lock);
+    sys::Smart_Scoped_तालकम्<सत्य> Writer(तालकम्_2);
     // Check Initialized again after acquiring the lock.
-    if (Initialized.load(std::memory_order_relaxed))
-      return;
-    if (EnableStats || Enabled)
-      SI.addStatistic(this);
+    यदि (Initialized.आरोपय(std::memory_order_relaxed))
+      प्रत्यागम;
+    यदि (EnableStats || Enabled)
+      SI.सङ्कलय_Statistic(एतत्);
 
     // Remember we have been registered.
-    Initialized.store(true, std::memory_order_release);
+    Initialized.store(सत्य, std::memory_order_release);
   }
 }
 
 StatisticInfo::StatisticInfo() {
   // Ensure that necessary timer global objects are created first so they are
   // destructed after us.
-  TimerGroup::constructForStatistics();
+  Timer_गणः::constructForStatistics();
 }
 
 // Print information when destroyed, iff command line option is specified.
 StatisticInfo::~StatisticInfo() {
-  if (EnableStats || PrintOnExit)
+  यदि (EnableStats || PrintOnExit)
     llvm::PrintStatistics();
 }
 
-void llvm::EnableStatistics(bool DoPrintOnExit) {
-  Enabled = true;
+शून्य llvm::EnableStatistics(तार्किक DoPrintOnExit) {
+  Enabled = सत्य;
   PrintOnExit = DoPrintOnExit;
 }
 
-bool llvm::AreStatisticsEnabled() { return Enabled || EnableStats; }
+तार्किक llvm::AreStatisticsEnabled() { प्रत्यागम Enabled || EnableStats; }
 
-void StatisticInfo::sort() {
-  llvm::stable_sort(
-      Stats, [](const TrackingStatistic *LHS, const TrackingStatistic *RHS) {
-        if (int Cmp = std::strcmp(LHS->getDebugType(), RHS->getDebugType()))
-          return Cmp < 0;
+शून्य StatisticInfo::क्रमय() {
+  llvm::stable_क्रमय(
+      Stats, [](ध्रुव TrackingStatistic *LHS, ध्रुव TrackingStatistic *RHS) {
+        यदि (पूर्णाङ्क Cmp = std::वाक्यं_तुलय(LHS->getDebugType(), RHS->getDebugType()))
+          प्रत्यागम Cmp < 0;
 
-        if (int Cmp = std::strcmp(LHS->getName(), RHS->getName()))
-          return Cmp < 0;
+        यदि (पूर्णाङ्क Cmp = std::वाक्यं_तुलय(LHS->getName(), RHS->getName()))
+          प्रत्यागम Cmp < 0;
 
-        return std::strcmp(LHS->getDesc(), RHS->getDesc()) < 0;
+        प्रत्यागम std::वाक्यं_तुलय(LHS->getDesc(), RHS->getDesc()) < 0;
       });
 }
 
-void StatisticInfo::reset() {
-  sys::SmartScopedLock<true> Writer(*StatLock);
+शून्य StatisticInfo::reset() {
+  sys::Smart_Scoped_तालकम्<सत्य> Writer(*Stat_तालकम्);
 
   // Tell each statistic that it isn't registered so it has to register
   // again. We're holding the lock so it won't be able to do so until we're
   // finished. Once we've forced it to re-register (after we return), then zero
   // the value.
-  for (auto *Stat : Stats) {
+  प्रति (स्वचालित *Stat : Stats) {
     // Value updates to a statistic that complete before this statement in the
     // iteration for that statistic will be lost as intended.
-    Stat->Initialized = false;
-    Stat->Value = 0;
+    Stat->Initialized = असत्य;
+    Stat->मानम् = 0;
   }
 
   // Clear the registration list and release the lock once we're done. Any
@@ -173,18 +173,18 @@ void StatisticInfo::reset() {
   Stats.clear();
 }
 
-void llvm::PrintStatistics(raw_ostream &OS) {
+शून्य llvm::PrintStatistics(raw_ostream &OS) {
   StatisticInfo &Stats = *StatInfo;
 
   // Figure out how long the biggest Value and Name fields are.
-  unsigned MaxDebugTypeLen = 0, MaxValLen = 0;
-  for (TrackingStatistic *Stat : Stats.Stats) {
-    MaxValLen = std::max(MaxValLen, (unsigned)utostr(Stat->getValue()).size());
+  अचिह्नित MaxDebugTypeLen = 0, MaxValLen = 0;
+  प्रति (TrackingStatistic *Stat : Stats.Stats) {
+    MaxValLen = std::max(MaxValLen, (अचिह्नित)utostr(Stat->get_मानम्()).आकार_2());
     MaxDebugTypeLen =
-        std::max(MaxDebugTypeLen, (unsigned)std::strlen(Stat->getDebugType()));
+        std::max(MaxDebugTypeLen, (अचिह्नित)std::वाक्यदैर्घ्यम्(Stat->getDebugType()));
   }
 
-  Stats.sort();
+  Stats.क्रमय();
 
   // Print out the statistics header...
   OS << "===" << std::string(73, '-') << "===\n"
@@ -192,77 +192,77 @@ void llvm::PrintStatistics(raw_ostream &OS) {
      << "===" << std::string(73, '-') << "===\n\n";
 
   // Print all of the statistics.
-  for (TrackingStatistic *Stat : Stats.Stats)
-    OS << format("%*" PRIu64 " %-*s - %s\n", MaxValLen, Stat->getValue(),
+  प्रति (TrackingStatistic *Stat : Stats.Stats)
+    OS << format("%*" PRIu64 " %-*s - %s\n", MaxValLen, Stat->get_मानम्(),
                  MaxDebugTypeLen, Stat->getDebugType(), Stat->getDesc());
 
   OS << '\n';  // Flush the output stream.
   OS.flush();
 }
 
-void llvm::PrintStatisticsJSON(raw_ostream &OS) {
-  sys::SmartScopedLock<true> Reader(*StatLock);
+शून्य llvm::PrintStatisticsJSON(raw_ostream &OS) {
+  sys::Smart_Scoped_तालकम्<सत्य> Reader(*Stat_तालकम्);
   StatisticInfo &Stats = *StatInfo;
 
-  Stats.sort();
+  Stats.क्रमय();
 
   // Print all of the statistics.
   OS << "{\n";
-  const char *delim = "";
-  for (const TrackingStatistic *Stat : Stats.Stats) {
+  ध्रुव वर्ण *delim = "";
+  प्रति (ध्रुव TrackingStatistic *Stat : Stats.Stats) {
     OS << delim;
-    assert(yaml::needsQuotes(Stat->getDebugType()) == yaml::QuotingType::None &&
+    प्रतिज्ञा(yaml::needsQuotes(Stat->getDebugType()) == yaml::QuotingType::None &&
            "Statistic group/type name is simple.");
-    assert(yaml::needsQuotes(Stat->getName()) == yaml::QuotingType::None &&
+    प्रतिज्ञा(yaml::needsQuotes(Stat->getName()) == yaml::QuotingType::None &&
            "Statistic name is simple");
     OS << "\t\"" << Stat->getDebugType() << '.' << Stat->getName() << "\": "
-       << Stat->getValue();
+       << Stat->get_मानम्();
     delim = ",\n";
   }
   // Print timers.
-  TimerGroup::printAllJSONValues(OS, delim);
+  Timer_गणः::printAllJSONValues(OS, delim);
 
   OS << "\n}\n";
   OS.flush();
 }
 
-void llvm::PrintStatistics() {
-#if LLVM_ENABLE_STATS
-  sys::SmartScopedLock<true> Reader(*StatLock);
+शून्य llvm::PrintStatistics() {
+#यदि LLVM_ENABLE_STATS
+  sys::Smart_Scoped_तालकम्<सत्य> Reader(*Stat_तालकम्);
   StatisticInfo &Stats = *StatInfo;
 
   // Statistics not enabled?
-  if (Stats.Stats.empty()) return;
+  यदि (Stats.Stats.रिक्तानि()) प्रत्यागम;
 
   // Get the stream to write to.
-  std::unique_ptr<raw_ostream> OutStream = CreateInfoOutputFile();
-  if (StatsAsJSON)
-    PrintStatisticsJSON(*OutStream);
-  else
-    PrintStatistics(*OutStream);
+  std::unique_ptr<raw_ostream> बहिर्गमनम्_प्रवाहः = CreateInfoOutputFile();
+  यदि (StatsAsJSON)
+    PrintStatisticsJSON(*बहिर्गमनम्_प्रवाहः);
+  अन्यथा
+    PrintStatistics(*बहिर्गमनम्_प्रवाहः);
 
-#else
+#अन्यथा
   // Check if the -stats option is set instead of checking
   // !Stats.Stats.empty().  In release builds, Statistics operators
   // do nothing, so stats are never Registered.
-  if (EnableStats) {
+  यदि (EnableStats) {
     // Get the stream to write to.
-    std::unique_ptr<raw_ostream> OutStream = CreateInfoOutputFile();
-    (*OutStream) << "Statistics are disabled.  "
+    std::unique_ptr<raw_ostream> बहिर्गमनम्_प्रवाहः = CreateInfoOutputFile();
+    (*बहिर्गमनम्_प्रवाहः) << "Statistics are disabled.  "
                  << "Build with asserts or with -DLLVM_FORCE_ENABLE_STATS\n";
   }
-#endif
+#यदि_अन्तः
 }
 
-std::vector<std::pair<StringRef, uint64_t>> llvm::GetStatistics() {
-  sys::SmartScopedLock<true> Reader(*StatLock);
-  std::vector<std::pair<StringRef, uint64_t>> ReturnStats;
+std::सदिशम्<std::pair<StringRef, uint64_t>> llvm::GetStatistics() {
+  sys::Smart_Scoped_तालकम्<सत्य> Reader(*Stat_तालकम्);
+  std::सदिशम्<std::pair<StringRef, uint64_t>> ReturnStats;
 
-  for (const auto &Stat : StatInfo->statistics())
-    ReturnStats.emplace_back(Stat->getName(), Stat->getValue());
-  return ReturnStats;
+  प्रति (ध्रुव स्वचालित &Stat : StatInfo->statistics())
+    ReturnStats.emplace_पृष्ठभागः(Stat->getName(), Stat->get_मानम्());
+  प्रत्यागम ReturnStats;
 }
 
-void llvm::ResetStatistics() {
+शून्य llvm::ResetStatistics() {
   StatInfo->reset();
 }

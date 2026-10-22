@@ -37,134 +37,134 @@
  * compile-time configuration.
  */
 
-#include "llvm/Support/MD5.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Support/Endian.h"
-#include <cstdint>
-#include <cstring>
+#अन्तर्भाव "llvm/Support/MD5.h"
+#अन्तर्भाव "llvm/ADT/ArrayRef.h"
+#अन्तर्भाव "llvm/ADT/SmallString.h"
+#अन्तर्भाव "llvm/ADT/StringExtras.h"
+#अन्तर्भाव "llvm/ADT/StringRef.h"
+#अन्तर्भाव "llvm/Support/Endian.h"
+#अन्तर्भाव <cstdint>
+#अन्तर्भाव <cstring>
 
 // The basic MD5 functions.
 
 // F and G are optimized compared to their RFC 1321 definitions for
 // architectures that lack an AND-NOT instruction, just like in Colin Plumb's
 // implementation.
-#define F(x, y, z) ((z) ^ ((x) & ((y) ^ (z))))
-#define G(x, y, z) ((y) ^ ((z) & ((x) ^ (y))))
-#define H(x, y, z) ((x) ^ (y) ^ (z))
-#define I(x, y, z) ((y) ^ ((x) | ~(z)))
+#परिभाषय F(x, y, z) ((z) ^ ((x) & ((y) ^ (z))))
+#परिभाषय G(x, y, z) ((y) ^ ((z) & ((x) ^ (y))))
+#परिभाषय H(x, y, z) ((x) ^ (y) ^ (z))
+#परिभाषय I(x, y, z) ((y) ^ ((x) | ~(z)))
 
 // The MD5 transformation for all four rounds.
-#define STEP(f, a, b, c, d, x, t, s)                                           \
+#परिभाषय चरणः(f, a, b, c, d, x, t, s)                                           \
   (a) += f((b), (c), (d)) + (x) + (t);                                         \
   (a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s))));                   \
   (a) += (b);
 
 // SET reads 4 input bytes in little-endian byte order and stores them
 // in a properly aligned word in host byte order.
-#define SET(n)                                                                 \
-  (InternalState.block[(n)] = (MD5_u32plus)ptr[(n)*4] |                        \
+#परिभाषय समुच्चयः_3(n)                                                                 \
+  (आन्तरिकम्_State.खण्डम्[(n)] = (MD5_u32plus)ptr[(n)*4] |                        \
                               ((MD5_u32plus)ptr[(n)*4 + 1] << 8) |             \
                               ((MD5_u32plus)ptr[(n)*4 + 2] << 16) |            \
                               ((MD5_u32plus)ptr[(n)*4 + 3] << 24))
-#define GET(n) (InternalState.block[(n)])
+#परिभाषय GET(n) (आन्तरिकम्_State.खण्डम्[(n)])
 
-using namespace llvm;
+उपयुज्य नामाकाश llvm;
 
 /// This processes one or more 64-byte data blocks, but does NOT update
 ///the bit counters.  There are no alignment requirements.
-const uint8_t *MD5::body(ArrayRef<uint8_t> Data) {
-  const uint8_t *ptr;
+ध्रुव uint8_t *MD5::body(ArrayRef<uint8_t> दत्त_2) {
+  ध्रुव uint8_t *ptr;
   MD5_u32plus a, b, c, d;
   MD5_u32plus saved_a, saved_b, saved_c, saved_d;
-  unsigned long Size = Data.size();
+  अचिह्नित दीर्घ आकार = दत्त_2.आकार_2();
 
-  ptr = Data.data();
+  ptr = दत्त_2.दत्त();
 
-  a = InternalState.a;
-  b = InternalState.b;
-  c = InternalState.c;
-  d = InternalState.d;
+  a = आन्तरिकम्_State.a;
+  b = आन्तरिकम्_State.b;
+  c = आन्तरिकम्_State.c;
+  d = आन्तरिकम्_State.d;
 
-  do {
+  कुरु {
     saved_a = a;
     saved_b = b;
     saved_c = c;
     saved_d = d;
 
     // Round 1
-    STEP(F, a, b, c, d, SET(0), 0xd76aa478, 7)
-    STEP(F, d, a, b, c, SET(1), 0xe8c7b756, 12)
-    STEP(F, c, d, a, b, SET(2), 0x242070db, 17)
-    STEP(F, b, c, d, a, SET(3), 0xc1bdceee, 22)
-    STEP(F, a, b, c, d, SET(4), 0xf57c0faf, 7)
-    STEP(F, d, a, b, c, SET(5), 0x4787c62a, 12)
-    STEP(F, c, d, a, b, SET(6), 0xa8304613, 17)
-    STEP(F, b, c, d, a, SET(7), 0xfd469501, 22)
-    STEP(F, a, b, c, d, SET(8), 0x698098d8, 7)
-    STEP(F, d, a, b, c, SET(9), 0x8b44f7af, 12)
-    STEP(F, c, d, a, b, SET(10), 0xffff5bb1, 17)
-    STEP(F, b, c, d, a, SET(11), 0x895cd7be, 22)
-    STEP(F, a, b, c, d, SET(12), 0x6b901122, 7)
-    STEP(F, d, a, b, c, SET(13), 0xfd987193, 12)
-    STEP(F, c, d, a, b, SET(14), 0xa679438e, 17)
-    STEP(F, b, c, d, a, SET(15), 0x49b40821, 22)
+    चरणः(F, a, b, c, d, समुच्चयः_3(0), 0xd76aa478, 7)
+    चरणः(F, d, a, b, c, समुच्चयः_3(1), 0xe8c7b756, 12)
+    चरणः(F, c, d, a, b, समुच्चयः_3(2), 0x242070db, 17)
+    चरणः(F, b, c, d, a, समुच्चयः_3(3), 0xc1bdceee, 22)
+    चरणः(F, a, b, c, d, समुच्चयः_3(4), 0xf57c0faf, 7)
+    चरणः(F, d, a, b, c, समुच्चयः_3(5), 0x4787c62a, 12)
+    चरणः(F, c, d, a, b, समुच्चयः_3(6), 0xa8304613, 17)
+    चरणः(F, b, c, d, a, समुच्चयः_3(7), 0xfd469501, 22)
+    चरणः(F, a, b, c, d, समुच्चयः_3(8), 0x698098d8, 7)
+    चरणः(F, d, a, b, c, समुच्चयः_3(9), 0x8b44f7af, 12)
+    चरणः(F, c, d, a, b, समुच्चयः_3(10), 0xffff5bb1, 17)
+    चरणः(F, b, c, d, a, समुच्चयः_3(11), 0x895cd7be, 22)
+    चरणः(F, a, b, c, d, समुच्चयः_3(12), 0x6b901122, 7)
+    चरणः(F, d, a, b, c, समुच्चयः_3(13), 0xfd987193, 12)
+    चरणः(F, c, d, a, b, समुच्चयः_3(14), 0xa679438e, 17)
+    चरणः(F, b, c, d, a, समुच्चयः_3(15), 0x49b40821, 22)
 
     // Round 2
-    STEP(G, a, b, c, d, GET(1), 0xf61e2562, 5)
-    STEP(G, d, a, b, c, GET(6), 0xc040b340, 9)
-    STEP(G, c, d, a, b, GET(11), 0x265e5a51, 14)
-    STEP(G, b, c, d, a, GET(0), 0xe9b6c7aa, 20)
-    STEP(G, a, b, c, d, GET(5), 0xd62f105d, 5)
-    STEP(G, d, a, b, c, GET(10), 0x02441453, 9)
-    STEP(G, c, d, a, b, GET(15), 0xd8a1e681, 14)
-    STEP(G, b, c, d, a, GET(4), 0xe7d3fbc8, 20)
-    STEP(G, a, b, c, d, GET(9), 0x21e1cde6, 5)
-    STEP(G, d, a, b, c, GET(14), 0xc33707d6, 9)
-    STEP(G, c, d, a, b, GET(3), 0xf4d50d87, 14)
-    STEP(G, b, c, d, a, GET(8), 0x455a14ed, 20)
-    STEP(G, a, b, c, d, GET(13), 0xa9e3e905, 5)
-    STEP(G, d, a, b, c, GET(2), 0xfcefa3f8, 9)
-    STEP(G, c, d, a, b, GET(7), 0x676f02d9, 14)
-    STEP(G, b, c, d, a, GET(12), 0x8d2a4c8a, 20)
+    चरणः(G, a, b, c, d, GET(1), 0xf61e2562, 5)
+    चरणः(G, d, a, b, c, GET(6), 0xc040b340, 9)
+    चरणः(G, c, d, a, b, GET(11), 0x265e5a51, 14)
+    चरणः(G, b, c, d, a, GET(0), 0xe9b6c7aa, 20)
+    चरणः(G, a, b, c, d, GET(5), 0xd62f105d, 5)
+    चरणः(G, d, a, b, c, GET(10), 0x02441453, 9)
+    चरणः(G, c, d, a, b, GET(15), 0xd8a1e681, 14)
+    चरणः(G, b, c, d, a, GET(4), 0xe7d3fbc8, 20)
+    चरणः(G, a, b, c, d, GET(9), 0x21e1cde6, 5)
+    चरणः(G, d, a, b, c, GET(14), 0xc33707d6, 9)
+    चरणः(G, c, d, a, b, GET(3), 0xf4d50d87, 14)
+    चरणः(G, b, c, d, a, GET(8), 0x455a14ed, 20)
+    चरणः(G, a, b, c, d, GET(13), 0xa9e3e905, 5)
+    चरणः(G, d, a, b, c, GET(2), 0xfcefa3f8, 9)
+    चरणः(G, c, d, a, b, GET(7), 0x676f02d9, 14)
+    चरणः(G, b, c, d, a, GET(12), 0x8d2a4c8a, 20)
 
     // Round 3
-    STEP(H, a, b, c, d, GET(5), 0xfffa3942, 4)
-    STEP(H, d, a, b, c, GET(8), 0x8771f681, 11)
-    STEP(H, c, d, a, b, GET(11), 0x6d9d6122, 16)
-    STEP(H, b, c, d, a, GET(14), 0xfde5380c, 23)
-    STEP(H, a, b, c, d, GET(1), 0xa4beea44, 4)
-    STEP(H, d, a, b, c, GET(4), 0x4bdecfa9, 11)
-    STEP(H, c, d, a, b, GET(7), 0xf6bb4b60, 16)
-    STEP(H, b, c, d, a, GET(10), 0xbebfbc70, 23)
-    STEP(H, a, b, c, d, GET(13), 0x289b7ec6, 4)
-    STEP(H, d, a, b, c, GET(0), 0xeaa127fa, 11)
-    STEP(H, c, d, a, b, GET(3), 0xd4ef3085, 16)
-    STEP(H, b, c, d, a, GET(6), 0x04881d05, 23)
-    STEP(H, a, b, c, d, GET(9), 0xd9d4d039, 4)
-    STEP(H, d, a, b, c, GET(12), 0xe6db99e5, 11)
-    STEP(H, c, d, a, b, GET(15), 0x1fa27cf8, 16)
-    STEP(H, b, c, d, a, GET(2), 0xc4ac5665, 23)
+    चरणः(H, a, b, c, d, GET(5), 0xfffa3942, 4)
+    चरणः(H, d, a, b, c, GET(8), 0x8771f681, 11)
+    चरणः(H, c, d, a, b, GET(11), 0x6d9d6122, 16)
+    चरणः(H, b, c, d, a, GET(14), 0xfde5380c, 23)
+    चरणः(H, a, b, c, d, GET(1), 0xa4beea44, 4)
+    चरणः(H, d, a, b, c, GET(4), 0x4bdecfa9, 11)
+    चरणः(H, c, d, a, b, GET(7), 0xf6bb4b60, 16)
+    चरणः(H, b, c, d, a, GET(10), 0xbebfbc70, 23)
+    चरणः(H, a, b, c, d, GET(13), 0x289b7ec6, 4)
+    चरणः(H, d, a, b, c, GET(0), 0xeaa127fa, 11)
+    चरणः(H, c, d, a, b, GET(3), 0xd4ef3085, 16)
+    चरणः(H, b, c, d, a, GET(6), 0x04881d05, 23)
+    चरणः(H, a, b, c, d, GET(9), 0xd9d4d039, 4)
+    चरणः(H, d, a, b, c, GET(12), 0xe6db99e5, 11)
+    चरणः(H, c, d, a, b, GET(15), 0x1fa27cf8, 16)
+    चरणः(H, b, c, d, a, GET(2), 0xc4ac5665, 23)
 
     // Round 4
-    STEP(I, a, b, c, d, GET(0), 0xf4292244, 6)
-    STEP(I, d, a, b, c, GET(7), 0x432aff97, 10)
-    STEP(I, c, d, a, b, GET(14), 0xab9423a7, 15)
-    STEP(I, b, c, d, a, GET(5), 0xfc93a039, 21)
-    STEP(I, a, b, c, d, GET(12), 0x655b59c3, 6)
-    STEP(I, d, a, b, c, GET(3), 0x8f0ccc92, 10)
-    STEP(I, c, d, a, b, GET(10), 0xffeff47d, 15)
-    STEP(I, b, c, d, a, GET(1), 0x85845dd1, 21)
-    STEP(I, a, b, c, d, GET(8), 0x6fa87e4f, 6)
-    STEP(I, d, a, b, c, GET(15), 0xfe2ce6e0, 10)
-    STEP(I, c, d, a, b, GET(6), 0xa3014314, 15)
-    STEP(I, b, c, d, a, GET(13), 0x4e0811a1, 21)
-    STEP(I, a, b, c, d, GET(4), 0xf7537e82, 6)
-    STEP(I, d, a, b, c, GET(11), 0xbd3af235, 10)
-    STEP(I, c, d, a, b, GET(2), 0x2ad7d2bb, 15)
-    STEP(I, b, c, d, a, GET(9), 0xeb86d391, 21)
+    चरणः(I, a, b, c, d, GET(0), 0xf4292244, 6)
+    चरणः(I, d, a, b, c, GET(7), 0x432aff97, 10)
+    चरणः(I, c, d, a, b, GET(14), 0xab9423a7, 15)
+    चरणः(I, b, c, d, a, GET(5), 0xfc93a039, 21)
+    चरणः(I, a, b, c, d, GET(12), 0x655b59c3, 6)
+    चरणः(I, d, a, b, c, GET(3), 0x8f0ccc92, 10)
+    चरणः(I, c, d, a, b, GET(10), 0xffeff47d, 15)
+    चरणः(I, b, c, d, a, GET(1), 0x85845dd1, 21)
+    चरणः(I, a, b, c, d, GET(8), 0x6fa87e4f, 6)
+    चरणः(I, d, a, b, c, GET(15), 0xfe2ce6e0, 10)
+    चरणः(I, c, d, a, b, GET(6), 0xa3014314, 15)
+    चरणः(I, b, c, d, a, GET(13), 0x4e0811a1, 21)
+    चरणः(I, a, b, c, d, GET(4), 0xf7537e82, 6)
+    चरणः(I, d, a, b, c, GET(11), 0xbd3af235, 10)
+    चरणः(I, c, d, a, b, GET(2), 0x2ad7d2bb, 15)
+    चरणः(I, b, c, d, a, GET(9), 0xeb86d391, 21)
 
     a += saved_a;
     b += saved_b;
@@ -172,134 +172,134 @@ const uint8_t *MD5::body(ArrayRef<uint8_t> Data) {
     d += saved_d;
 
     ptr += 64;
-  } while (Size -= 64);
+  } यावत् (आकार -= 64);
 
-  InternalState.a = a;
-  InternalState.b = b;
-  InternalState.c = c;
-  InternalState.d = d;
+  आन्तरिकम्_State.a = a;
+  आन्तरिकम्_State.b = b;
+  आन्तरिकम्_State.c = c;
+  आन्तरिकम्_State.d = d;
 
-  return ptr;
+  प्रत्यागम ptr;
 }
 
-MD5::MD5() = default;
+MD5::MD5() = स्वभाव;
 
 /// Incrementally add the bytes in \p Data to the hash.
-void MD5::update(ArrayRef<uint8_t> Data) {
+शून्य MD5::update(ArrayRef<uint8_t> दत्त_2) {
   MD5_u32plus saved_lo;
-  unsigned long used, free;
-  const uint8_t *Ptr = Data.data();
-  unsigned long Size = Data.size();
+  अचिह्नित दीर्घ प्रयुक्तम्, मुक्त;
+  ध्रुव uint8_t *Ptr = दत्त_2.दत्त();
+  अचिह्नित दीर्घ आकार = दत्त_2.आकार_2();
 
-  saved_lo = InternalState.lo;
-  if ((InternalState.lo = (saved_lo + Size) & 0x1fffffff) < saved_lo)
-    InternalState.hi++;
-  InternalState.hi += Size >> 29;
+  saved_lo = आन्तरिकम्_State.lo;
+  यदि ((आन्तरिकम्_State.lo = (saved_lo + आकार) & 0x1fffffff) < saved_lo)
+    आन्तरिकम्_State.hi++;
+  आन्तरिकम्_State.hi += आकार >> 29;
 
-  used = saved_lo & 0x3f;
+  प्रयुक्तम् = saved_lo & 0x3f;
 
-  if (used) {
-    free = 64 - used;
+  यदि (प्रयुक्तम्) {
+    मुक्त = 64 - प्रयुक्तम्;
 
-    if (Size < free) {
-      memcpy(&InternalState.buffer[used], Ptr, Size);
-      return;
+    यदि (आकार < मुक्त) {
+      स्मृतिं_प्रतिलिख(&आन्तरिकम्_State.बफर_2[प्रयुक्तम्], Ptr, आकार);
+      प्रत्यागम;
     }
 
-    memcpy(&InternalState.buffer[used], Ptr, free);
-    Ptr = Ptr + free;
-    Size -= free;
-    body(ArrayRef(InternalState.buffer, 64));
+    स्मृतिं_प्रतिलिख(&आन्तरिकम्_State.बफर_2[प्रयुक्तम्], Ptr, मुक्त);
+    Ptr = Ptr + मुक्त;
+    आकार -= मुक्त;
+    body(ArrayRef(आन्तरिकम्_State.बफर_2, 64));
   }
 
-  if (Size >= 64) {
-    Ptr = body(ArrayRef(Ptr, Size & ~(unsigned long)0x3f));
-    Size &= 0x3f;
+  यदि (आकार >= 64) {
+    Ptr = body(ArrayRef(Ptr, आकार & ~(अचिह्नित दीर्घ)0x3f));
+    आकार &= 0x3f;
   }
 
-  memcpy(InternalState.buffer, Ptr, Size);
+  स्मृतिं_प्रतिलिख(आन्तरिकम्_State.बफर_2, Ptr, आकार);
 }
 
 /// Add the bytes in the StringRef \p Str to the hash.
 // Note that this isn't a string and so this won't include any trailing NULL
 // bytes.
-void MD5::update(StringRef Str) {
-  ArrayRef<uint8_t> SVal((const uint8_t *)Str.data(), Str.size());
+शून्य MD5::update(StringRef Str) {
+  ArrayRef<uint8_t> SVal((ध्रुव uint8_t *)Str.दत्त(), Str.आकार_2());
   update(SVal);
 }
 
 /// Finish the hash and place the resulting hash into \p result.
 /// \param Result is assumed to be a minimum of 16-bytes in size.
-void MD5::final(MD5Result &Result) {
-  unsigned long used, free;
+शून्य MD5::final(MD5_परिणाम &परिणाम) {
+  अचिह्नित दीर्घ प्रयुक्तम्, मुक्त;
 
-  used = InternalState.lo & 0x3f;
+  प्रयुक्तम् = आन्तरिकम्_State.lo & 0x3f;
 
-  InternalState.buffer[used++] = 0x80;
+  आन्तरिकम्_State.बफर_2[प्रयुक्तम्++] = 0x80;
 
-  free = 64 - used;
+  मुक्त = 64 - प्रयुक्तम्;
 
-  if (free < 8) {
-    memset(&InternalState.buffer[used], 0, free);
-    body(ArrayRef(InternalState.buffer, 64));
-    used = 0;
-    free = 64;
+  यदि (मुक्त < 8) {
+    स्मृतिं_पूरय(&आन्तरिकम्_State.बफर_2[प्रयुक्तम्], 0, मुक्त);
+    body(ArrayRef(आन्तरिकम्_State.बफर_2, 64));
+    प्रयुक्तम् = 0;
+    मुक्त = 64;
   }
 
-  memset(&InternalState.buffer[used], 0, free - 8);
+  स्मृतिं_पूरय(&आन्तरिकम्_State.बफर_2[प्रयुक्तम्], 0, मुक्त - 8);
 
-  InternalState.lo <<= 3;
-  support::endian::write32le(&InternalState.buffer[56], InternalState.lo);
-  support::endian::write32le(&InternalState.buffer[60], InternalState.hi);
+  आन्तरिकम्_State.lo <<= 3;
+  support::endian::write32le(&आन्तरिकम्_State.बफर_2[56], आन्तरिकम्_State.lo);
+  support::endian::write32le(&आन्तरिकम्_State.बफर_2[60], आन्तरिकम्_State.hi);
 
-  body(ArrayRef(InternalState.buffer, 64));
+  body(ArrayRef(आन्तरिकम्_State.बफर_2, 64));
 
-  support::endian::write32le(&Result[0], InternalState.a);
-  support::endian::write32le(&Result[4], InternalState.b);
-  support::endian::write32le(&Result[8], InternalState.c);
-  support::endian::write32le(&Result[12], InternalState.d);
+  support::endian::write32le(&परिणाम[0], आन्तरिकम्_State.a);
+  support::endian::write32le(&परिणाम[4], आन्तरिकम्_State.b);
+  support::endian::write32le(&परिणाम[8], आन्तरिकम्_State.c);
+  support::endian::write32le(&परिणाम[12], आन्तरिकम्_State.d);
 }
 
-MD5::MD5Result MD5::final() {
-  MD5Result Result;
-  final(Result);
-  return Result;
+MD5::MD5_परिणाम MD5::final() {
+  MD5_परिणाम परिणाम;
+  final(परिणाम);
+  प्रत्यागम परिणाम;
 }
 
-MD5::MD5Result MD5::result() {
-  auto StateToRestore = InternalState;
+MD5::MD5_परिणाम MD5::परिणाम_2() {
+  स्वचालित State_गन्तव्यम्_Restore = आन्तरिकम्_State;
 
-  auto Hash = final();
+  स्वचालित Hash = final();
 
   // Restore the state
-  InternalState = StateToRestore;
+  आन्तरिकम्_State = State_गन्तव्यम्_Restore;
 
-  return Hash;
+  प्रत्यागम Hash;
 }
 
-SmallString<32> MD5::MD5Result::digest() const {
+SmallString<32> MD5::MD5_परिणाम::digest() ध्रुव {
   SmallString<32> Str;
-  toHex(*this, /*LowerCase*/ true, Str);
-  return Str;
+  गन्तव्यम्_Hex(*एतत्, /*LowerCase*/ सत्य, Str);
+  प्रत्यागम Str;
 }
 
-void MD5::stringifyResult(MD5Result &Result, SmallVectorImpl<char> &Str) {
-  toHex(Result, /*LowerCase*/ true, Str);
+शून्य MD5::stringify_परिणाम(MD5_परिणाम &परिणाम, Small_सदिशम्_Impl<वर्ण> &Str) {
+  गन्तव्यम्_Hex(परिणाम, /*LowerCase*/ सत्य, Str);
 }
 
-MD5::MD5Result MD5::hash(ArrayRef<uint8_t> Data) {
+MD5::MD5_परिणाम MD5::hash(ArrayRef<uint8_t> दत्त_2) {
   MD5 Hash;
-  Hash.update(Data);
-  MD5::MD5Result Res;
+  Hash.update(दत्त_2);
+  MD5::MD5_परिणाम Res;
   Hash.final(Res);
 
-  return Res;
+  प्रत्यागम Res;
 }
 
-#undef F
-#undef G
-#undef H
-#undef I
-#undef STEP
-#undef SET
-#undef GET
+#अपरिभाषय F
+#अपरिभाषय G
+#अपरिभाषय H
+#अपरिभाषय I
+#अपरिभाषय चरणः
+#अपरिभाषय समुच्चयः_3
+#अपरिभाषय GET

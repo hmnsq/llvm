@@ -6,93 +6,93 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/LineIterator.h"
-#include "llvm/Support/MemoryBuffer.h"
+#अन्तर्भाव "llvm/Support/LineIterator.h"
+#अन्तर्भाव "llvm/Support/MemoryBuffer.h"
 
-using namespace llvm;
+उपयुज्य नामाकाश llvm;
 
-static bool isAtLineEnd(const char *P) {
-  if (*P == '\n')
-    return true;
-  if (*P == '\r' && *(P + 1) == '\n')
-    return true;
-  return false;
+स्थिर तार्किक is_At_पङ्क्तिः_अन्तः(ध्रुव वर्ण *P) {
+  यदि (*P == '\n')
+    प्रत्यागम सत्य;
+  यदि (*P == '\r' && *(P + 1) == '\n')
+    प्रत्यागम सत्य;
+  प्रत्यागम असत्य;
 }
 
-static bool skipIfAtLineEnd(const char *&P) {
-  if (*P == '\n') {
+स्थिर तार्किक skip_If_At_पङ्क्तिः_अन्तः(ध्रुव वर्ण *&P) {
+  यदि (*P == '\n') {
     ++P;
-    return true;
+    प्रत्यागम सत्य;
   }
-  if (*P == '\r' && *(P + 1) == '\n') {
+  यदि (*P == '\r' && *(P + 1) == '\n') {
     P += 2;
-    return true;
+    प्रत्यागम सत्य;
   }
-  return false;
+  प्रत्यागम असत्य;
 }
 
-line_iterator::line_iterator(const MemoryBuffer &Buffer, bool SkipBlanks,
-                             char CommentMarker)
-    : line_iterator(Buffer.getMemBufferRef(), SkipBlanks, CommentMarker) {}
+पङ्क्तिः_iterator::पङ्क्तिः_iterator(ध्रुव स्मृतिः_बफर &बफर, तार्किक SkipBlanks,
+                             वर्ण CommentMarker)
+    : पङ्क्तिः_iterator(बफर.get_Mem_बफर_Ref(), SkipBlanks, CommentMarker) {}
 
-line_iterator::line_iterator(const MemoryBufferRef &Buffer, bool SkipBlanks,
-                             char CommentMarker)
-    : Buffer(Buffer.getBufferSize() ? std::optional<MemoryBufferRef>(Buffer)
+पङ्क्तिः_iterator::पङ्क्तिः_iterator(ध्रुव स्मृतिः_बफर_Ref &बफर, तार्किक SkipBlanks,
+                             वर्ण CommentMarker)
+    : बफर(बफर.get_बफर_आकार() ? std::optional<स्मृतिः_बफर_Ref>(बफर)
                                     : std::nullopt),
       CommentMarker(CommentMarker), SkipBlanks(SkipBlanks),
-      CurrentLine(Buffer.getBufferSize() ? Buffer.getBufferStart() : nullptr,
+      Current_पङ्क्तिः(बफर.get_बफर_आकार() ? बफर.get_बफर_Start() : शून्यसूचकः,
                   0) {
   // Ensure that if we are constructed on a non-empty memory buffer that it is
   // a null terminated buffer.
-  if (Buffer.getBufferSize()) {
-    assert(Buffer.getBufferEnd()[0] == '\0');
+  यदि (बफर.get_बफर_आकार()) {
+    प्रतिज्ञा(बफर.get_बफर_अन्तः()[0] == '\0');
     // Make sure we don't skip a leading newline if we're keeping blanks
-    if (SkipBlanks || !isAtLineEnd(Buffer.getBufferStart()))
+    यदि (SkipBlanks || !is_At_पङ्क्तिः_अन्तः(बफर.get_बफर_Start()))
       advance();
   }
 }
 
-void line_iterator::advance() {
-  assert(Buffer && "Cannot advance past the end!");
+शून्य पङ्क्तिः_iterator::advance() {
+  प्रतिज्ञा(बफर && "Cannot advance past the end!");
 
-  const char *Pos = CurrentLine.end();
-  assert(Pos == Buffer->getBufferStart() || isAtLineEnd(Pos) || *Pos == '\0');
+  ध्रुव वर्ण *Pos = Current_पङ्क्तिः.अन्तः();
+  प्रतिज्ञा(Pos == बफर->get_बफर_Start() || is_At_पङ्क्तिः_अन्तः(Pos) || *Pos == '\0');
 
-  if (skipIfAtLineEnd(Pos))
-    ++LineNumber;
-  if (!SkipBlanks && isAtLineEnd(Pos)) {
+  यदि (skip_If_At_पङ्क्तिः_अन्तः(Pos))
+    ++पङ्क्तिः_सङ्ख्या;
+  यदि (!SkipBlanks && is_At_पङ्क्तिः_अन्तः(Pos)) {
     // Nothing to do for a blank line.
-  } else if (CommentMarker == '\0') {
+  } अन्यथा यदि (CommentMarker == '\0') {
     // If we're not stripping comments, this is simpler.
-    while (skipIfAtLineEnd(Pos))
-      ++LineNumber;
-  } else {
+    यावत् (skip_If_At_पङ्क्तिः_अन्तः(Pos))
+      ++पङ्क्तिः_सङ्ख्या;
+  } अन्यथा {
     // Skip comments and count line numbers, which is a bit more complex.
-    for (;;) {
-      if (isAtLineEnd(Pos) && !SkipBlanks)
-        break;
-      if (*Pos == CommentMarker)
-        do {
+    प्रति (;;) {
+      यदि (is_At_पङ्क्तिः_अन्तः(Pos) && !SkipBlanks)
+        भङ्ग;
+      यदि (*Pos == CommentMarker)
+        कुरु {
           ++Pos;
-        } while (*Pos != '\0' && !isAtLineEnd(Pos));
-      if (!skipIfAtLineEnd(Pos))
-        break;
-      ++LineNumber;
+        } यावत् (*Pos != '\0' && !is_At_पङ्क्तिः_अन्तः(Pos));
+      यदि (!skip_If_At_पङ्क्तिः_अन्तः(Pos))
+        भङ्ग;
+      ++पङ्क्तिः_सङ्ख्या;
     }
   }
 
-  if (*Pos == '\0') {
+  यदि (*Pos == '\0') {
     // We've hit the end of the buffer, reset ourselves to the end state.
-    Buffer = std::nullopt;
-    CurrentLine = StringRef();
-    return;
+    बफर = std::nullopt;
+    Current_पङ्क्तिः = StringRef();
+    प्रत्यागम;
   }
 
   // Measure the line.
-  size_t Length = 0;
-  while (Pos[Length] != '\0' && !isAtLineEnd(&Pos[Length])) {
-    ++Length;
+  size_t दीर्घता = 0;
+  यावत् (Pos[दीर्घता] != '\0' && !is_At_पङ्क्तिः_अन्तः(&Pos[दीर्घता])) {
+    ++दीर्घता;
   }
 
-  CurrentLine = StringRef(Pos, Length);
+  Current_पङ्क्तिः = StringRef(Pos, दीर्घता);
 }

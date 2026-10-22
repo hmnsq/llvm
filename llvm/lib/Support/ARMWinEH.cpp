@@ -6,42 +6,42 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ARMWinEH.h"
+#अन्तर्भाव "llvm/Support/ARMWinEH.h"
 
-namespace llvm {
-namespace ARM {
-namespace WinEH {
-std::pair<uint16_t, uint32_t> SavedRegisterMask(const RuntimeFunction &RF,
-                                                bool Prologue) {
-  uint8_t NumRegisters = RF.Reg();
+नामाकाश llvm {
+नामाकाश ARM {
+नामाकाश WinEH {
+std::pair<uint16_t, uint32_t> Saved_पञ्जिकाकोशः_आवरणम्(ध्रुव RuntimeFunction &RF,
+                                                तार्किक Prologue) {
+  uint8_t अङ्कः_Registers = RF.Reg();
   uint8_t RegistersVFP = RF.R();
-  uint8_t LinkRegister = RF.L();
+  uint8_t Link_पञ्जिकाकोशः = RF.L();
   uint8_t ChainedFrame = RF.C();
 
   uint16_t GPRMask = (ChainedFrame << 11);
   uint32_t VFPMask = 0;
 
-  if (Prologue) {
-    GPRMask |= (LinkRegister << 14);
-  } else {
+  यदि (Prologue) {
+    GPRMask |= (Link_पञ्जिकाकोशः << 14);
+  } अन्यथा {
     // If Ret != 0, we pop into Lr and return later
-    if (RF.Ret() != ReturnType::RT_POP)
-      GPRMask |= (LinkRegister << 14);
-    else if (!RF.H()) // If H == 0, we pop directly into Pc
-      GPRMask |= (LinkRegister << 15);
+    यदि (RF.Ret() != ReturnType::RT_निष्कासय)
+      GPRMask |= (Link_पञ्जिकाकोशः << 14);
+    अन्यथा यदि (!RF.H()) // If H == 0, we pop directly into Pc
+      GPRMask |= (Link_पञ्जिकाकोशः << 15);
     // else, Ret == 0 && H == 1, we pop into Pc separately afterwards
   }
 
-  if (RegistersVFP)
-    VFPMask |= (((1 << ((NumRegisters + 1) % 8)) - 1) << 8);
-  else
-    GPRMask |= (((1 << (NumRegisters + 1)) - 1) << 4);
+  यदि (RegistersVFP)
+    VFPMask |= (((1 << ((अङ्कः_Registers + 1) % 8)) - 1) << 8);
+  अन्यथा
+    GPRMask |= (((1 << (अङ्कः_Registers + 1)) - 1) << 4);
 
-  if ((PrologueFolding(RF) && Prologue) || (EpilogueFolding(RF) && !Prologue))
-    GPRMask |= (((1 << ((RF.StackAdjust() & 0x3) + 1)) - 1)
-                << (~RF.StackAdjust() & 0x3));
+  यदि ((PrologueFolding(RF) && Prologue) || (EpilogueFolding(RF) && !Prologue))
+    GPRMask |= (((1 << ((RF.राशिः_Adjust() & 0x3) + 1)) - 1)
+                << (~RF.राशिः_Adjust() & 0x3));
 
-  return {GPRMask, VFPMask};
+  प्रत्यागम {GPRMask, VFPMask};
 }
 } // namespace WinEH
 } // namespace ARM

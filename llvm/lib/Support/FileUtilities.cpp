@@ -11,160 +11,160 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/FileUtilities.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/ErrorOr.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/Process.h"
-#include "llvm/Support/raw_ostream.h"
-#include <cmath>
-#include <cstdint>
-#include <cstdlib>
-#include <cstring>
-#include <memory>
-#include <system_error>
+#अन्तर्भाव "llvm/Support/FileUtilities.h"
+#अन्तर्भाव "llvm/ADT/SmallString.h"
+#अन्तर्भाव "llvm/ADT/StringExtras.h"
+#अन्तर्भाव "llvm/Support/Error.h"
+#अन्तर्भाव "llvm/Support/ErrorOr.h"
+#अन्तर्भाव "llvm/Support/MemoryBuffer.h"
+#अन्तर्भाव "llvm/Support/Process.h"
+#अन्तर्भाव "llvm/Support/raw_ostream.h"
+#अन्तर्भाव <cmath>
+#अन्तर्भाव <cstdint>
+#अन्तर्भाव <cstdlib>
+#अन्तर्भाव <cstring>
+#अन्तर्भाव <memory>
+#अन्तर्भाव <system_error>
 
-using namespace llvm;
+उपयुज्य नामाकाश llvm;
 
-static bool isSignedChar(char C) {
-  return (C == '+' || C == '-');
+स्थिर तार्किक isSignedChar(वर्ण C) {
+  प्रत्यागम (C == '+' || C == '-');
 }
 
-static bool isExponentChar(char C) {
-  switch (C) {
-  case 'D':  // Strange exponential notation.
-  case 'd':  // Strange exponential notation.
-  case 'e':
-  case 'E': return true;
-  default: return false;
+स्थिर तार्किक isExponentChar(वर्ण C) {
+  विकल्प (C) {
+  पक्ष 'D':  // Strange exponential notation.
+  पक्ष 'd':  // Strange exponential notation.
+  पक्ष 'e':
+  पक्ष 'E': प्रत्यागम सत्य;
+  स्वभाव: प्रत्यागम असत्य;
   }
 }
 
-static bool isNumberChar(char C) {
-  switch (C) {
-  case '0': case '1': case '2': case '3': case '4':
-  case '5': case '6': case '7': case '8': case '9':
-  case '.': return true;
-  default: return isSignedChar(C) || isExponentChar(C);
+स्थिर तार्किक is_सङ्ख्या_Char(वर्ण C) {
+  विकल्प (C) {
+  पक्ष '0': पक्ष '1': पक्ष '2': पक्ष '3': पक्ष '4':
+  पक्ष '5': पक्ष '6': पक्ष '7': पक्ष '8': पक्ष '9':
+  पक्ष '.': प्रत्यागम सत्य;
+  स्वभाव: प्रत्यागम isSignedChar(C) || isExponentChar(C);
   }
 }
 
-static const char *BackupNumber(const char *Pos, const char *FirstChar) {
+स्थिर ध्रुव वर्ण *Backup_सङ्ख्या(ध्रुव वर्ण *Pos, ध्रुव वर्ण *FirstChar) {
   // If we didn't stop in the middle of a number, don't backup.
-  if (!isNumberChar(*Pos)) return Pos;
+  यदि (!is_सङ्ख्या_Char(*Pos)) प्रत्यागम Pos;
 
   // Otherwise, return to the start of the number.
-  bool HasPeriod = false;
-  while (Pos > FirstChar && isNumberChar(Pos[-1])) {
+  तार्किक HasPeriod = असत्य;
+  यावत् (Pos > FirstChar && is_सङ्ख्या_Char(Pos[-1])) {
     // Backup over at most one period.
-    if (Pos[-1] == '.') {
-      if (HasPeriod)
-        break;
-      HasPeriod = true;
+    यदि (Pos[-1] == '.') {
+      यदि (HasPeriod)
+        भङ्ग;
+      HasPeriod = सत्य;
     }
 
     --Pos;
-    if (Pos > FirstChar && isSignedChar(Pos[0]) && !isExponentChar(Pos[-1]))
-      break;
+    यदि (Pos > FirstChar && isSignedChar(Pos[0]) && !isExponentChar(Pos[-1]))
+      भङ्ग;
   }
-  return Pos;
+  प्रत्यागम Pos;
 }
 
 /// EndOfNumber - Return the first character that is not part of the specified
 /// number.  This assumes that the buffer is null terminated, so it won't fall
 /// off the end.
-static const char *EndOfNumber(const char *Pos) {
-  while (isNumberChar(*Pos))
+स्थिर ध्रुव वर्ण *अन्तः_सम्बन्धि_सङ्ख्या(ध्रुव वर्ण *Pos) {
+  यावत् (is_सङ्ख्या_Char(*Pos))
     ++Pos;
-  return Pos;
+  प्रत्यागम Pos;
 }
 
 /// CompareNumbers - compare two numbers, returning true if they are different.
-static bool CompareNumbers(const char *&F1P, const char *&F2P,
-                           const char *F1End, const char *F2End,
-                           double AbsTolerance, double RelTolerance,
-                           std::string *ErrorMsg) {
-  const char *F1NumEnd, *F2NumEnd;
-  double V1 = 0.0, V2 = 0.0;
+स्थिर तार्किक CompareNumbers(ध्रुव वर्ण *&F1P, ध्रुव वर्ण *&F2P,
+                           ध्रुव वर्ण *F1_अन्तः, ध्रुव वर्ण *F2_अन्तः,
+                           द्विगुण AbsTolerance, द्विगुण RelTolerance,
+                           std::string *Error_सन्देशः) {
+  ध्रुव वर्ण *F1_अङ्कः_अन्तः, *F2_अङ्कः_अन्तः;
+  द्विगुण V1 = 0.0, V2 = 0.0;
 
   // If one of the positions is at a space and the other isn't, chomp up 'til
   // the end of the space.
-  while (isSpace(static_cast<unsigned char>(*F1P)) && F1P != F1End)
+  यावत् (isSpace(static_cast<अचिह्नित वर्ण>(*F1P)) && F1P != F1_अन्तः)
     ++F1P;
-  while (isSpace(static_cast<unsigned char>(*F2P)) && F2P != F2End)
+  यावत् (isSpace(static_cast<अचिह्नित वर्ण>(*F2P)) && F2P != F2_अन्तः)
     ++F2P;
 
   // If we stop on numbers, compare their difference.
-  if (!isNumberChar(*F1P) || !isNumberChar(*F2P)) {
+  यदि (!is_सङ्ख्या_Char(*F1P) || !is_सङ्ख्या_Char(*F2P)) {
     // The diff failed.
-    F1NumEnd = F1P;
-    F2NumEnd = F2P;
-  } else {
+    F1_अङ्कः_अन्तः = F1P;
+    F2_अङ्कः_अन्तः = F2P;
+  } अन्यथा {
     // Note that some ugliness is built into this to permit support for numbers
     // that use "D" or "d" as their exponential marker, e.g. "1.234D45".  This
     // occurs in 200.sixtrack in spec2k.
-    V1 = strtod(F1P, const_cast<char**>(&F1NumEnd));
-    V2 = strtod(F2P, const_cast<char**>(&F2NumEnd));
+    V1 = strtod(F1P, const_cast<वर्ण**>(&F1_अङ्कः_अन्तः));
+    V2 = strtod(F2P, const_cast<वर्ण**>(&F2_अङ्कः_अन्तः));
 
-    if (*F1NumEnd == 'D' || *F1NumEnd == 'd') {
+    यदि (*F1_अङ्कः_अन्तः == 'D' || *F1_अङ्कः_अन्तः == 'd') {
       // Copy string into tmp buffer to replace the 'D' with an 'e'.
-      SmallString<200> StrTmp(F1P, EndOfNumber(F1NumEnd)+1);
+      SmallString<200> StrTmp(F1P, अन्तः_सम्बन्धि_सङ्ख्या(F1_अङ्कः_अन्तः)+1);
       // Strange exponential notation!
-      StrTmp[static_cast<unsigned>(F1NumEnd-F1P)] = 'e';
+      StrTmp[static_cast<अचिह्नित>(F1_अङ्कः_अन्तः-F1P)] = 'e';
 
-      V1 = strtod(&StrTmp[0], const_cast<char**>(&F1NumEnd));
-      F1NumEnd = F1P + (F1NumEnd-&StrTmp[0]);
+      V1 = strtod(&StrTmp[0], const_cast<वर्ण**>(&F1_अङ्कः_अन्तः));
+      F1_अङ्कः_अन्तः = F1P + (F1_अङ्कः_अन्तः-&StrTmp[0]);
     }
 
-    if (*F2NumEnd == 'D' || *F2NumEnd == 'd') {
+    यदि (*F2_अङ्कः_अन्तः == 'D' || *F2_अङ्कः_अन्तः == 'd') {
       // Copy string into tmp buffer to replace the 'D' with an 'e'.
-      SmallString<200> StrTmp(F2P, EndOfNumber(F2NumEnd)+1);
+      SmallString<200> StrTmp(F2P, अन्तः_सम्बन्धि_सङ्ख्या(F2_अङ्कः_अन्तः)+1);
       // Strange exponential notation!
-      StrTmp[static_cast<unsigned>(F2NumEnd-F2P)] = 'e';
+      StrTmp[static_cast<अचिह्नित>(F2_अङ्कः_अन्तः-F2P)] = 'e';
 
-      V2 = strtod(&StrTmp[0], const_cast<char**>(&F2NumEnd));
-      F2NumEnd = F2P + (F2NumEnd-&StrTmp[0]);
+      V2 = strtod(&StrTmp[0], const_cast<वर्ण**>(&F2_अङ्कः_अन्तः));
+      F2_अङ्कः_अन्तः = F2P + (F2_अङ्कः_अन्तः-&StrTmp[0]);
     }
   }
 
-  if (F1NumEnd == F1P || F2NumEnd == F2P) {
-    if (ErrorMsg) {
-      *ErrorMsg = "FP Comparison failed, not a numeric difference between '";
-      *ErrorMsg += F1P[0];
-      *ErrorMsg += "' and '";
-      *ErrorMsg += F2P[0];
-      *ErrorMsg += "'";
+  यदि (F1_अङ्कः_अन्तः == F1P || F2_अङ्कः_अन्तः == F2P) {
+    यदि (Error_सन्देशः) {
+      *Error_सन्देशः = "FP Comparison failed, not a numeric difference between '";
+      *Error_सन्देशः += F1P[0];
+      *Error_सन्देशः += "' and '";
+      *Error_सन्देशः += F2P[0];
+      *Error_सन्देशः += "'";
     }
-    return true;
+    प्रत्यागम सत्य;
   }
 
   // Check to see if these are inside the absolute tolerance
-  if (AbsTolerance < std::abs(V1-V2)) {
+  यदि (AbsTolerance < std::निरपेक्षम्(V1-V2)) {
     // Nope, check the relative tolerance...
-    double Diff;
-    if (V2)
-      Diff = std::abs(V1/V2 - 1.0);
-    else if (V1)
-      Diff = std::abs(V2/V1 - 1.0);
-    else
+    द्विगुण Diff;
+    यदि (V2)
+      Diff = std::निरपेक्षम्(V1/V2 - 1.0);
+    अन्यथा यदि (V1)
+      Diff = std::निरपेक्षम्(V2/V1 - 1.0);
+    अन्यथा
       Diff = 0;  // Both zero.
-    if (Diff > RelTolerance) {
-      if (ErrorMsg) {
-        raw_string_ostream(*ErrorMsg)
+    यदि (Diff > RelTolerance) {
+      यदि (Error_सन्देशः) {
+        raw_string_ostream(*Error_सन्देशः)
           << "Compared: " << V1 << " and " << V2 << '\n'
-          << "abs. diff = " << std::abs(V1-V2) << " rel.diff = " << Diff << '\n'
+          << "abs. diff = " << std::निरपेक्षम्(V1-V2) << " rel.diff = " << Diff << '\n'
           << "Out of tolerance: rel/abs: " << RelTolerance << '/'
           << AbsTolerance;
       }
-      return true;
+      प्रत्यागम सत्य;
     }
   }
 
   // Otherwise, advance our read pointers to the end of the numbers.
-  F1P = F1NumEnd;  F2P = F2NumEnd;
-  return false;
+  F1P = F1_अङ्कः_अन्तः;  F2P = F2_अङ्कः_अन्तः;
+  प्रत्यागम असत्य;
 }
 
 /// DiffFilesWithTolerance - Compare the two files specified, returning 0 if the
@@ -175,160 +175,160 @@ static bool CompareNumbers(const char *&F1P, const char *&F2P,
 /// error occurs, allowing the caller to distinguish between a failed diff and a
 /// file system error.
 ///
-int llvm::DiffFilesWithTolerance(StringRef NameA,
+पूर्णाङ्क llvm::DiffFilesWithTolerance(StringRef NameA,
                                  StringRef NameB,
-                                 double AbsTol, double RelTol,
+                                 द्विगुण AbsTol, द्विगुण RelTol,
                                  std::string *Error) {
   // Now its safe to mmap the files into memory because both files
   // have a non-zero size.
-  ErrorOr<std::unique_ptr<MemoryBuffer>> F1OrErr = MemoryBuffer::getFile(NameA);
-  if (std::error_code EC = F1OrErr.getError()) {
-    if (Error)
-      *Error = EC.message();
-    return 2;
+  ErrorOr<std::unique_ptr<स्मृतिः_बफर>> F1OrErr = स्मृतिः_बफर::getFile(NameA);
+  यदि (std::error_संहिता EC = F1OrErr.getError()) {
+    यदि (Error)
+      *Error = EC.सन्देशः_2();
+    प्रत्यागम 2;
   }
-  MemoryBuffer &F1 = *F1OrErr.get();
+  स्मृतिः_बफर &F1 = *F1OrErr.get();
 
-  ErrorOr<std::unique_ptr<MemoryBuffer>> F2OrErr = MemoryBuffer::getFile(NameB);
-  if (std::error_code EC = F2OrErr.getError()) {
-    if (Error)
-      *Error = EC.message();
-    return 2;
+  ErrorOr<std::unique_ptr<स्मृतिः_बफर>> F2OrErr = स्मृतिः_बफर::getFile(NameB);
+  यदि (std::error_संहिता EC = F2OrErr.getError()) {
+    यदि (Error)
+      *Error = EC.सन्देशः_2();
+    प्रत्यागम 2;
   }
-  MemoryBuffer &F2 = *F2OrErr.get();
+  स्मृतिः_बफर &F2 = *F2OrErr.get();
 
   // Okay, now that we opened the files, scan them for the first difference.
-  const char *File1Start = F1.getBufferStart();
-  const char *File2Start = F2.getBufferStart();
-  const char *File1End = F1.getBufferEnd();
-  const char *File2End = F2.getBufferEnd();
-  const char *F1P = File1Start;
-  const char *F2P = File2Start;
-  uint64_t A_size = F1.getBufferSize();
-  uint64_t B_size = F2.getBufferSize();
+  ध्रुव वर्ण *File1Start = F1.get_बफर_Start();
+  ध्रुव वर्ण *File2Start = F2.get_बफर_Start();
+  ध्रुव वर्ण *File1_अन्तः = F1.get_बफर_अन्तः();
+  ध्रुव वर्ण *File2_अन्तः = F2.get_बफर_अन्तः();
+  ध्रुव वर्ण *F1P = File1Start;
+  ध्रुव वर्ण *F2P = File2Start;
+  uint64_t A_आकार = F1.get_बफर_आकार();
+  uint64_t B_आकार = F2.get_बफर_आकार();
 
   // Are the buffers identical?  Common case: Handle this efficiently.
-  if (A_size == B_size &&
-      std::memcmp(File1Start, File2Start, A_size) == 0)
-    return 0;
+  यदि (A_आकार == B_आकार &&
+      std::memcmp(File1Start, File2Start, A_आकार) == 0)
+    प्रत्यागम 0;
 
   // Otherwise, we are done a tolerances are set.
-  if (AbsTol == 0 && RelTol == 0) {
-    if (Error)
+  यदि (AbsTol == 0 && RelTol == 0) {
+    यदि (Error)
       *Error = "Files differ without tolerance allowance";
-    return 1;   // Files different!
+    प्रत्यागम 1;   // Files different!
   }
 
-  bool CompareFailed = false;
-  while (true) {
+  तार्किक CompareFailed = असत्य;
+  यावत् (सत्य) {
     // Scan for the end of file or next difference.
-    while (F1P < File1End && F2P < File2End && *F1P == *F2P) {
+    यावत् (F1P < File1_अन्तः && F2P < File2_अन्तः && *F1P == *F2P) {
       ++F1P;
       ++F2P;
     }
 
-    if (F1P >= File1End || F2P >= File2End) break;
+    यदि (F1P >= File1_अन्तः || F2P >= File2_अन्तः) भङ्ग;
 
     // Okay, we must have found a difference.  Backup to the start of the
     // current number each stream is at so that we can compare from the
     // beginning.
-    F1P = BackupNumber(F1P, File1Start);
-    F2P = BackupNumber(F2P, File2Start);
+    F1P = Backup_सङ्ख्या(F1P, File1Start);
+    F2P = Backup_सङ्ख्या(F2P, File2Start);
 
     // Now that we are at the start of the numbers, compare them, exiting if
     // they don't match.
-    if (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error)) {
-      CompareFailed = true;
-      break;
+    यदि (CompareNumbers(F1P, F2P, File1_अन्तः, File2_अन्तः, AbsTol, RelTol, Error)) {
+      CompareFailed = सत्य;
+      भङ्ग;
     }
   }
 
   // Okay, we reached the end of file.  If both files are at the end, we
   // succeeded.
-  bool F1AtEnd = F1P >= File1End;
-  bool F2AtEnd = F2P >= File2End;
-  if (!CompareFailed && (!F1AtEnd || !F2AtEnd)) {
+  तार्किक F1_At_अन्तः = F1P >= File1_अन्तः;
+  तार्किक F2_At_अन्तः = F2P >= File2_अन्तः;
+  यदि (!CompareFailed && (!F1_At_अन्तः || !F2_At_अन्तः)) {
     // Else, we might have run off the end due to a number: backup and retry.
-    if (F1AtEnd && isNumberChar(F1P[-1])) --F1P;
-    if (F2AtEnd && isNumberChar(F2P[-1])) --F2P;
-    F1P = BackupNumber(F1P, File1Start);
-    F2P = BackupNumber(F2P, File2Start);
+    यदि (F1_At_अन्तः && is_सङ्ख्या_Char(F1P[-1])) --F1P;
+    यदि (F2_At_अन्तः && is_सङ्ख्या_Char(F2P[-1])) --F2P;
+    F1P = Backup_सङ्ख्या(F1P, File1Start);
+    F2P = Backup_सङ्ख्या(F2P, File2Start);
 
     // Now that we are at the start of the numbers, compare them, exiting if
     // they don't match.
-    if (CompareNumbers(F1P, F2P, File1End, File2End, AbsTol, RelTol, Error))
-      CompareFailed = true;
+    यदि (CompareNumbers(F1P, F2P, File1_अन्तः, File2_अन्तः, AbsTol, RelTol, Error))
+      CompareFailed = सत्य;
 
     // If we found the end, we succeeded.
-    if (F1P < File1End || F2P < File2End)
-      CompareFailed = true;
+    यदि (F1P < File1_अन्तः || F2P < File2_अन्तः)
+      CompareFailed = सत्य;
   }
 
-  return CompareFailed;
+  प्रत्यागम CompareFailed;
 }
 
 Expected<FilePermissionsApplier>
-FilePermissionsApplier::create(StringRef InputFilename) {
-  sys::fs::file_status Status;
+FilePermissionsApplier::create(StringRef निवेशः_Filename) {
+  sys::fs::file_स्थितिः स्थितिः;
 
-  if (InputFilename != "-") {
-    if (auto EC = sys::fs::status(InputFilename, Status))
-      return createFileError(InputFilename, EC);
-  } else {
-    Status.permissions(static_cast<sys::fs::perms>(0777));
+  यदि (निवेशः_Filename != "-") {
+    यदि (स्वचालित EC = sys::fs::स्थितिः_2(निवेशः_Filename, स्थितिः))
+      प्रत्यागम createFileError(निवेशः_Filename, EC);
+  } अन्यथा {
+    स्थितिः.permissions(static_cast<sys::fs::perms>(0777));
   }
 
-  return FilePermissionsApplier(InputFilename, Status);
+  प्रत्यागम FilePermissionsApplier(निवेशः_Filename, स्थितिः);
 }
 
 Error FilePermissionsApplier::apply(
-    StringRef OutputFilename, bool CopyDates,
+    StringRef OutputFilename, तार्किक CopyDates,
     std::optional<sys::fs::perms> OverwritePermissions) {
-  sys::fs::file_status Status = InputStatus;
+  sys::fs::file_स्थितिः स्थितिः = निवेशः_स्थितिः;
 
-  if (OverwritePermissions)
-    Status.permissions(*OverwritePermissions);
+  यदि (OverwritePermissions)
+    स्थितिः.permissions(*OverwritePermissions);
 
-  int FD = 0;
+  पूर्णाङ्क FD = 0;
 
   // Writing to stdout should not be treated as an error here, just
   // do not set access/modification times or permissions.
-  if (OutputFilename == "-")
-    return Error::success();
+  यदि (OutputFilename == "-")
+    प्रत्यागम Error::success();
 
-  if (std::error_code EC = sys::fs::openFileForWrite(OutputFilename, FD,
+  यदि (std::error_संहिता EC = sys::fs::openFileForWrite(OutputFilename, FD,
                                                      sys::fs::CD_OpenExisting))
-    return createFileError(OutputFilename, EC);
+    प्रत्यागम createFileError(OutputFilename, EC);
 
-  if (CopyDates)
-    if (std::error_code EC = sys::fs::setLastAccessAndModificationTime(
-            FD, Status.getLastAccessedTime(), Status.getLastModificationTime()))
-      return createFileError(OutputFilename, EC);
+  यदि (CopyDates)
+    यदि (std::error_संहिता EC = sys::fs::समुच्चयः_चरमः_Access_And_Modification_Time(
+            FD, स्थितिः.get_चरमः_Accessed_Time(), स्थितिः.get_चरमः_Modification_Time()))
+      प्रत्यागम createFileError(OutputFilename, EC);
 
-  sys::fs::file_status OStat;
-  if (std::error_code EC =
-          sys::fs::status(sys::fs::convertFDToNativeFile(FD), OStat))
-    return createFileError(OutputFilename, EC);
-  if (OStat.type() == sys::fs::file_type::regular_file) {
-#ifndef _WIN32
+  sys::fs::file_स्थितिः OStat;
+  यदि (std::error_संहिता EC =
+          sys::fs::स्थितिः_2(sys::fs::convertFDToNativeFile(FD), OStat))
+    प्रत्यागम createFileError(OutputFilename, EC);
+  यदि (OStat.type() == sys::fs::file_type::regular_file) {
+#यदि_अपरिभाषितम् _WIN32
     // Keep ownership if llvm-objcopy is called under root.
-    if (OutputFilename == InputFilename && OStat.getUser() == 0)
-      sys::fs::changeFileOwnership(FD, Status.getUser(), Status.getGroup());
-#endif
+    यदि (OutputFilename == निवेशः_Filename && OStat.getUser() == 0)
+      sys::fs::changeFileOwnership(FD, स्थितिः.getUser(), स्थितिः.get_गणः());
+#यदि_अन्तः
 
-    sys::fs::perms Perm = Status.permissions();
-    if (OutputFilename != InputFilename)
+    sys::fs::perms Perm = स्थितिः.permissions();
+    यदि (OutputFilename != निवेशः_Filename)
       Perm = static_cast<sys::fs::perms>(Perm & ~sys::fs::getUmask() & ~06000);
-#ifdef _WIN32
-    if (std::error_code EC = sys::fs::setPermissions(OutputFilename, Perm))
-#else
-    if (std::error_code EC = sys::fs::setPermissions(FD, Perm))
-#endif
-      return createFileError(OutputFilename, EC);
+#यदि_परिभाषितम् _WIN32
+    यदि (std::error_संहिता EC = sys::fs::समुच्चयः_Permissions(OutputFilename, Perm))
+#अन्यथा
+    यदि (std::error_संहिता EC = sys::fs::समुच्चयः_Permissions(FD, Perm))
+#यदि_अन्तः
+      प्रत्यागम createFileError(OutputFilename, EC);
   }
 
-  if (std::error_code EC = sys::Process::SafelyCloseFileDescriptor(FD))
-    return createFileError(OutputFilename, EC);
+  यदि (std::error_संहिता EC = sys::Process::SafelyCloseFileDescriptor(FD))
+    प्रत्यागम createFileError(OutputFilename, EC);
 
-  return Error::success();
+  प्रत्यागम Error::success();
 }

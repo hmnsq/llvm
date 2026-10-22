@@ -42,93 +42,93 @@
  * macros that code uses.  This lets the same code operate on two different
  * representations for state sets.
  */
-#include <sys/types.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
-#include <ctype.h>
-#include "regex_impl.h"
+#अन्तर्भाव <sys/types.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <string.h>
+#अन्तर्भाव <limits.h>
+#अन्तर्भाव <ctype.h>
+#अन्तर्भाव "regex_impl.h"
 
-#include "regutils.h"
-#include "regex2.h"
+#अन्तर्भाव "regutils.h"
+#अन्तर्भाव "regex2.h"
 
 /* macros for manipulating states, small version */
 /* FIXME: 'states' is assumed as 'long' on small version. */
-#define	states1	long		/* for later use in llvm_regexec() decision */
-#define	states	states1
-#define	CLEAR(v)	((v) = 0)
-#define	SET0(v, n)	((v) &= ~((unsigned long)1 << (n)))
-#define	SET1(v, n)	((v) |= (unsigned long)1 << (n))
-#define	ISSET(v, n)	(((v) & ((unsigned long)1 << (n))) != 0)
-#define	ASSIGN(d, s)	((d) = (s))
-#define	EQ(a, b)	((a) == (b))
-#define	STATEVARS	long dummy	/* dummy version */
-#define	STATESETUP(m, n)	/* nothing */
-#define	STATETEARDOWN(m)	/* nothing */
-#define	SETUP(v)	((v) = 0)
-#define	onestate	long
-#define	INIT(o, n)	((o) = (unsigned long)1 << (n))
-#define	INC(o)		((o) = (unsigned long)(o) << 1)
-#define	ISSTATEIN(v, o)	(((v) & (o)) != 0)
+#परिभाषय	states1	दीर्घ		/* for later use in llvm_regexec() decision */
+#परिभाषय	अवस्थाः	states1
+#परिभाषय	CLEAR(v)	((v) = 0)
+#परिभाषय	SET0(v, n)	((v) &= ~((अचिह्नित दीर्घ)1 << (n)))
+#परिभाषय	SET1(v, n)	((v) |= (अचिह्नित दीर्घ)1 << (n))
+#परिभाषय	ISSET(v, n)	(((v) & ((अचिह्नित दीर्घ)1 << (n))) != 0)
+#परिभाषय	नियोजय_3(d, s)	((d) = (s))
+#परिभाषय	EQ(a, b)	((a) == (b))
+#परिभाषय	STATEVARS	दीर्घ dummy	/* dummy version */
+#परिभाषय	STATESETUP(m, n)	/* nothing */
+#परिभाषय	STATETEARDOWN(m)	/* nothing */
+#परिभाषय	सज्जता(v)	((v) = 0)
+#परिभाषय	onestate	दीर्घ
+#परिभाषय	INIT(o, n)	((o) = (अचिह्नित दीर्घ)1 << (n))
+#परिभाषय	INC(o)		((o) = (अचिह्नित दीर्घ)(o) << 1)
+#परिभाषय	ISSTATEIN(v, o)	(((v) & (o)) != 0)
 /* some abbreviations; note that some of these know variable names! */
 /* do "if I'm here, I can also be there" etc without branches */
-#define	FWD(dst, src, n)	((dst) |= ((unsigned long)(src)&(here)) << (n))
-#define	BACK(dst, src, n)	((dst) |= ((unsigned long)(src)&(here)) >> (n))
-#define	ISSETBACK(v, n)		(((v) & ((unsigned long)here >> (n))) != 0)
+#परिभाषय	FWD(dst, src, n)	((dst) |= ((अचिह्नित दीर्घ)(src)&(अत्र_2)) << (n))
+#परिभाषय	पृष्ठभागः_2(dst, src, n)	((dst) |= ((अचिह्नित दीर्घ)(src)&(अत्र_2)) >> (n))
+#परिभाषय	ISSETBACK(v, n)		(((v) & ((अचिह्नित दीर्घ)अत्र_2 >> (n))) != 0)
 /* function names */
-#define SNAMES			/* engine.inc looks after details */
+#परिभाषय SNAMES			/* engine.inc looks after details */
 
-#include "regengine.inc"
+#अन्तर्भाव "regengine.inc"
 
 /* now undo things */
-#undef	states
-#undef	CLEAR
-#undef	SET0
-#undef	SET1
-#undef	ISSET
-#undef	ASSIGN
-#undef	EQ
-#undef	STATEVARS
-#undef	STATESETUP
-#undef	STATETEARDOWN
-#undef	SETUP
-#undef	onestate
-#undef	INIT
-#undef	INC
-#undef	ISSTATEIN
-#undef	FWD
-#undef	BACK
-#undef	ISSETBACK
-#undef	SNAMES
+#अपरिभाषय	अवस्थाः
+#अपरिभाषय	CLEAR
+#अपरिभाषय	SET0
+#अपरिभाषय	SET1
+#अपरिभाषय	ISSET
+#अपरिभाषय	नियोजय_3
+#अपरिभाषय	EQ
+#अपरिभाषय	STATEVARS
+#अपरिभाषय	STATESETUP
+#अपरिभाषय	STATETEARDOWN
+#अपरिभाषय	सज्जता
+#अपरिभाषय	onestate
+#अपरिभाषय	INIT
+#अपरिभाषय	INC
+#अपरिभाषय	ISSTATEIN
+#अपरिभाषय	FWD
+#अपरिभाषय	पृष्ठभागः_2
+#अपरिभाषय	ISSETBACK
+#अपरिभाषय	SNAMES
 
 /* macros for manipulating states, large version */
-#define	states	char *
-#define	CLEAR(v)	memset(v, 0, m->g->nstates)
-#define	SET0(v, n)	((v)[n] = 0)
-#define	SET1(v, n)	((v)[n] = 1)
-#define	ISSET(v, n)	((v)[n])
-#define	ASSIGN(d, s)	memmove(d, s, m->g->nstates)
-#define	EQ(a, b)	(memcmp(a, b, m->g->nstates) == 0)
-#define	STATEVARS	long vn; char *space
-#define	STATESETUP(m, nv)	{ (m)->space = malloc((nv)*(m)->g->nstates); \
-				if ((m)->space == NULL) return(REG_ESPACE); \
+#परिभाषय	अवस्थाः	वर्ण *
+#परिभाषय	CLEAR(v)	स्मृतिं_पूरय(v, 0, m->g->nstates)
+#परिभाषय	SET0(v, n)	((v)[n] = 0)
+#परिभाषय	SET1(v, n)	((v)[n] = 1)
+#परिभाषय	ISSET(v, n)	((v)[n])
+#परिभाषय	नियोजय_3(d, s)	memmove(d, s, m->g->nstates)
+#परिभाषय	EQ(a, b)	(memcmp(a, b, m->g->nstates) == 0)
+#परिभाषय	STATEVARS	दीर्घ vn; वर्ण *space
+#परिभाषय	STATESETUP(m, nv)	{ (m)->space = स्मृतिं_देहि((nv)*(m)->g->nstates); \
+				यदि ((m)->space == रिक्त) प्रत्यागम(REG_ESPACE); \
 				(m)->vn = 0; }
-#define	STATETEARDOWN(m)	{ free((m)->space); }
-#define	SETUP(v)	((v) = &m->space[m->vn++ * m->g->nstates])
-#define	onestate	long
-#define	INIT(o, n)	((o) = (n))
-#define	INC(o)	((o)++)
-#define	ISSTATEIN(v, o)	((v)[o])
+#परिभाषय	STATETEARDOWN(m)	{ मुक्त((m)->space); }
+#परिभाषय	सज्जता(v)	((v) = &m->space[m->vn++ * m->g->nstates])
+#परिभाषय	onestate	दीर्घ
+#परिभाषय	INIT(o, n)	((o) = (n))
+#परिभाषय	INC(o)	((o)++)
+#परिभाषय	ISSTATEIN(v, o)	((v)[o])
 /* some abbreviations; note that some of these know variable names! */
 /* do "if I'm here, I can also be there" etc without branches */
-#define	FWD(dst, src, n)	((dst)[here+(n)] |= (src)[here])
-#define	BACK(dst, src, n)	((dst)[here-(n)] |= (src)[here])
-#define	ISSETBACK(v, n)	((v)[here - (n)])
+#परिभाषय	FWD(dst, src, n)	((dst)[अत्र_2+(n)] |= (src)[अत्र_2])
+#परिभाषय	पृष्ठभागः_2(dst, src, n)	((dst)[अत्र_2-(n)] |= (src)[अत्र_2])
+#परिभाषय	ISSETBACK(v, n)	((v)[अत्र_2 - (n)])
 /* function names */
-#define	LNAMES			/* flag */
+#परिभाषय	LNAMES			/* flag */
 
-#include "regengine.inc"
+#अन्तर्भाव "regengine.inc"
 
 /*
  - llvm_regexec - interface for matching
@@ -137,26 +137,26 @@
  * when choosing which matcher to call.  Also, by this point the matchers
  * have been prototyped.
  */
-int				/* 0 success, REG_NOMATCH failure */
-llvm_regexec(const llvm_regex_t *preg, const char *string, size_t nmatch,
-             llvm_regmatch_t pmatch[], int eflags)
+पूर्णाङ्क				/* 0 success, REG_NOMATCH failure */
+llvm_regexec(ध्रुव llvm_regex_t *preg, ध्रुव वर्ण *string, size_t nmatch,
+             llvm_regmatch_t pmatch[], पूर्णाङ्क eflags)
 {
-	struct re_guts *g = preg->re_g;
-#ifdef REDEBUG
+	संरचना re_guts *g = preg->re_g;
+#यदि_परिभाषितम् REDEBUG
 #	define	GOODFLAGS(f)	(f)
-#else
+#अन्यथा
 #	define	GOODFLAGS(f)	((f)&(REG_NOTBOL|REG_NOTEOL|REG_STARTEND))
-#endif
+#यदि_अन्तः
 
-	if (preg->re_magic != MAGIC1 || g->magic != MAGIC2)
-		return(REG_BADPAT);
-	assert(!(g->iflags&REGEX_BAD));
-	if (g->iflags&REGEX_BAD)		/* backstop for no-debug case */
-		return(REG_BADPAT);
+	यदि (preg->re_magic != MAGIC1 || g->magic != MAGIC2)
+		प्रत्यागम(REG_BADPAT);
+	प्रतिज्ञा(!(g->iflags&REGEX_BAD));
+	यदि (g->iflags&REGEX_BAD)		/* backstop for no-debug case */
+		प्रत्यागम(REG_BADPAT);
 	eflags = GOODFLAGS(eflags);
 
-	if (g->nstates <= (long)(CHAR_BIT*sizeof(states1)) && !(eflags&REG_LARGE))
-		return(smatcher(g, string, nmatch, pmatch, eflags));
-	else
-		return(lmatcher(g, string, nmatch, pmatch, eflags));
+	यदि (g->nstates <= (दीर्घ)(CHAR_BIT*परिमाण(states1)) && !(eflags&REG_LARGE))
+		प्रत्यागम(smatcher(g, string, nmatch, pmatch, eflags));
+	अन्यथा
+		प्रत्यागम(lmatcher(g, string, nmatch, pmatch, eflags));
 }

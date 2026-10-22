@@ -10,13 +10,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Watchdog.h"
-#include "llvm/Config/llvm-config.h"
+#अन्तर्भाव "llvm/Support/Watchdog.h"
+#अन्तर्भाव "llvm/Config/llvm-config.h"
 
 // Include the platform-specific parts of this class.
-#ifdef LLVM_ON_UNIX
-#include "Unix/Watchdog.inc"
-#endif
-#ifdef _WIN32
-#include "Windows/Watchdog.inc"
-#endif
+#यदि_परिभाषितम् LLVM_ON_UNIX
+#अन्तर्भाव "Unix/Watchdog.inc"
+#यदि_अन्तः
+#यदि_परिभाषितम् _WIN32
+#अन्तर्भाव "Windows/Watchdog.inc"
+#यदि_अन्तः

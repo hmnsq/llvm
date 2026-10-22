@@ -11,23 +11,23 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_SUPPORT_DEBUGOPTIONS_H
-#define LLVM_SUPPORT_DEBUGOPTIONS_H
+#यदि_अपरिभाषितम् LLVM_SUPPORT_DEBUGOPTIONS_H
+#परिभाषय LLVM_SUPPORT_DEBUGOPTIONS_H
 
 namespace llvm {
 
 // These are invoked internally before parsing command line options.
 // This enables lazy-initialization of all the globals in libSupport, instead
 // of eagerly loading everything on program startup.
-void initDebugCounterOptions();
-void initGraphWriterOptions();
-void initSignalsOptions();
-void initStatisticOptions();
-void initTimerOptions();
-void initWithColorOptions();
-void initDebugOptions();
-void initRandomSeedOptions();
+शून्य init_Debug_गणक_Options();
+शून्य initGraphWriterOptions();
+शून्य init_सङ्केताः_Options();
+शून्य initStatisticOptions();
+शून्य initTimerOptions();
+शून्य initWithColorOptions();
+शून्य initDebugOptions();
+शून्य init_Random_बीजम्_Options();
 
 } // namespace llvm
 
-#endif // LLVM_SUPPORT_DEBUGOPTIONS_H
+#यदि_अन्तः // LLVM_SUPPORT_DEBUGOPTIONS_H

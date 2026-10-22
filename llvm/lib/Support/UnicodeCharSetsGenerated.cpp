@@ -11,15 +11,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/UnicodeCharRanges.h"
+#अन्तर्भाव "llvm/Support/UnicodeCharRanges.h"
 
-using llvm::sys::UnicodeCharRange;
-using CharRanges = llvm::sys::UnicodeCharSet::CharRanges;
+उपयुज्य llvm::sys::UnicodeCharRange;
+उपयुज्य CharRanges = llvm::sys::Unicode_Char_समुच्चयः::CharRanges;
 
-namespace llvm::sys::unicode {
+नामाकाश llvm::sys::unicode {
 
 // Characters
-static constexpr UnicodeCharRange GeneratedCharacterRangesData[] = {
+स्थिर constexpr UnicodeCharRange Generated_Character_Ranges_दत्त[] = {
     {0x0000, 0x0377},   {0x037A, 0x037F},   {0x0384, 0x038A},
     {0x038C, 0x038C},   {0x038E, 0x03A1},   {0x03A3, 0x052F},
     {0x0531, 0x0556},   {0x0558, 0x058F},   {0x0591, 0x05C9},
@@ -266,10 +266,10 @@ static constexpr UnicodeCharRange GeneratedCharacterRangesData[] = {
     {0x3D000, 0x3FC3F}, {0xE0001, 0xE0001}, {0xE0020, 0xE007F},
     {0xE0100, 0xE01EF}, {0xF0000, 0xFFFFD}, {0x100000, 0x10FFFD},
 };
-extern const CharRanges GeneratedCharacterRanges = GeneratedCharacterRangesData;
+बाह्य ध्रुव CharRanges GeneratedCharacterRanges = Generated_Character_Ranges_दत्त;
 
 // General_Category=L|M|N|P|S|Zs
-static constexpr UnicodeCharRange GeneratedPrintableRangesData[] = {
+स्थिर constexpr UnicodeCharRange Generated_Printable_Ranges_दत्त[] = {
     {0x0020, 0x007E},   {0x00A0, 0x00AC},   {0x00AE, 0x0377},
     {0x037A, 0x037F},   {0x0384, 0x038A},   {0x038C, 0x038C},
     {0x038E, 0x03A1},   {0x03A3, 0x052F},   {0x0531, 0x0556},
@@ -518,18 +518,18 @@ static constexpr UnicodeCharRange GeneratedPrintableRangesData[] = {
     {0x2F800, 0x2FA1D}, {0x30000, 0x3134A}, {0x31350, 0x33479},
     {0x3D000, 0x3FC3F}, {0xE0100, 0xE01EF},
 };
-extern const CharRanges GeneratedPrintableRanges = GeneratedPrintableRangesData;
+बाह्य ध्रुव CharRanges GeneratedPrintableRanges = Generated_Printable_Ranges_दत्त;
 
 // General_Category=Cc
-static constexpr UnicodeCharRange GeneratedControlCharacterRangesData[] = {
+स्थिर constexpr UnicodeCharRange Generated_Control_Character_Ranges_दत्त[] = {
     {0x0000, 0x001F},
     {0x007F, 0x009F},
 };
-extern const CharRanges GeneratedControlCharacterRanges =
-    GeneratedControlCharacterRangesData;
+बाह्य ध्रुव CharRanges GeneratedControlCharacterRanges =
+    Generated_Control_Character_Ranges_दत्त;
 
 // General_Category=Cf
-static constexpr UnicodeCharRange GeneratedFormatCharacterRangesData[] = {
+स्थिर constexpr UnicodeCharRange Generated_Format_Character_Ranges_दत्त[] = {
     {0x00AD, 0x00AD},   {0x0600, 0x0605},   {0x061C, 0x061C},
     {0x06DD, 0x06DD},   {0x070F, 0x070F},   {0x0890, 0x0891},
     {0x08E2, 0x08E2},   {0x180E, 0x180E},   {0x200B, 0x200F},
@@ -538,11 +538,11 @@ static constexpr UnicodeCharRange GeneratedFormatCharacterRangesData[] = {
     {0x110CD, 0x110CD}, {0x13430, 0x1343F}, {0x1BCA0, 0x1BCA3},
     {0x1D173, 0x1D17A}, {0xE0001, 0xE0001}, {0xE0020, 0xE007F},
 };
-extern const CharRanges GeneratedFormatCharacterRanges =
-    GeneratedFormatCharacterRangesData;
+बाह्य ध्रुव CharRanges GeneratedFormatCharacterRanges =
+    Generated_Format_Character_Ranges_दत्त;
 
 // General_Category=Mn|Me
-static constexpr UnicodeCharRange GeneratedCombiningCharacterRangesData[] = {
+स्थिर constexpr UnicodeCharRange Generated_Combining_Character_Ranges_दत्त[] = {
     {0x0300, 0x036F},   {0x0483, 0x0489},   {0x0591, 0x05BD},
     {0x05BF, 0x05BF},   {0x05C1, 0x05C2},   {0x05C4, 0x05C5},
     {0x05C7, 0x05C9},   {0x0610, 0x061A},   {0x064B, 0x065F},
@@ -666,11 +666,11 @@ static constexpr UnicodeCharRange GeneratedCombiningCharacterRangesData[] = {
     {0x1E6EE, 0x1E6EF}, {0x1E6F5, 0x1E6F5}, {0x1E8D0, 0x1E8D6},
     {0x1E944, 0x1E94A}, {0xE0100, 0xE01EF},
 };
-extern const CharRanges GeneratedCombiningCharacterRanges =
-    GeneratedCombiningCharacterRangesData;
+बाह्य ध्रुव CharRanges GeneratedCombiningCharacterRanges =
+    Generated_Combining_Character_Ranges_दत्त;
 
 // East_Asian_Width=F|W
-static constexpr UnicodeCharRange GeneratedDoubleWidthCharacterRangesData[] = {
+स्थिर constexpr UnicodeCharRange Generated_Double_विस्तारः_Character_Ranges_दत्त[] = {
     {0x1100, 0x115F},   {0x231A, 0x231B},   {0x2329, 0x232A},
     {0x23E9, 0x23EC},   {0x23F0, 0x23F0},   {0x23F3, 0x23F3},
     {0x25FD, 0x25FE},   {0x2614, 0x2615},   {0x2630, 0x2637},
@@ -714,7 +714,7 @@ static constexpr UnicodeCharRange GeneratedDoubleWidthCharacterRangesData[] = {
     {0x1FAC8, 0x1FAC8}, {0x1FACC, 0x1FADD}, {0x1FADF, 0x1FAEB},
     {0x1FAEF, 0x1FAFA}, {0x20000, 0x2FFFD}, {0x30000, 0x3FFFD},
 };
-extern const CharRanges GeneratedDoubleWidthCharacterRanges =
-    GeneratedDoubleWidthCharacterRangesData;
+बाह्य ध्रुव CharRanges Generated_Double_विस्तारः_Character_Ranges =
+    Generated_Double_विस्तारः_Character_Ranges_दत्त;
 
 } // namespace llvm::sys::unicode

@@ -6,129 +6,129 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/Driver.h"
+#अन्तर्भाव "llvm/Support/Driver.h"
 
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/InitLLVM.h"
-#include "llvm/Support/Path.h"
+#अन्तर्भाव "llvm/ADT/SmallVector.h"
+#अन्तर्भाव "llvm/ADT/StringExtras.h"
+#अन्तर्भाव "llvm/Support/InitLLVM.h"
+#अन्तर्भाव "llvm/Support/Path.h"
 
-#include <cassert>
-#include <string>
-#include <system_error>
-#include <utility>
-#include <vector>
+#अन्तर्भाव <cassert>
+#अन्तर्भाव <string>
+#अन्तर्भाव <system_error>
+#अन्तर्भाव <utility>
+#अन्तर्भाव <vector>
 
-using namespace llvm;
+उपयुज्य नामाकाश llvm;
 
-namespace {
+नामाकाश {
 
-bool matchesToolName(StringRef RegisteredName, StringRef InvokedName) {
-  StringRef Stem = sys::path::stem(InvokedName);
-  StringRef Filename = sys::path::filename(InvokedName);
-  auto Matches = [RegisteredName](StringRef Candidate) {
+तार्किक matchesToolName(StringRef RegisteredName, StringRef InvokedName) {
+  StringRef Stem = sys::मार्गः_2::stem(InvokedName);
+  StringRef Filename = sys::मार्गः_2::filename(InvokedName);
+  स्वचालित Matches = [RegisteredName](StringRef Candidate) {
     size_t Position = Candidate.rfind_insensitive(RegisteredName);
-    return Position != StringRef::npos &&
-           (Position + RegisteredName.size() == Candidate.size() ||
-            !llvm::isAlnum(Candidate[Position + RegisteredName.size()]));
+    प्रत्यागम Position != StringRef::npos &&
+           (Position + RegisteredName.आकार_2() == Candidate.आकार_2() ||
+            !llvm::isAlnum(Candidate[Position + RegisteredName.आकार_2()]));
   };
-  return Matches(Stem) || Matches(Filename);
+  प्रत्यागम Matches(Stem) || Matches(Filename);
 }
 
-bool isMulticallName(StringRef Name) { return matchesToolName("llvm", Name); }
+तार्किक isMulticallName(StringRef Name) { प्रत्यागम matchesToolName("llvm", Name); }
 
 } // namespace
 
-struct ToolSession::Impl {
+संरचना ToolSession::Impl {
   InitLLVM Initialization;
-  std::string ExecutablePath;
-  std::vector<std::pair<std::string, ToolMainFn>> Tools;
+  std::string Executable_मार्गः;
+  std::सदिशम्<std::pair<std::string, ToolMainFn>> Tools;
 
-  Impl(int &Argc, char **&Argv, ArrayRef<CallableTool> RegisteredTools,
-       bool InstallPipeSignalExitHandler, bool NeedsPOSIXUtilitySignalHandling)
+  Impl(पूर्णाङ्क &Argc, वर्ण **&Argv, ArrayRef<CallableTool> RegisteredTools,
+       तार्किक InstallPipeSignalExitHandler, तार्किक NeedsPOSIXUtilitySignalHandling)
       : Initialization(Argc, Argv, InstallPipeSignalExitHandler,
                        NeedsPOSIXUtilitySignalHandling),
-        ExecutablePath(Argv[0]) {
-    Tools.reserve(RegisteredTools.size());
-    for (const CallableTool &Tool : RegisteredTools)
-      Tools.emplace_back(Tool.Name.str(), Tool.Main);
+        Executable_मार्गः(Argv[0]) {
+    Tools.reserve(RegisteredTools.आकार_2());
+    प्रति (ध्रुव CallableTool &Tool : RegisteredTools)
+      Tools.emplace_पृष्ठभागः(Tool.Name.str(), Tool.Main);
   }
 };
 
-ToolSession::ToolSession(int &Argc, char **&Argv, ArrayRef<CallableTool> Tools,
-                         bool InstallPipeSignalExitHandler,
-                         bool NeedsPOSIXUtilitySignalHandling) {
-  assert(Argc > 0 && Argv && Argv[0] && "ToolSession requires a valid argv[0]");
+ToolSession::ToolSession(पूर्णाङ्क &Argc, वर्ण **&Argv, ArrayRef<CallableTool> Tools,
+                         तार्किक InstallPipeSignalExitHandler,
+                         तार्किक NeedsPOSIXUtilitySignalHandling) {
+  प्रतिज्ञा(Argc > 0 && Argv && Argv[0] && "ToolSession requires a valid argv[0]");
   PImpl =
       std::make_unique<Impl>(Argc, Argv, Tools, InstallPipeSignalExitHandler,
                              NeedsPOSIXUtilitySignalHandling);
 }
 
-ToolSession::~ToolSession() = default;
+ToolSession::~ToolSession() = स्वभाव;
 
-ErrorOr<CallableTool> ToolSession::findTool(StringRef Name) const {
-  StringRef Stem = sys::path::stem(Name);
-  StringRef Filename = sys::path::filename(Name);
-  for (const auto &[RegisteredName, Main] : PImpl->Tools)
-    if (Stem.equals_insensitive(RegisteredName) ||
+ErrorOr<CallableTool> ToolSession::findTool(StringRef Name) ध्रुव {
+  StringRef Stem = sys::मार्गः_2::stem(Name);
+  StringRef Filename = sys::मार्गः_2::filename(Name);
+  प्रति (ध्रुव स्वचालित &[RegisteredName, Main] : PImpl->Tools)
+    यदि (Stem.equals_insensitive(RegisteredName) ||
         Filename.equals_insensitive(RegisteredName))
-      return CallableTool{RegisteredName, Main};
+      प्रत्यागम CallableTool{RegisteredName, Main};
 
-  for (const auto &[RegisteredName, Main] : PImpl->Tools)
-    if (matchesToolName(RegisteredName, Name))
-      return CallableTool{RegisteredName, Main};
-  return make_error_code(std::errc::no_such_file_or_directory);
+  प्रति (ध्रुव स्वचालित &[RegisteredName, Main] : PImpl->Tools)
+    यदि (matchesToolName(RegisteredName, Name))
+      प्रत्यागम CallableTool{RegisteredName, Main};
+  प्रत्यागम make_error_संहिता(std::errc::no_such_file_or_directory);
 }
 
 ToolContext ToolSession::makeContext(StringRef RegisteredName,
-                                     const char *PrependArg) {
-  ErrorOr<CallableTool> ExecutableTool = findTool(PImpl->ExecutablePath);
-  bool NeedsPrependArg =
+                                     ध्रुव वर्ण *PrependArg) {
+  ErrorOr<CallableTool> ExecutableTool = findTool(PImpl->Executable_मार्गः);
+  तार्किक NeedsPrependArg =
       !ExecutableTool ||
       !ExecutableTool->Name.equals_insensitive(RegisteredName);
-  ToolContext Context(PImpl->ExecutablePath.c_str(), PrependArg,
+  ToolContext Context(PImpl->Executable_मार्गः.c_str(), PrependArg,
                       NeedsPrependArg);
-  Context.Session = this;
-  return Context;
+  Context.Session = एतत्;
+  प्रत्यागम Context;
 }
 
-ErrorOr<int> ToolSession::callTool(ArrayRef<const char *> Args) {
-  if (Args.empty())
-    return make_error_code(std::errc::invalid_argument);
+ErrorOr<पूर्णाङ्क> ToolSession::callTool(ArrayRef<ध्रुव वर्ण *> तर्काः) {
+  यदि (तर्काः.रिक्तानि())
+    प्रत्यागम make_error_संहिता(std::errc::invalid_तर्कः);
 
-  StringRef InvokedName = Args.front();
+  StringRef InvokedName = तर्काः.front();
   ErrorOr<CallableTool> Tool = findTool(InvokedName);
-  if (!Tool) {
-    if (InvokedName != PImpl->ExecutablePath && !isMulticallName(InvokedName))
-      return make_error_code(std::errc::no_such_file_or_directory);
-    Args = Args.drop_front();
-    if (Args.empty())
-      return make_error_code(std::errc::invalid_argument);
-    InvokedName = Args.front();
+  यदि (!Tool) {
+    यदि (InvokedName != PImpl->Executable_मार्गः && !isMulticallName(InvokedName))
+      प्रत्यागम make_error_संहिता(std::errc::no_such_file_or_directory);
+    तर्काः = तर्काः.drop_front();
+    यदि (तर्काः.रिक्तानि())
+      प्रत्यागम make_error_संहिता(std::errc::invalid_तर्कः);
+    InvokedName = तर्काः.front();
     Tool = findTool(InvokedName);
   }
 
-  if (!Tool)
-    return Tool.getError();
+  यदि (!Tool)
+    प्रत्यागम Tool.getError();
 
-  std::string PrependArg = sys::path::stem(InvokedName).str();
+  std::string PrependArg = sys::मार्गः_2::stem(InvokedName).str();
   ToolContext Context = makeContext(Tool->Name, PrependArg.c_str());
-  SmallVector<char *, 16> MutableArgs;
-  MutableArgs.reserve(Args.size() + 1);
-  for (const char *Arg : Args)
-    MutableArgs.push_back(const_cast<char *>(Arg));
-  MutableArgs.push_back(nullptr);
-  return Tool->Main(Args.size(), MutableArgs.data(), Context);
+  Small_सदिशम्<वर्ण *, 16> Mutable_तर्काः;
+  Mutable_तर्काः.reserve(तर्काः.आकार_2() + 1);
+  प्रति (ध्रुव वर्ण *Arg : तर्काः)
+    Mutable_तर्काः.प्रक्षिप_पृष्ठभागः(const_cast<वर्ण *>(Arg));
+  Mutable_तर्काः.प्रक्षिप_पृष्ठभागः(शून्यसूचकः);
+  प्रत्यागम Tool->Main(तर्काः.आकार_2(), Mutable_तर्काः.दत्त(), Context);
 }
 
-ErrorOr<CallableTool> ToolContext::getCallableTool(StringRef Name) const {
-  if (!Session)
-    return make_error_code(std::errc::operation_not_permitted);
-  return Session->findTool(Name);
+ErrorOr<CallableTool> ToolContext::getCallableTool(StringRef Name) ध्रुव {
+  यदि (!Session)
+    प्रत्यागम make_error_संहिता(std::errc::operation_not_permitted);
+  प्रत्यागम Session->findTool(Name);
 }
 
-ErrorOr<int> ToolContext::callTool(ArrayRef<const char *> Args) const {
-  if (!Session)
-    return make_error_code(std::errc::operation_not_permitted);
-  return Session->callTool(Args);
+ErrorOr<पूर्णाङ्क> ToolContext::callTool(ArrayRef<ध्रुव वर्ण *> तर्काः) ध्रुव {
+  यदि (!Session)
+    प्रत्यागम make_error_संहिता(std::errc::operation_not_permitted);
+  प्रत्यागम Session->callTool(तर्काः);
 }

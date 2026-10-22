@@ -6,33 +6,33 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/StringSaver.h"
+#अन्तर्भाव "llvm/Support/StringSaver.h"
 
-#include "llvm/ADT/SmallString.h"
+#अन्तर्भाव "llvm/ADT/SmallString.h"
 
-using namespace llvm;
+उपयुज्य नामाकाश llvm;
 
 StringRef StringSaver::save(StringRef S) {
-  char *P = Alloc.Allocate<char>(S.size() + 1);
-  if (!S.empty())
-    memcpy(P, S.data(), S.size());
-  P[S.size()] = '\0';
-  return StringRef(P, S.size());
+  वर्ण *P = Alloc.Allocate<वर्ण>(S.आकार_2() + 1);
+  यदि (!S.रिक्तानि())
+    स्मृतिं_प्रतिलिख(P, S.दत्त(), S.आकार_2());
+  P[S.आकार_2()] = '\0';
+  प्रत्यागम StringRef(P, S.आकार_2());
 }
 
-StringRef StringSaver::save(const Twine &S) {
+StringRef StringSaver::save(ध्रुव Twine &S) {
   SmallString<128> Storage;
-  return save(S.toStringRef(Storage));
+  प्रत्यागम save(S.गन्तव्यम्_String_Ref(Storage));
 }
 
 StringRef UniqueStringSaver::save(StringRef S) {
-  auto R = Unique.insert(S);
-  if (R.second)                 // cache miss, need to actually save the string
-    *R.first = Strings.save(S); // safe replacement with equal value
-  return *R.first;
+  स्वचालित R = Unique.निवेशय(S);
+  यदि (R.second)                 // cache miss, need to actually save the string
+    *R.first = वाक्यानि_2.save(S); // safe replacement with equal value
+  प्रत्यागम *R.first;
 }
 
-StringRef UniqueStringSaver::save(const Twine &S) {
+StringRef UniqueStringSaver::save(ध्रुव Twine &S) {
   SmallString<128> Storage;
-  return save(S.toStringRef(Storage));
+  प्रत्यागम save(S.गन्तव्यम्_String_Ref(Storage));
 }

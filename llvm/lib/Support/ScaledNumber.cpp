@@ -10,269 +10,269 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ScaledNumber.h"
-#include "llvm/ADT/APFloat.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/raw_ostream.h"
+#अन्तर्भाव "llvm/Support/ScaledNumber.h"
+#अन्तर्भाव "llvm/ADT/APFloat.h"
+#अन्तर्भाव "llvm/ADT/ArrayRef.h"
+#अन्तर्भाव "llvm/Support/Debug.h"
+#अन्तर्भाव "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-using namespace llvm::ScaledNumbers;
+उपयुज्य नामाकाश llvm;
+उपयुज्य नामाकाश llvm::ScaledNumbers;
 
 std::pair<uint64_t, int16_t> ScaledNumbers::multiply64(uint64_t LHS,
                                                        uint64_t RHS) {
-  uint64_t Upper, Lower;
-#if defined(__SIZEOF_INT128__) ||                                              \
-    (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 128)
-  auto Product = __uint128_t(LHS) * RHS;
-  Upper = uint64_t(Product >> 64);
-  Lower = uint64_t(Product);
-#else
+  uint64_t ऊर्ध्वस्थम्_2, अधस्तनम्_2;
+#यदि defined(__SIZEOF_INT128__) ||                                              \
+    (defined(INTEGRAL_MAX_द्वयङ्काः) && INTEGRAL_MAX_द्वयङ्काः >= 128)
+  स्वचालित गुणनफलम् = __uint128_t(LHS) * RHS;
+  ऊर्ध्वस्थम्_2 = uint64_t(गुणनफलम् >> 64);
+  अधस्तनम्_2 = uint64_t(गुणनफलम्);
+#अन्यथा
   // Separate into two 32-bit digits (U.L).
-  auto getU = [](uint64_t N) { return N >> 32; };
-  auto getL = [](uint64_t N) { return N & UINT32_MAX; };
+  स्वचालित getU = [](uint64_t N) { प्रत्यागम N >> 32; };
+  स्वचालित getL = [](uint64_t N) { प्रत्यागम N & UINT32_MAX; };
   uint64_t UL = getU(LHS), LL = getL(LHS), UR = getU(RHS), LR = getL(RHS);
 
   // Compute cross products.
   uint64_t P1 = UL * UR, P2 = UL * LR, P3 = LL * UR, P4 = LL * LR;
 
   // Sum into two 64-bit digits.
-  Upper = P1;
-  Lower = P4;
-  auto addWithCarry = [&](uint64_t N) {
-    uint64_t NewLower = Lower + (getL(N) << 32);
-    Upper += getU(N) + (NewLower < Lower);
-    Lower = NewLower;
+  ऊर्ध्वस्थम्_2 = P1;
+  अधस्तनम्_2 = P4;
+  स्वचालित सङ्कलय_With_Carry = [&](uint64_t N) {
+    uint64_t New_अधस्तनम् = अधस्तनम्_2 + (getL(N) << 32);
+    ऊर्ध्वस्थम्_2 += getU(N) + (New_अधस्तनम् < अधस्तनम्_2);
+    अधस्तनम्_2 = New_अधस्तनम्;
   };
-  addWithCarry(P2);
-  addWithCarry(P3);
-#endif
+  सङ्कलय_With_Carry(P2);
+  सङ्कलय_With_Carry(P3);
+#यदि_अन्तः
 
   // Check whether the upper digit is empty.
-  if (!Upper)
-    return {Lower, 0};
+  यदि (!ऊर्ध्वस्थम्_2)
+    प्रत्यागम {अधस्तनम्_2, 0};
 
   // Shift as little as possible to maximize precision.
-  unsigned LeadingZeros = llvm::countl_zero(Upper);
-  int Shift = 64 - LeadingZeros;
-  if (LeadingZeros)
-    Upper = Upper << LeadingZeros | Lower >> Shift;
-  return getRounded(Upper, Shift,
-                    Shift && (Lower & UINT64_C(1) << (Shift - 1)));
+  अचिह्नित LeadingZeros = llvm::countl_zero(ऊर्ध्वस्थम्_2);
+  पूर्णाङ्क सरणम्_2 = 64 - LeadingZeros;
+  यदि (LeadingZeros)
+    ऊर्ध्वस्थम्_2 = ऊर्ध्वस्थम्_2 << LeadingZeros | अधस्तनम्_2 >> सरणम्_2;
+  प्रत्यागम getRounded(ऊर्ध्वस्थम्_2, सरणम्_2,
+                    सरणम्_2 && (अधस्तनम्_2 & UINT64_C(1) << (सरणम्_2 - 1)));
 }
 
-static uint64_t getHalf(uint64_t N) { return (N >> 1) + (N & 1); }
+स्थिर uint64_t getHalf(uint64_t N) { प्रत्यागम (N >> 1) + (N & 1); }
 
 std::pair<uint32_t, int16_t> ScaledNumbers::divide32(uint32_t Dividend,
-                                                     uint32_t Divisor) {
-  assert(Dividend && "expected non-zero dividend");
-  assert(Divisor && "expected non-zero divisor");
+                                                     uint32_t भाजकः_2) {
+  प्रतिज्ञा(Dividend && "expected non-zero dividend");
+  प्रतिज्ञा(भाजकः_2 && "expected non-zero divisor");
 
   // Use 64-bit math and canonicalize the dividend to gain precision.
   uint64_t Dividend64 = Dividend;
-  int Shift = 0;
-  if (int Zeros = llvm::countl_zero(Dividend64)) {
-    Shift -= Zeros;
+  पूर्णाङ्क सरणम्_2 = 0;
+  यदि (पूर्णाङ्क Zeros = llvm::countl_zero(Dividend64)) {
+    सरणम्_2 -= Zeros;
     Dividend64 <<= Zeros;
   }
-  uint64_t Quotient = Dividend64 / Divisor;
-  uint64_t Remainder = Dividend64 % Divisor;
+  uint64_t Quotient = Dividend64 / भाजकः_2;
+  uint64_t Remainder = Dividend64 % भाजकः_2;
 
   // If Quotient needs to be shifted, leave the rounding to getAdjusted().
-  if (Quotient > UINT32_MAX)
-    return getAdjusted<uint32_t>(Quotient, Shift);
+  यदि (Quotient > UINT32_MAX)
+    प्रत्यागम getAdjusted<uint32_t>(Quotient, सरणम्_2);
 
   // Round based on the value of the next bit.
-  return getRounded<uint32_t>(Quotient, Shift, Remainder >= getHalf(Divisor));
+  प्रत्यागम getRounded<uint32_t>(Quotient, सरणम्_2, Remainder >= getHalf(भाजकः_2));
 }
 
 std::pair<uint64_t, int16_t> ScaledNumbers::divide64(uint64_t Dividend,
-                                                     uint64_t Divisor) {
-  assert(Dividend && "expected non-zero dividend");
-  assert(Divisor && "expected non-zero divisor");
+                                                     uint64_t भाजकः_2) {
+  प्रतिज्ञा(Dividend && "expected non-zero dividend");
+  प्रतिज्ञा(भाजकः_2 && "expected non-zero divisor");
 
   // Minimize size of divisor.
-  int Shift = 0;
-  if (int Zeros = llvm::countr_zero(Divisor)) {
-    Shift -= Zeros;
-    Divisor >>= Zeros;
+  पूर्णाङ्क सरणम्_2 = 0;
+  यदि (पूर्णाङ्क Zeros = llvm::countr_zero(भाजकः_2)) {
+    सरणम्_2 -= Zeros;
+    भाजकः_2 >>= Zeros;
   }
 
   // Check for powers of two.
-  if (Divisor == 1)
-    return {Dividend, Shift};
+  यदि (भाजकः_2 == 1)
+    प्रत्यागम {Dividend, सरणम्_2};
 
   // Maximize size of dividend.
-  if (int Zeros = llvm::countl_zero(Dividend)) {
-    Shift -= Zeros;
+  यदि (पूर्णाङ्क Zeros = llvm::countl_zero(Dividend)) {
+    सरणम्_2 -= Zeros;
     Dividend <<= Zeros;
   }
 
   // Start with the result of a divide.
-  uint64_t Quotient = Dividend / Divisor;
-  Dividend %= Divisor;
+  uint64_t Quotient = Dividend / भाजकः_2;
+  Dividend %= भाजकः_2;
 
   // Continue building the quotient with long division.
-  while (!(Quotient >> 63) && Dividend) {
+  यावत् (!(Quotient >> 63) && Dividend) {
     // Shift Dividend and check for overflow.
-    bool IsOverflow = Dividend >> 63;
+    तार्किक Is_अतिप्रवाहः = Dividend >> 63;
     Dividend <<= 1;
-    --Shift;
+    --सरणम्_2;
 
     // Get the next bit of Quotient.
     Quotient <<= 1;
-    if (IsOverflow || Divisor <= Dividend) {
+    यदि (Is_अतिप्रवाहः || भाजकः_2 <= Dividend) {
       Quotient |= 1;
-      Dividend -= Divisor;
+      Dividend -= भाजकः_2;
     }
   }
 
-  return getRounded(Quotient, Shift, Dividend >= getHalf(Divisor));
+  प्रत्यागम getRounded(Quotient, सरणम्_2, Dividend >= getHalf(भाजकः_2));
 }
 
-int ScaledNumbers::compareImpl(uint64_t L, uint64_t R, int ScaleDiff) {
-  assert(ScaleDiff >= 0 && "wrong argument order");
-  assert(ScaleDiff < 64 && "numbers too far apart");
+पूर्णाङ्क ScaledNumbers::compareImpl(uint64_t L, uint64_t R, पूर्णाङ्क ScaleDiff) {
+  प्रतिज्ञा(ScaleDiff >= 0 && "wrong argument order");
+  प्रतिज्ञा(ScaleDiff < 64 && "numbers too far apart");
 
   uint64_t L_adjusted = L >> ScaleDiff;
-  if (L_adjusted < R)
-    return -1;
-  if (L_adjusted > R)
-    return 1;
+  यदि (L_adjusted < R)
+    प्रत्यागम -1;
+  यदि (L_adjusted > R)
+    प्रत्यागम 1;
 
-  return L > L_adjusted << ScaleDiff ? 1 : 0;
+  प्रत्यागम L > L_adjusted << ScaleDiff ? 1 : 0;
 }
 
-static void appendDigit(std::string &Str, unsigned D) {
-  assert(D < 10);
+स्थिर शून्य appendDigit(std::string &Str, अचिह्नित D) {
+  प्रतिज्ञा(D < 10);
   Str += '0' + D % 10;
 }
 
-static void appendNumber(std::string &Str, uint64_t N) {
-  while (N) {
+स्थिर शून्य append_सङ्ख्या(std::string &Str, uint64_t N) {
+  यावत् (N) {
     appendDigit(Str, N % 10);
     N /= 10;
   }
 }
 
-static bool doesRoundUp(char Digit) {
-  switch (Digit) {
-  case '5':
-  case '6':
-  case '7':
-  case '8':
-  case '9':
-    return true;
-  default:
-    return false;
+स्थिर तार्किक does_आवर्तनम्_ऊर्ध्वम्(वर्ण Digit) {
+  विकल्प (Digit) {
+  पक्ष '5':
+  पक्ष '6':
+  पक्ष '7':
+  पक्ष '8':
+  पक्ष '9':
+    प्रत्यागम सत्य;
+  स्वभाव:
+    प्रत्यागम असत्य;
   }
 }
 
-static std::string toStringAPFloat(uint64_t D, int E, unsigned Precision) {
-  assert(E >= ScaledNumbers::MinScale);
-  assert(E <= ScaledNumbers::MaxScale);
+स्थिर std::string गन्तव्यम्_String_APFloat(uint64_t D, पूर्णाङ्क E, अचिह्नित Precision) {
+  प्रतिज्ञा(E >= ScaledNumbers::MinScale);
+  प्रतिज्ञा(E <= ScaledNumbers::MaxScale);
 
   // Find a new E, but don't let it increase past MaxScale.
-  int LeadingZeros = ScaledNumberBase::countLeadingZeros64(D);
-  int NewE = std::min(ScaledNumbers::MaxScale, E + 63 - LeadingZeros);
-  int Shift = 63 - (NewE - E);
-  assert(Shift <= LeadingZeros);
-  assert(Shift == LeadingZeros || NewE == ScaledNumbers::MaxScale);
-  assert(Shift >= 0 && Shift < 64 && "undefined behavior");
-  D <<= Shift;
+  पूर्णाङ्क LeadingZeros = Scaled_सङ्ख्या_आधारः::गणनम्_Leading_Zeros64(D);
+  पूर्णाङ्क NewE = std::min(ScaledNumbers::MaxScale, E + 63 - LeadingZeros);
+  पूर्णाङ्क सरणम्_2 = 63 - (NewE - E);
+  प्रतिज्ञा(सरणम्_2 <= LeadingZeros);
+  प्रतिज्ञा(सरणम्_2 == LeadingZeros || NewE == ScaledNumbers::MaxScale);
+  प्रतिज्ञा(सरणम्_2 >= 0 && सरणम्_2 < 64 && "undefined behavior");
+  D <<= सरणम्_2;
   E = NewE;
 
   // Check for a denormal.
-  unsigned AdjustedE = E + 16383;
-  if (!(D >> 63)) {
-    assert(E == ScaledNumbers::MaxScale);
+  अचिह्नित AdjustedE = E + 16383;
+  यदि (!(D >> 63)) {
+    प्रतिज्ञा(E == ScaledNumbers::MaxScale);
     AdjustedE = 0;
   }
 
   // Build the float and print it.
-  uint64_t RawBits[2] = {D, AdjustedE};
-  APFloat Float(APFloat::x87DoubleExtended(), APInt(80, RawBits));
-  SmallVector<char, 24> Chars;
-  Float.toString(Chars, Precision, 0);
-  return std::string(Chars.begin(), Chars.end());
+  uint64_t Raw_द्वयङ्काः[2] = {D, AdjustedE};
+  APFloat Float(APFloat::x87DoubleExtended(), APInt(80, Raw_द्वयङ्काः));
+  Small_सदिशम्<वर्ण, 24> Chars;
+  Float.गन्तव्यम्_String(Chars, Precision, 0);
+  प्रत्यागम std::string(Chars.begin(), Chars.अन्तः());
 }
 
-static std::string stripTrailingZeros(const std::string &Float) {
-  size_t NonZero = Float.find_last_not_of('0');
-  assert(NonZero != std::string::npos && "no . in floating point string");
+स्थिर std::string stripTrailingZeros(ध्रुव std::string &Float) {
+  size_t NonZero = Float.find_चरमः_not_सम्बन्धि('0');
+  प्रतिज्ञा(NonZero != std::string::npos && "no . in floating point string");
 
-  if (Float[NonZero] == '.')
+  यदि (Float[NonZero] == '.')
     ++NonZero;
 
-  return Float.substr(0, NonZero + 1);
+  प्रत्यागम Float.substr(0, NonZero + 1);
 }
 
-std::string ScaledNumberBase::toString(uint64_t D, int16_t E, int Width,
-                                       unsigned Precision) {
-  if (!D)
-    return "0.0";
+std::string Scaled_सङ्ख्या_आधारः::गन्तव्यम्_String(uint64_t D, int16_t E, पूर्णाङ्क विस्तारः,
+                                       अचिह्नित Precision) {
+  यदि (!D)
+    प्रत्यागम "0.0";
 
   // Canonicalize exponent and digits.
   uint64_t Above0 = 0;
   uint64_t Below0 = 0;
   uint64_t Extra = 0;
-  int ExtraShift = 0;
-  if (E == 0) {
+  पूर्णाङ्क Extra_सरणम् = 0;
+  यदि (E == 0) {
     Above0 = D;
-  } else if (E > 0) {
-    if (int Shift = std::min(int16_t(countLeadingZeros64(D)), E)) {
-      D <<= Shift;
-      E -= Shift;
+  } अन्यथा यदि (E > 0) {
+    यदि (पूर्णाङ्क सरणम्_2 = std::min(int16_t(गणनम्_Leading_Zeros64(D)), E)) {
+      D <<= सरणम्_2;
+      E -= सरणम्_2;
 
-      if (!E)
+      यदि (!E)
         Above0 = D;
     }
-  } else if (E > -64) {
+  } अन्यथा यदि (E > -64) {
     Above0 = D >> -E;
     Below0 = D << (64 + E);
-  } else if (E == -64) {
+  } अन्यथा यदि (E == -64) {
     // Special case: shift by 64 bits is undefined behavior.
     Below0 = D;
-  } else if (E > -120) {
+  } अन्यथा यदि (E > -120) {
     Below0 = D >> (-E - 64);
     Extra = D << (128 + E);
-    ExtraShift = -64 - E;
+    Extra_सरणम् = -64 - E;
   }
 
   // Fall back on APFloat for very small and very large numbers.
-  if (!Above0 && !Below0)
-    return toStringAPFloat(D, E, Precision);
+  यदि (!Above0 && !Below0)
+    प्रत्यागम गन्तव्यम्_String_APFloat(D, E, Precision);
 
   // Append the digits before the decimal.
   std::string Str;
-  size_t DigitsOut = 0;
-  if (Above0) {
-    appendNumber(Str, Above0);
-    DigitsOut = Str.size();
-  } else {
+  size_t Digits_बहिर्गमनम् = 0;
+  यदि (Above0) {
+    append_सङ्ख्या(Str, Above0);
+    Digits_बहिर्गमनम् = Str.आकार_2();
+  } अन्यथा {
     appendDigit(Str, 0);
   }
-  std::reverse(Str.begin(), Str.end());
+  std::reverse(Str.begin(), Str.अन्तः());
 
   // Return early if there's nothing after the decimal.
-  if (!Below0)
-    return Str + ".0";
+  यदि (!Below0)
+    प्रत्यागम Str + ".0";
 
   // Append the decimal and beyond.
   Str += '.';
-  uint64_t Error = UINT64_C(1) << (64 - Width);
+  uint64_t Error = UINT64_C(1) << (64 - विस्तारः);
 
   // We need to shift Below0 to the right to make space for calculating
   // digits.  Save the precision we're losing in Extra.
   Extra = (Below0 & 0xf) << 56 | (Extra >> 8);
   Below0 >>= 4;
   size_t SinceDot = 0;
-  size_t AfterDot = Str.size();
-  do {
-    if (ExtraShift) {
-      --ExtraShift;
+  size_t AfterDot = Str.आकार_2();
+  कुरु {
+    यदि (Extra_सरणम्) {
+      --Extra_सरणम्;
       Error *= 5;
-    } else {
+    } अन्यथा {
       Error *= 10;
     }
 
@@ -282,53 +282,53 @@ std::string ScaledNumberBase::toString(uint64_t D, int16_t E, int Width,
     Extra = Extra & (UINT64_MAX >> 4);
     appendDigit(Str, Below0 >> 60);
     Below0 = Below0 & (UINT64_MAX >> 4);
-    if (DigitsOut || Str.back() != '0')
-      ++DigitsOut;
+    यदि (Digits_बहिर्गमनम् || Str.पृष्ठभागः() != '0')
+      ++Digits_बहिर्गमनम्;
     ++SinceDot;
-  } while (Error && (Below0 << 4 | Extra >> 60) >= Error / 2 &&
-           (!Precision || DigitsOut <= Precision || SinceDot < 2));
+  } यावत् (Error && (Below0 << 4 | Extra >> 60) >= Error / 2 &&
+           (!Precision || Digits_बहिर्गमनम् <= Precision || SinceDot < 2));
 
   // Return early for maximum precision.
-  if (!Precision || DigitsOut <= Precision)
-    return stripTrailingZeros(Str);
+  यदि (!Precision || Digits_बहिर्गमनम् <= Precision)
+    प्रत्यागम stripTrailingZeros(Str);
 
   // Find where to truncate.
   size_t Truncate =
-      std::max(Str.size() - (DigitsOut - Precision), AfterDot + 1);
+      std::max(Str.आकार_2() - (Digits_बहिर्गमनम् - Precision), AfterDot + 1);
 
   // Check if there's anything to truncate.
-  if (Truncate >= Str.size())
-    return stripTrailingZeros(Str);
+  यदि (Truncate >= Str.आकार_2())
+    प्रत्यागम stripTrailingZeros(Str);
 
-  bool Carry = doesRoundUp(Str[Truncate]);
-  if (!Carry)
-    return stripTrailingZeros(Str.substr(0, Truncate));
+  तार्किक Carry = does_आवर्तनम्_ऊर्ध्वम्(Str[Truncate]);
+  यदि (!Carry)
+    प्रत्यागम stripTrailingZeros(Str.substr(0, Truncate));
 
   // Round with the first truncated digit.
-  for (std::string::reverse_iterator I(Str.begin() + Truncate), E = Str.rend();
+  प्रति (std::string::reverse_iterator I(Str.begin() + Truncate), E = Str.rend();
        I != E; ++I) {
-    if (*I == '.')
-      continue;
-    if (*I == '9') {
+    यदि (*I == '.')
+      अनुवर्त;
+    यदि (*I == '9') {
       *I = '0';
-      continue;
+      अनुवर्त;
     }
 
     ++*I;
-    Carry = false;
-    break;
+    Carry = असत्य;
+    भङ्ग;
   }
 
   // Add "1" in front if we still need to carry.
-  return stripTrailingZeros(std::string(Carry, '1') + Str.substr(0, Truncate));
+  प्रत्यागम stripTrailingZeros(std::string(Carry, '1') + Str.substr(0, Truncate));
 }
 
-raw_ostream &ScaledNumberBase::print(raw_ostream &OS, uint64_t D, int16_t E,
-                                     int Width, unsigned Precision) {
-  return OS << toString(D, E, Width, Precision);
+raw_ostream &Scaled_सङ्ख्या_आधारः::print(raw_ostream &OS, uint64_t D, int16_t E,
+                                     पूर्णाङ्क विस्तारः, अचिह्नित Precision) {
+  प्रत्यागम OS << गन्तव्यम्_String(D, E, विस्तारः, Precision);
 }
 
-void ScaledNumberBase::dump(uint64_t D, int16_t E, int Width) {
-  print(dbgs(), D, E, Width, 0) << "[" << Width << ":" << D << "*2^" << E
+शून्य Scaled_सङ्ख्या_आधारः::dump(uint64_t D, int16_t E, पूर्णाङ्क विस्तारः) {
+  print(dbgs(), D, E, विस्तारः, 0) << "[" << विस्तारः << ":" << D << "*2^" << E
                                 << "]";
 }

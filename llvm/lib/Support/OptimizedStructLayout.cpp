@@ -10,79 +10,79 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/OptimizedStructLayout.h"
-#include <optional>
+#अन्तर्भाव "llvm/Support/OptimizedStructLayout.h"
+#अन्तर्भाव <optional>
 
-using namespace llvm;
+उपयुज्य नामाकाश llvm;
 
-using Field = OptimizedStructLayoutField;
+उपयुज्य क्षेत्रम्_2 = Optimized_Struct_Layout_क्षेत्रम्;
 
-#ifndef NDEBUG
-static void checkValidLayout(ArrayRef<Field> Fields, uint64_t Size,
+#यदि_अपरिभाषितम् NDEBUG
+स्थिर शून्य checkValidLayout(ArrayRef<क्षेत्रम्_2> Fields, uint64_t आकार,
                              Align MaxAlign) {
-  uint64_t LastEnd = 0;
+  uint64_t चरमः_अन्तः = 0;
   Align ComputedMaxAlign;
-  for (auto &Field : Fields) {
-    assert(Field.hasFixedOffset() &&
+  प्रति (स्वचालित &क्षेत्रम्_2 : Fields) {
+    प्रतिज्ञा(क्षेत्रम्_2.has_Fixed_विस्थापनम्() &&
            "didn't assign a fixed offset to field");
-    assert(isAligned(Field.Alignment, Field.Offset) &&
+    प्रतिज्ञा(isAligned(क्षेत्रम्_2.Alignment, क्षेत्रम्_2.विस्थापनम्) &&
            "didn't assign a correctly-aligned offset to field");
-    assert(Field.Offset >= LastEnd &&
+    प्रतिज्ञा(क्षेत्रम्_2.विस्थापनम् >= चरमः_अन्तः &&
            "didn't assign offsets in ascending order");
-    LastEnd = Field.getEndOffset();
-    assert(Field.Alignment <= MaxAlign &&
+    चरमः_अन्तः = क्षेत्रम्_2.get_अन्तः_विस्थापनम्();
+    प्रतिज्ञा(क्षेत्रम्_2.Alignment <= MaxAlign &&
            "didn't compute MaxAlign correctly");
-    ComputedMaxAlign = std::max(Field.Alignment, MaxAlign);
+    ComputedMaxAlign = std::max(क्षेत्रम्_2.Alignment, MaxAlign);
   }
-  assert(LastEnd == Size && "didn't compute LastEnd correctly");
-  assert(ComputedMaxAlign == MaxAlign && "didn't compute MaxAlign correctly");
+  प्रतिज्ञा(चरमः_अन्तः == आकार && "didn't compute LastEnd correctly");
+  प्रतिज्ञा(ComputedMaxAlign == MaxAlign && "didn't compute MaxAlign correctly");
 }
-#endif
+#यदि_अन्तः
 
 std::pair<uint64_t, Align>
-llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
-#ifndef NDEBUG
+llvm::performOptimizedStructLayout(MutableArrayRef<क्षेत्रम्_2> Fields) {
+#यदि_अपरिभाषितम् NDEBUG
   // Do some simple precondition checks.
   {
-    bool InFixedPrefix = true;
-    size_t LastEnd = 0;
-    for (auto &Field : Fields) {
-      assert(Field.Size > 0 && "field of zero size");
-      if (Field.hasFixedOffset()) {
-        assert(InFixedPrefix &&
+    तार्किक अन्तर्_Fixed_उपसर्गः = सत्य;
+    size_t चरमः_अन्तः = 0;
+    प्रति (स्वचालित &क्षेत्रम्_2 : Fields) {
+      प्रतिज्ञा(क्षेत्रम्_2.आकार > 0 && "field of zero size");
+      यदि (क्षेत्रम्_2.has_Fixed_विस्थापनम्()) {
+        प्रतिज्ञा(अन्तर्_Fixed_उपसर्गः &&
                "fixed-offset fields are not a strict prefix of array");
-        assert(LastEnd <= Field.Offset &&
+        प्रतिज्ञा(चरमः_अन्तः <= क्षेत्रम्_2.विस्थापनम् &&
                "fixed-offset fields overlap or are not in order");
-        LastEnd = Field.getEndOffset();
-        assert(LastEnd > Field.Offset &&
+        चरमः_अन्तः = क्षेत्रम्_2.get_अन्तः_विस्थापनम्();
+        प्रतिज्ञा(चरमः_अन्तः > क्षेत्रम्_2.विस्थापनम् &&
                "overflow in fixed-offset end offset");
-      } else {
-        InFixedPrefix = false;
+      } अन्यथा {
+        अन्तर्_Fixed_उपसर्गः = असत्य;
       }
     }
   }
-#endif
+#यदि_अन्तः
 
   // Do an initial pass over the fields.
   Align MaxAlign;
 
   // Find the first flexible-offset field, tracking MaxAlign.
-  auto FirstFlexible = Fields.begin(), E = Fields.end();
-  while (FirstFlexible != E && FirstFlexible->hasFixedOffset()) {
+  स्वचालित FirstFlexible = Fields.begin(), E = Fields.अन्तः();
+  यावत् (FirstFlexible != E && FirstFlexible->has_Fixed_विस्थापनम्()) {
     MaxAlign = std::max(MaxAlign, FirstFlexible->Alignment);
     ++FirstFlexible;
   }
 
   // If there are no flexible fields, we're done.
-  if (FirstFlexible == E) {
-    uint64_t Size = 0;
-    if (!Fields.empty())
-      Size = Fields.back().getEndOffset();
+  यदि (FirstFlexible == E) {
+    uint64_t आकार = 0;
+    यदि (!Fields.रिक्तानि())
+      आकार = Fields.पृष्ठभागः().get_अन्तः_विस्थापनम्();
 
-#ifndef NDEBUG
-    checkValidLayout(Fields, Size, MaxAlign);
-#endif
-    return {Size, MaxAlign};
+#यदि_अपरिभाषितम् NDEBUG
+    checkValidLayout(Fields, आकार, MaxAlign);
+#यदि_अन्तः
+    प्रत्यागम {आकार, MaxAlign};
   }
 
   // Walk over the flexible-offset fields, tracking MaxAlign and
@@ -91,9 +91,9 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
   // we can use array_pod_sort, which isn't stable.  We won't use it
   // past that point.
   {
-    uintptr_t UniqueNumber = 0;
-    for (auto I = FirstFlexible; I != E; ++I) {
-      I->Scratch = reinterpret_cast<void*>(UniqueNumber++);
+    uintptr_t Unique_सङ्ख्या = 0;
+    प्रति (स्वचालित I = FirstFlexible; I != E; ++I) {
+      I->Scratch = reinterpret_cast<शून्य*>(Unique_सङ्ख्या++);
       MaxAlign = std::max(MaxAlign, I->Alignment);
     }
   }
@@ -103,23 +103,23 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
   // in Scratch.  The decreasing-size aspect of this is only really
   // important if we get into the gap-filling stage below, but it
   // doesn't hurt here.
-  array_pod_sort(FirstFlexible, E,
-                 [](const Field *lhs, const Field *rhs) -> int {
+  array_pod_क्रमय(FirstFlexible, E,
+                 [](ध्रुव क्षेत्रम्_2 *lhs, ध्रुव क्षेत्रम्_2 *rhs) -> पूर्णाङ्क {
     // Decreasing alignment.
-    if (lhs->Alignment != rhs->Alignment)
-      return (lhs->Alignment < rhs->Alignment ? 1 : -1);
+    यदि (lhs->Alignment != rhs->Alignment)
+      प्रत्यागम (lhs->Alignment < rhs->Alignment ? 1 : -1);
 
     // Decreasing size.
-    if (lhs->Size != rhs->Size)
-      return (lhs->Size < rhs->Size ? 1 : -1);
+    यदि (lhs->आकार != rhs->आकार)
+      प्रत्यागम (lhs->आकार < rhs->आकार ? 1 : -1);
 
     // Original order.
-    auto lhsNumber = reinterpret_cast<uintptr_t>(lhs->Scratch);
-    auto rhsNumber = reinterpret_cast<uintptr_t>(rhs->Scratch);
-    if (lhsNumber != rhsNumber)
-      return (lhsNumber < rhsNumber ? -1 : 1);
+    स्वचालित lhs_सङ्ख्या = reinterpret_cast<uintptr_t>(lhs->Scratch);
+    स्वचालित rhs_सङ्ख्या = reinterpret_cast<uintptr_t>(rhs->Scratch);
+    यदि (lhs_सङ्ख्या != rhs_सङ्ख्या)
+      प्रत्यागम (lhs_सङ्ख्या < rhs_सङ्ख्या ? -1 : 1);
 
-    return 0;
+    प्रत्यागम 0;
   });
 
   // Do a quick check for whether that sort alone has given us a perfect
@@ -129,17 +129,17 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
   // and the flexible-layout fields all have sizes that are multiples
   // of their alignment, then this will reliably trigger.
   {
-    bool HasPadding = false;
-    uint64_t LastEnd = 0;
+    तार्किक HasPadding = असत्य;
+    uint64_t चरमः_अन्तः = 0;
 
     // Walk the fixed-offset fields.
-    for (auto I = Fields.begin(); I != FirstFlexible; ++I) {
-      assert(I->hasFixedOffset());
-      if (LastEnd != I->Offset) {
-        HasPadding = true;
-        break;
+    प्रति (स्वचालित I = Fields.begin(); I != FirstFlexible; ++I) {
+      प्रतिज्ञा(I->has_Fixed_विस्थापनम्());
+      यदि (चरमः_अन्तः != I->विस्थापनम्) {
+        HasPadding = सत्य;
+        भङ्ग;
       }
-      LastEnd = I->getEndOffset();
+      चरमः_अन्तः = I->get_अन्तः_विस्थापनम्();
     }
 
     // Walk the flexible-offset fields, optimistically assigning fixed
@@ -147,24 +147,24 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
     // fixed-offset and flexible-offset fields, so if we end up
     // discovering padding later in this loop, we can just abandon this
     // work and we'll ignore the offsets we already assigned.
-    if (!HasPadding) {
-      for (auto I = FirstFlexible; I != E; ++I) {
-        auto Offset = alignTo(LastEnd, I->Alignment);
-        if (LastEnd != Offset) {
-          HasPadding = true;
-          break;
+    यदि (!HasPadding) {
+      प्रति (स्वचालित I = FirstFlexible; I != E; ++I) {
+        स्वचालित विस्थापनम् = align_गन्तव्यम्(चरमः_अन्तः, I->Alignment);
+        यदि (चरमः_अन्तः != विस्थापनम्) {
+          HasPadding = सत्य;
+          भङ्ग;
         }
-        I->Offset = Offset;
-        LastEnd = I->getEndOffset();
+        I->विस्थापनम् = विस्थापनम्;
+        चरमः_अन्तः = I->get_अन्तः_विस्थापनम्();
       }
     }
 
     // If we already have a perfect layout, we're done.
-    if (!HasPadding) {
-#ifndef NDEBUG
-      checkValidLayout(Fields, LastEnd, MaxAlign);
-#endif
-      return {LastEnd, MaxAlign};
+    यदि (!HasPadding) {
+#यदि_अपरिभाषितम् NDEBUG
+      checkValidLayout(Fields, चरमः_अन्तः, MaxAlign);
+#यदि_अन्तः
+      प्रत्यागम {चरमः_अन्तः, MaxAlign};
     }
   }
 
@@ -233,139 +233,139 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
   // Start by organizing the flexible-offset fields into bins according to
   // their alignment.  We expect a small enough number of bins that we
   // don't care about the asymptotic costs of walking this.
-  struct AlignmentQueue {
+  संरचना AlignmentQueue {
     /// The minimum size of anything currently in this queue.
-    uint64_t MinSize;
+    uint64_t Min_आकार;
 
     /// The head of the queue.  A singly-linked list.  The order here should
     /// be consistent with the earlier sort, i.e. the elements should be
     /// monotonically descending in size and otherwise in the original order.
     ///
     /// We remove the queue from the array as soon as this is empty.
-    OptimizedStructLayoutField *Head;
+    Optimized_Struct_Layout_क्षेत्रम् *शीर्ष_2;
 
     /// The alignment requirement of the queue.
     Align Alignment;
 
-    static Field *getNext(Field *Cur) {
-      return static_cast<Field *>(Cur->Scratch);
+    स्थिर क्षेत्रम्_2 *get_अग्र(क्षेत्रम्_2 *Cur) {
+      प्रत्यागम static_cast<क्षेत्रम्_2 *>(Cur->Scratch);
     }
   };
-  SmallVector<AlignmentQueue, 8> FlexibleFieldsByAlignment;
-  for (auto I = FirstFlexible; I != E; ) {
-    auto Head = I;
-    auto Alignment = I->Alignment;
+  Small_सदिशम्<AlignmentQueue, 8> FlexibleFieldsByAlignment;
+  प्रति (स्वचालित I = FirstFlexible; I != E; ) {
+    स्वचालित शीर्ष_2 = I;
+    स्वचालित Alignment = I->Alignment;
 
-    uint64_t MinSize = I->Size;
-    auto LastInQueue = I;
-    for (++I; I != E && I->Alignment == Alignment; ++I) {
-      LastInQueue->Scratch = I;
-      LastInQueue = I;
-      MinSize = std::min(MinSize, I->Size);
+    uint64_t Min_आकार = I->आकार;
+    स्वचालित चरमः_अन्तर्_Queue = I;
+    प्रति (++I; I != E && I->Alignment == Alignment; ++I) {
+      चरमः_अन्तर्_Queue->Scratch = I;
+      चरमः_अन्तर्_Queue = I;
+      Min_आकार = std::min(Min_आकार, I->आकार);
     }
-    LastInQueue->Scratch = nullptr;
+    चरमः_अन्तर्_Queue->Scratch = शून्यसूचकः;
 
-    FlexibleFieldsByAlignment.push_back({MinSize, Head, Alignment});
+    FlexibleFieldsByAlignment.प्रक्षिप_पृष्ठभागः({Min_आकार, शीर्ष_2, Alignment});
   }
 
-#ifndef NDEBUG
+#यदि_अपरिभाषितम् NDEBUG
   // Verify that we set the queues up correctly.
-  auto checkQueues = [&]{
-    bool FirstQueue = true;
-    Align LastQueueAlignment;
-    for (auto &Queue : FlexibleFieldsByAlignment) {
-      assert((FirstQueue || Queue.Alignment < LastQueueAlignment) &&
+  स्वचालित checkQueues = [&]{
+    तार्किक FirstQueue = सत्य;
+    Align चरमः_Queue_Alignment;
+    प्रति (स्वचालित &Queue : FlexibleFieldsByAlignment) {
+      प्रतिज्ञा((FirstQueue || Queue.Alignment < चरमः_Queue_Alignment) &&
              "bins not in order of descending alignment");
-      LastQueueAlignment = Queue.Alignment;
-      FirstQueue = false;
+      चरमः_Queue_Alignment = Queue.Alignment;
+      FirstQueue = असत्य;
 
-      assert(Queue.Head && "queue was empty");
-      uint64_t LastSize = ~(uint64_t)0;
-      for (auto I = Queue.Head; I; I = Queue.getNext(I)) {
-        assert(I->Alignment == Queue.Alignment && "bad field in queue");
-        assert(I->Size <= LastSize && "queue not in descending size order");
-        LastSize = I->Size;
+      प्रतिज्ञा(Queue.शीर्ष_2 && "queue was empty");
+      uint64_t चरमः_आकार = ~(uint64_t)0;
+      प्रति (स्वचालित I = Queue.शीर्ष_2; I; I = Queue.get_अग्र(I)) {
+        प्रतिज्ञा(I->Alignment == Queue.Alignment && "bad field in queue");
+        प्रतिज्ञा(I->आकार <= चरमः_आकार && "queue not in descending size order");
+        चरमः_आकार = I->आकार;
       }
     }
   };
   checkQueues();
-#endif
+#यदि_अन्तः
 
   /// Helper function to remove a field from a queue.
-  auto spliceFromQueue = [&](AlignmentQueue *Queue, Field *Last, Field *Cur) {
-    assert(Last ? Queue->getNext(Last) == Cur : Queue->Head == Cur);
+  स्वचालित spliceFromQueue = [&](AlignmentQueue *Queue, क्षेत्रम्_2 *चरमः, क्षेत्रम्_2 *Cur) {
+    प्रतिज्ञा(चरमः ? Queue->get_अग्र(चरमः) == Cur : Queue->शीर्ष_2 == Cur);
 
     // If we're removing Cur from a non-initial position, splice it out
     // of the linked list.
-    if (Last) {
-      Last->Scratch = Cur->Scratch;
+    यदि (चरमः) {
+      चरमः->Scratch = Cur->Scratch;
 
       // If Cur was the last field in the list, we need to update MinSize.
       // We can just use the last field's size because the list is in
       // descending order of size.
-      if (!Cur->Scratch)
-        Queue->MinSize = Last->Size;
+      यदि (!Cur->Scratch)
+        Queue->Min_आकार = चरमः->आकार;
 
     // Otherwise, replace the head.
-    } else {
-      if (auto NewHead = Queue->getNext(Cur))
-        Queue->Head = NewHead;
+    } अन्यथा {
+      यदि (स्वचालित New_शीर्ष = Queue->get_अग्र(Cur))
+        Queue->शीर्ष_2 = New_शीर्ष;
 
       // If we just emptied the queue, destroy its bin.
-      else
+      अन्यथा
         FlexibleFieldsByAlignment.erase(Queue);
     }
   };
 
   // Do layout into a local array.  Doing this in-place on Fields is
   // not really feasible.
-  SmallVector<Field, 16> Layout;
-  Layout.reserve(Fields.size());
+  Small_सदिशम्<क्षेत्रम्_2, 16> Layout;
+  Layout.reserve(Fields.आकार_2());
 
   // The offset that we're currently looking to insert at (or after).
-  uint64_t LastEnd = 0;
+  uint64_t चरमः_अन्तः = 0;
 
   // Helper function to splice Cur out of the given queue and add it
   // to the layout at the given offset.
-  auto addToLayout = [&](AlignmentQueue *Queue, Field *Last, Field *Cur,
-                         uint64_t Offset) -> bool {
-    assert(Offset == alignTo(LastEnd, Cur->Alignment));
+  स्वचालित सङ्कलय_गन्तव्यम्_Layout = [&](AlignmentQueue *Queue, क्षेत्रम्_2 *चरमः, क्षेत्रम्_2 *Cur,
+                         uint64_t विस्थापनम्) -> तार्किक {
+    प्रतिज्ञा(विस्थापनम् == align_गन्तव्यम्(चरमः_अन्तः, Cur->Alignment));
 
     // Splice out.  This potentially invalidates Queue.
-    spliceFromQueue(Queue, Last, Cur);
+    spliceFromQueue(Queue, चरमः, Cur);
 
     // Add Cur to the layout.
-    Layout.push_back(*Cur);
-    Layout.back().Offset = Offset;
-    LastEnd = Layout.back().getEndOffset();
+    Layout.प्रक्षिप_पृष्ठभागः(*Cur);
+    Layout.पृष्ठभागः().विस्थापनम् = विस्थापनम्;
+    चरमः_अन्तः = Layout.पृष्ठभागः().get_अन्तः_विस्थापनम्();
 
     // Always return true so that we can be tail-called.
-    return true;
+    प्रत्यागम सत्य;
   };
 
   // Helper function to try to find a field in the given queue that'll
   // fit starting at StartOffset but before EndOffset (if present).
   // Note that this never fails if EndOffset is not provided.
-  auto tryAddFillerFromQueue = [&](AlignmentQueue *Queue, uint64_t StartOffset,
-                                   std::optional<uint64_t> EndOffset) -> bool {
-    assert(Queue->Head);
-    assert(StartOffset == alignTo(LastEnd, Queue->Alignment));
-    assert(!EndOffset || StartOffset < *EndOffset);
+  स्वचालित try_सङ्कलय_Filler_From_Queue = [&](AlignmentQueue *Queue, uint64_t Start_विस्थापनम्,
+                                   std::optional<uint64_t> अन्तः_विस्थापनम्) -> तार्किक {
+    प्रतिज्ञा(Queue->शीर्ष_2);
+    प्रतिज्ञा(Start_विस्थापनम् == align_गन्तव्यम्(चरमः_अन्तः, Queue->Alignment));
+    प्रतिज्ञा(!अन्तः_विस्थापनम् || Start_विस्थापनम् < *अन्तः_विस्थापनम्);
 
     // Figure out the maximum size that a field can be, and ignore this
     // queue if there's nothing in it that small.
-    auto MaxViableSize =
-      (EndOffset ? *EndOffset - StartOffset : ~(uint64_t)0);
-    if (Queue->MinSize > MaxViableSize)
-      return false;
+    स्वचालित Max_Viable_आकार =
+      (अन्तः_विस्थापनम् ? *अन्तः_विस्थापनम् - Start_विस्थापनम् : ~(uint64_t)0);
+    यदि (Queue->Min_आकार > Max_Viable_आकार)
+      प्रत्यागम असत्य;
 
     // Find the matching field.  Note that this should always find
     // something because of the MinSize check above.
-    for (Field *Cur = Queue->Head, *Last = nullptr; true;
-           Last = Cur, Cur = Queue->getNext(Cur)) {
-      assert(Cur && "didn't find a match in queue despite its MinSize");
-      if (Cur->Size <= MaxViableSize)
-        return addToLayout(Queue, Last, Cur, StartOffset);
+    प्रति (क्षेत्रम्_2 *Cur = Queue->शीर्ष_2, *चरमः = शून्यसूचकः; सत्य;
+           चरमः = Cur, Cur = Queue->get_अग्र(Cur)) {
+      प्रतिज्ञा(Cur && "didn't find a match in queue despite its MinSize");
+      यदि (Cur->आकार <= Max_Viable_आकार)
+        प्रत्यागम सङ्कलय_गन्तव्यम्_Layout(Queue, चरमः, Cur, Start_विस्थापनम्);
     }
 
     llvm_unreachable("didn't find a match in queue despite its MinSize");
@@ -373,84 +373,84 @@ llvm::performOptimizedStructLayout(MutableArrayRef<Field> Fields) {
 
   // Helper function to find the "best" flexible-offset field according
   // to the criteria described above.
-  auto tryAddBestField = [&](std::optional<uint64_t> BeforeOffset) -> bool {
-    assert(!BeforeOffset || LastEnd < *BeforeOffset);
-    auto QueueB = FlexibleFieldsByAlignment.begin();
-    auto QueueE = FlexibleFieldsByAlignment.end();
+  स्वचालित try_सङ्कलय_Best_क्षेत्रम् = [&](std::optional<uint64_t> Before_विस्थापनम्) -> तार्किक {
+    प्रतिज्ञा(!Before_विस्थापनम् || चरमः_अन्तः < *Before_विस्थापनम्);
+    स्वचालित QueueB = FlexibleFieldsByAlignment.begin();
+    स्वचालित QueueE = FlexibleFieldsByAlignment.अन्तः();
 
     // Start by looking for the most-aligned queue that doesn't need any
     // leading padding after LastEnd.
-    auto FirstQueueToSearch = QueueB;
-    for (; FirstQueueToSearch != QueueE; ++FirstQueueToSearch) {
-      if (isAligned(FirstQueueToSearch->Alignment, LastEnd))
-        break;
+    स्वचालित First_Queue_गन्तव्यम्_अन्वेषणम् = QueueB;
+    प्रति (; First_Queue_गन्तव्यम्_अन्वेषणम् != QueueE; ++First_Queue_गन्तव्यम्_अन्वेषणम्) {
+      यदि (isAligned(First_Queue_गन्तव्यम्_अन्वेषणम्->Alignment, चरमः_अन्तः))
+        भङ्ग;
     }
 
-    uint64_t Offset = LastEnd;
-    while (true) {
+    uint64_t विस्थापनम् = चरमः_अन्तः;
+    यावत् (सत्य) {
       // Invariant: all of the queues in [FirstQueueToSearch, QueueE)
       // require the same initial padding offset.
 
       // Search those queues in descending order of alignment for a
       // satisfactory field.
-      for (auto Queue = FirstQueueToSearch; Queue != QueueE; ++Queue) {
-        if (tryAddFillerFromQueue(Queue, Offset, BeforeOffset))
-          return true;
+      प्रति (स्वचालित Queue = First_Queue_गन्तव्यम्_अन्वेषणम्; Queue != QueueE; ++Queue) {
+        यदि (try_सङ्कलय_Filler_From_Queue(Queue, विस्थापनम्, Before_विस्थापनम्))
+          प्रत्यागम सत्य;
       }
 
       // Okay, we don't need to scan those again.
-      QueueE = FirstQueueToSearch;
+      QueueE = First_Queue_गन्तव्यम्_अन्वेषणम्;
 
       // If we started from the first queue, we're done.
-      if (FirstQueueToSearch == QueueB)
-        return false;
+      यदि (First_Queue_गन्तव्यम्_अन्वेषणम् == QueueB)
+        प्रत्यागम असत्य;
 
       // Otherwise, scan backwards to find the most-aligned queue that
       // still has minimal leading padding after LastEnd.  If that
       // minimal padding is already at or past the end point, we're done.
-      --FirstQueueToSearch;
-      Offset = alignTo(LastEnd, FirstQueueToSearch->Alignment);
-      if (BeforeOffset && Offset >= *BeforeOffset)
-        return false;
-      while (FirstQueueToSearch != QueueB &&
-             Offset == alignTo(LastEnd, FirstQueueToSearch[-1].Alignment))
-        --FirstQueueToSearch;
+      --First_Queue_गन्तव्यम्_अन्वेषणम्;
+      विस्थापनम् = align_गन्तव्यम्(चरमः_अन्तः, First_Queue_गन्तव्यम्_अन्वेषणम्->Alignment);
+      यदि (Before_विस्थापनम् && विस्थापनम् >= *Before_विस्थापनम्)
+        प्रत्यागम असत्य;
+      यावत् (First_Queue_गन्तव्यम्_अन्वेषणम् != QueueB &&
+             विस्थापनम् == align_गन्तव्यम्(चरमः_अन्तः, First_Queue_गन्तव्यम्_अन्वेषणम्[-1].Alignment))
+        --First_Queue_गन्तव्यम्_अन्वेषणम्;
     }
   };
 
   // Phase 1: fill the gaps between fixed-offset fields with the best
   // flexible-offset field that fits.
-  for (auto I = Fields.begin(); I != FirstFlexible; ++I) {
-    assert(LastEnd <= I->Offset);
-    while (LastEnd != I->Offset) {
-      if (!tryAddBestField(I->Offset))
-        break;
+  प्रति (स्वचालित I = Fields.begin(); I != FirstFlexible; ++I) {
+    प्रतिज्ञा(चरमः_अन्तः <= I->विस्थापनम्);
+    यावत् (चरमः_अन्तः != I->विस्थापनम्) {
+      यदि (!try_सङ्कलय_Best_क्षेत्रम्(I->विस्थापनम्))
+        भङ्ग;
     }
-    Layout.push_back(*I);
-    LastEnd = I->getEndOffset();
+    Layout.प्रक्षिप_पृष्ठभागः(*I);
+    चरमः_अन्तः = I->get_अन्तः_विस्थापनम्();
   }
 
-#ifndef NDEBUG
+#यदि_अपरिभाषितम् NDEBUG
   checkQueues();
-#endif
+#यदि_अन्तः
 
   // Phase 2: repeatedly add the best flexible-offset field until
   // they're all gone.
-  while (!FlexibleFieldsByAlignment.empty()) {
-    bool Success = tryAddBestField(std::nullopt);
-    assert(Success && "didn't find a field with no fixed limit?");
-    (void) Success;
+  यावत् (!FlexibleFieldsByAlignment.रिक्तानि()) {
+    तार्किक Success = try_सङ्कलय_Best_क्षेत्रम्(std::nullopt);
+    प्रतिज्ञा(Success && "didn't find a field with no fixed limit?");
+    (शून्य) Success;
   }
 
   // Copy the layout back into place.
-  assert(Layout.size() == Fields.size());
-  memcpy(Fields.data(), Layout.data(),
-         Fields.size() * sizeof(OptimizedStructLayoutField));
+  प्रतिज्ञा(Layout.आकार_2() == Fields.आकार_2());
+  स्मृतिं_प्रतिलिख(Fields.दत्त(), Layout.दत्त(),
+         Fields.आकार_2() * परिमाण(Optimized_Struct_Layout_क्षेत्रम्));
 
-#ifndef NDEBUG
+#यदि_अपरिभाषितम् NDEBUG
   // Make a final check that the layout is valid.
-  checkValidLayout(Fields, LastEnd, MaxAlign);
-#endif
+  checkValidLayout(Fields, चरमः_अन्तः, MaxAlign);
+#यदि_अन्तः
 
-  return {LastEnd, MaxAlign};
+  प्रत्यागम {चरमः_अन्तः, MaxAlign};
 }

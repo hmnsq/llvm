@@ -6,20 +6,20 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "llvm/Support/ARMAttributeParser.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/Support/ARMBuildAttributes.h"
-#include "llvm/Support/Errc.h"
-#include "llvm/Support/ScopedPrinter.h"
-#include <optional>
+#अन्तर्भाव "llvm/Support/ARMAttributeParser.h"
+#अन्तर्भाव "llvm/ADT/StringExtras.h"
+#अन्तर्भाव "llvm/Support/ARMBuildAttributes.h"
+#अन्तर्भाव "llvm/Support/Errc.h"
+#अन्तर्भाव "llvm/Support/ScopedPrinter.h"
+#अन्तर्भाव <optional>
 
-using namespace llvm;
-using namespace llvm::ARMBuildAttrs;
+उपयुज्य नामाकाश llvm;
+उपयुज्य नामाकाश llvm::ARMBuildAttrs;
 
-#define ATTRIBUTE_HANDLER(attr)                                                \
+#परिभाषय ATTRIBUTE_HANDLER(attr)                                                \
   { ARMBuildAttrs::attr, &ARMAttributeParser::attr }
 
-const ARMAttributeParser::DisplayHandler ARMAttributeParser::displayRoutines[] =
+ध्रुव ARMAttributeParser::DisplayHandler ARMAttributeParser::displayRoutines[] =
     {
         {ARMBuildAttrs::CPU_raw_name, &ARMAttributeParser::stringAttribute},
         {ARMBuildAttrs::CPU_name, &ARMAttributeParser::stringAttribute},
@@ -33,21 +33,21 @@ const ARMAttributeParser::DisplayHandler ARMAttributeParser::displayRoutines[] =
         ATTRIBUTE_HANDLER(MVE_arch),
         ATTRIBUTE_HANDLER(PCS_config),
         ATTRIBUTE_HANDLER(ABI_PCS_R9_use),
-        ATTRIBUTE_HANDLER(ABI_PCS_RW_data),
-        ATTRIBUTE_HANDLER(ABI_PCS_RO_data),
+        ATTRIBUTE_HANDLER(ABI_PCS_RW_दत्त),
+        ATTRIBUTE_HANDLER(ABI_PCS_RO_दत्त),
         ATTRIBUTE_HANDLER(ABI_PCS_GOT_use),
         ATTRIBUTE_HANDLER(ABI_PCS_wchar_t),
         ATTRIBUTE_HANDLER(ABI_FP_rounding),
         ATTRIBUTE_HANDLER(ABI_FP_denormal),
         ATTRIBUTE_HANDLER(ABI_FP_exceptions),
         ATTRIBUTE_HANDLER(ABI_FP_user_exceptions),
-        ATTRIBUTE_HANDLER(ABI_FP_number_model),
+        ATTRIBUTE_HANDLER(ABI_FP_सङ्ख्या_model),
         ATTRIBUTE_HANDLER(ABI_align_needed),
         ATTRIBUTE_HANDLER(ABI_align_preserved),
-        ATTRIBUTE_HANDLER(ABI_enum_size),
+        ATTRIBUTE_HANDLER(ABI_enum_आकार),
         ATTRIBUTE_HANDLER(ABI_HardFP_use),
-        ATTRIBUTE_HANDLER(ABI_VFP_args),
-        ATTRIBUTE_HANDLER(ABI_WMMX_args),
+        ATTRIBUTE_HANDLER(ABI_VFP_तर्काः),
+        ATTRIBUTE_HANDLER(ABI_WMMX_तर्काः),
         ATTRIBUTE_HANDLER(ABI_optimization_goals),
         ATTRIBUTE_HANDLER(ABI_FP_optimization_goals),
         ATTRIBUTE_HANDLER(compatibility),
@@ -67,24 +67,24 @@ const ARMAttributeParser::DisplayHandler ARMAttributeParser::displayRoutines[] =
         ATTRIBUTE_HANDLER(also_compatible_with),
 };
 
-#undef ATTRIBUTE_HANDLER
+#अपरिभाषय ATTRIBUTE_HANDLER
 
-Error ARMAttributeParser::stringAttribute(AttrType tag) {
-  StringRef tagName =
-      ELFAttrs::attrTypeAsString(tag, tagToStringMap, /*hasTagPrefix=*/false);
+Error ARMAttributeParser::stringAttribute(AttrType चिह्नकम्_2) {
+  StringRef चिह्नकम्_Name =
+      ELFAttrs::attrTypeAsString(चिह्नकम्_2, चिह्नकम्_गन्तव्यम्_String_Map, /*hasTagPrefix=*/असत्य);
   StringRef desc = de.getCStrRef(cursor);
 
-  if (sw) {
+  यदि (sw) {
     DictScope scope(*sw, "Attribute");
-    sw->printNumber("Tag", tag);
-    if (!tagName.empty())
-      sw->printString("TagName", tagName);
+    sw->print_सङ्ख्या("Tag", चिह्नकम्_2);
+    यदि (!चिह्नकम्_Name.रिक्तानि())
+      sw->printString("TagName", चिह्नकम्_Name);
     sw->printString("Value", desc);
   }
-  return Error::success();
+  प्रत्यागम Error::success();
 }
 
-static const char *const CPU_arch_strings[] = {"Pre-v4",
+स्थिर ध्रुव वर्ण *ध्रुव CPU_arch_वाक्यानि[] = {"Pre-v4",
                                                "ARM v4",
                                                "ARM v4T",
                                                "ARM v5T",
@@ -102,70 +102,70 @@ static const char *const CPU_arch_strings[] = {"Pre-v4",
                                                "ARM v8-R",
                                                "ARM v8-M Baseline",
                                                "ARM v8-M Mainline",
-                                               nullptr,
-                                               nullptr,
-                                               nullptr,
+                                               शून्यसूचकः,
+                                               शून्यसूचकः,
+                                               शून्यसूचकः,
                                                "ARM v8.1-M Mainline",
                                                "ARM v9-A"};
 
-Error ARMAttributeParser::CPU_arch(AttrType tag) {
-  return parseStringAttribute("CPU_arch", tag, ArrayRef(CPU_arch_strings));
+Error ARMAttributeParser::CPU_arch(AttrType चिह्नकम्_2) {
+  प्रत्यागम parseStringAttribute("CPU_arch", चिह्नकम्_2, ArrayRef(CPU_arch_वाक्यानि));
 }
 
-Error ARMAttributeParser::CPU_arch_profile(AttrType tag) {
-  uint64_t value = de.getULEB128(cursor);
+Error ARMAttributeParser::CPU_arch_profile(AttrType चिह्नकम्_2) {
+  uint64_t मानम्_2 = de.getULEB128(cursor);
 
   StringRef profile;
-  switch (value) {
-  default: profile = "Unknown"; break;
-  case 'A': profile = "Application"; break;
-  case 'R': profile = "Real-time"; break;
-  case 'M': profile = "Microcontroller"; break;
-  case 'S': profile = "Classic"; break;
-  case 0: profile = "None"; break;
+  विकल्प (मानम्_2) {
+  स्वभाव: profile = "Unknown"; भङ्ग;
+  पक्ष 'A': profile = "Application"; भङ्ग;
+  पक्ष 'R': profile = "Real-time"; भङ्ग;
+  पक्ष 'M': profile = "Microcontroller"; भङ्ग;
+  पक्ष 'S': profile = "Classic"; भङ्ग;
+  पक्ष 0: profile = "None"; भङ्ग;
   }
 
-  printAttribute(tag, value, profile);
-  return Error::success();
+  printAttribute(चिह्नकम्_2, मानम्_2, profile);
+  प्रत्यागम Error::success();
 }
 
-Error ARMAttributeParser::ARM_ISA_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Permitted"};
-  return parseStringAttribute("ARM_ISA_use", tag, ArrayRef(strings));
+Error ARMAttributeParser::ARM_ISA_use(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted", "Permitted"};
+  प्रत्यागम parseStringAttribute("ARM_ISA_use", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::THUMB_ISA_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Thumb-1", "Thumb-2",
+Error ARMAttributeParser::THUMB_ISA_use(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted", "Thumb-1", "Thumb-2",
                                         "Permitted"};
-  return parseStringAttribute("THUMB_ISA_use", tag, ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("THUMB_ISA_use", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::FP_arch(AttrType tag) {
-  static const char *const strings[] = {
+Error ARMAttributeParser::FP_arch(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {
       "Not Permitted", "VFPv1",     "VFPv2",      "VFPv3",         "VFPv3-D16",
       "VFPv4",         "VFPv4-D16", "ARMv8-a FP", "ARMv8-a FP-D16"};
-  return parseStringAttribute("FP_arch", tag, ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("FP_arch", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::WMMX_arch(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "WMMXv1", "WMMXv2"};
-  return parseStringAttribute("WMMX_arch", tag, ArrayRef(strings));
+Error ARMAttributeParser::WMMX_arch(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted", "WMMXv1", "WMMXv2"};
+  प्रत्यागम parseStringAttribute("WMMX_arch", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::Advanced_SIMD_arch(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "NEONv1", "NEONv2+FMA",
+Error ARMAttributeParser::Advanced_SIMD_arch(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted", "NEONv1", "NEONv2+FMA",
                                         "ARMv8-a NEON", "ARMv8.1-a NEON"};
-  return parseStringAttribute("Advanced_SIMD_arch", tag, ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("Advanced_SIMD_arch", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::MVE_arch(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "MVE integer",
+Error ARMAttributeParser::MVE_arch(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted", "MVE integer",
                                         "MVE integer and float"};
-  return parseStringAttribute("MVE_arch", tag, ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("MVE_arch", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::PCS_config(AttrType tag) {
-  static const char *const strings[] = {"None",
+Error ARMAttributeParser::PCS_config(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"None",
                                         "Bare Platform",
                                         "Linux Application",
                                         "Linux DSO",
@@ -173,329 +173,329 @@ Error ARMAttributeParser::PCS_config(AttrType tag) {
                                         "Reserved (Palm OS)",
                                         "Symbian OS 2004",
                                         "Reserved (Symbian OS)"};
-  return parseStringAttribute("PCS_config", tag, ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("PCS_config", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::ABI_PCS_R9_use(AttrType tag) {
-  static const char *const strings[] = {"v6", "Static Base", "TLS", "Unused"};
-  return parseStringAttribute("ABI_PCS_R9_use", tag, ArrayRef(strings));
+Error ARMAttributeParser::ABI_PCS_R9_use(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"v6", "Static Base", "TLS", "Unused"};
+  प्रत्यागम parseStringAttribute("ABI_PCS_R9_use", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::ABI_PCS_RW_data(AttrType tag) {
-  static const char *const strings[] = {"Absolute", "PC-relative",
+Error ARMAttributeParser::ABI_PCS_RW_दत्त(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Absolute", "PC-relative",
                                         "SB-relative", "Not Permitted"};
-  return parseStringAttribute("ABI_PCS_RW_data", tag, ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("ABI_PCS_RW_data", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::ABI_PCS_RO_data(AttrType tag) {
-  static const char *const strings[] = {"Absolute", "PC-relative",
+Error ARMAttributeParser::ABI_PCS_RO_दत्त(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Absolute", "PC-relative",
                                         "Not Permitted"};
-  return parseStringAttribute("ABI_PCS_RO_data", tag, ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("ABI_PCS_RO_data", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::ABI_PCS_GOT_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Direct",
+Error ARMAttributeParser::ABI_PCS_GOT_use(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted", "Direct",
                                         "GOT-Indirect"};
-  return parseStringAttribute("ABI_PCS_GOT_use", tag, ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("ABI_PCS_GOT_use", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::ABI_PCS_wchar_t(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Unknown", "2-byte",
+Error ARMAttributeParser::ABI_PCS_wchar_t(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted", "Unknown", "2-byte",
                                         "Unknown", "4-byte"};
-  return parseStringAttribute("ABI_PCS_wchar_t", tag, ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("ABI_PCS_wchar_t", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::ABI_FP_rounding(AttrType tag) {
-  static const char *const strings[] = {"IEEE-754", "Runtime"};
-  return parseStringAttribute("ABI_FP_rounding", tag, ArrayRef(strings));
+Error ARMAttributeParser::ABI_FP_rounding(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"IEEE-754", "Runtime"};
+  प्रत्यागम parseStringAttribute("ABI_FP_rounding", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::ABI_FP_denormal(AttrType tag) {
-  static const char *const strings[] = {"Unsupported", "IEEE-754", "Sign Only"};
-  return parseStringAttribute("ABI_FP_denormal", tag, ArrayRef(strings));
+Error ARMAttributeParser::ABI_FP_denormal(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Unsupported", "IEEE-754", "Sign Only"};
+  प्रत्यागम parseStringAttribute("ABI_FP_denormal", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::ABI_FP_exceptions(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "IEEE-754"};
-  return parseStringAttribute("ABI_FP_exceptions", tag, ArrayRef(strings));
+Error ARMAttributeParser::ABI_FP_exceptions(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted", "IEEE-754"};
+  प्रत्यागम parseStringAttribute("ABI_FP_exceptions", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
-Error ARMAttributeParser::ABI_FP_user_exceptions(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "IEEE-754"};
-  return parseStringAttribute("ABI_FP_user_exceptions", tag, ArrayRef(strings));
+Error ARMAttributeParser::ABI_FP_user_exceptions(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted", "IEEE-754"};
+  प्रत्यागम parseStringAttribute("ABI_FP_user_exceptions", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::ABI_FP_number_model(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Finite Only", "RTABI",
+Error ARMAttributeParser::ABI_FP_सङ्ख्या_model(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted", "Finite Only", "RTABI",
                                         "IEEE-754"};
-  return parseStringAttribute("ABI_FP_number_model", tag, ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("ABI_FP_number_model", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::ABI_align_needed(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "8-byte alignment",
+Error ARMAttributeParser::ABI_align_needed(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted", "8-byte alignment",
                                         "4-byte alignment", "Reserved"};
 
-  uint64_t value = de.getULEB128(cursor);
+  uint64_t मानम्_2 = de.getULEB128(cursor);
 
   std::string description;
-  if (value < std::size(strings))
-    description = strings[value];
-  else if (value <= 12)
-    description = "8-byte alignment, " + utostr(1ULL << value) +
+  यदि (मानम्_2 < std::आकार_2(वाक्यानि))
+    description = वाक्यानि[मानम्_2];
+  अन्यथा यदि (मानम्_2 <= 12)
+    description = "8-byte alignment, " + utostr(1ULL << मानम्_2) +
                   "-byte extended alignment";
-  else
+  अन्यथा
     description = "Invalid";
 
-  printAttribute(tag, value, description);
-  return Error::success();
+  printAttribute(चिह्नकम्_2, मानम्_2, description);
+  प्रत्यागम Error::success();
 }
 
-Error ARMAttributeParser::ABI_align_preserved(AttrType tag) {
-  static const char *strings[] = {"Not Required", "8-byte data alignment",
+Error ARMAttributeParser::ABI_align_preserved(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *वाक्यानि[] = {"Not Required", "8-byte data alignment",
                                   "8-byte data and code alignment", "Reserved"};
 
-  uint64_t value = de.getULEB128(cursor);
+  uint64_t मानम्_2 = de.getULEB128(cursor);
 
   std::string description;
-  if (value < std::size(strings))
-    description = std::string(strings[value]);
-  else if (value <= 12)
+  यदि (मानम्_2 < std::आकार_2(वाक्यानि))
+    description = std::string(वाक्यानि[मानम्_2]);
+  अन्यथा यदि (मानम्_2 <= 12)
     description = std::string("8-byte stack alignment, ") +
-                  utostr(1ULL << value) + std::string("-byte data alignment");
-  else
+                  utostr(1ULL << मानम्_2) + std::string("-byte data alignment");
+  अन्यथा
     description = "Invalid";
 
-  printAttribute(tag, value, description);
-  return Error::success();
+  printAttribute(चिह्नकम्_2, मानम्_2, description);
+  प्रत्यागम Error::success();
 }
 
-Error ARMAttributeParser::ABI_enum_size(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Packed", "Int32",
+Error ARMAttributeParser::ABI_enum_आकार(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted", "Packed", "Int32",
                                         "External Int32"};
-  return parseStringAttribute("ABI_enum_size", tag, ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("ABI_enum_size", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::ABI_HardFP_use(AttrType tag) {
-  static const char *const strings[] = {"Tag_FP_arch", "Single-Precision",
+Error ARMAttributeParser::ABI_HardFP_use(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Tag_FP_arch", "Single-Precision",
                                         "Reserved", "Tag_FP_arch (deprecated)"};
-  return parseStringAttribute("ABI_HardFP_use", tag, ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("ABI_HardFP_use", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::ABI_VFP_args(AttrType tag) {
-  static const char *const strings[] = {"AAPCS", "AAPCS VFP", "Custom",
+Error ARMAttributeParser::ABI_VFP_तर्काः(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"AAPCS", "AAPCS VFP", "Custom",
                                         "Not Permitted"};
-  return parseStringAttribute("ABI_VFP_args", tag, ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("ABI_VFP_args", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::ABI_WMMX_args(AttrType tag) {
-  static const char *const strings[] = {"AAPCS", "iWMMX", "Custom"};
-  return parseStringAttribute("ABI_WMMX_args", tag, ArrayRef(strings));
+Error ARMAttributeParser::ABI_WMMX_तर्काः(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"AAPCS", "iWMMX", "Custom"};
+  प्रत्यागम parseStringAttribute("ABI_WMMX_args", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::ABI_optimization_goals(AttrType tag) {
-  static const char *const strings[] = {
+Error ARMAttributeParser::ABI_optimization_goals(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {
       "None",          "Speed",           "Aggressive Speed",
       "Size",          "Aggressive Size", "Debugging",
       "Best Debugging"};
-  return parseStringAttribute("ABI_optimization_goals", tag, ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("ABI_optimization_goals", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::ABI_FP_optimization_goals(AttrType tag) {
-  static const char *const strings[] = {
+Error ARMAttributeParser::ABI_FP_optimization_goals(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {
       "None",     "Speed",        "Aggressive Speed", "Size", "Aggressive Size",
       "Accuracy", "Best Accuracy"};
-  return parseStringAttribute("ABI_FP_optimization_goals", tag,
-                              ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("ABI_FP_optimization_goals", चिह्नकम्_2,
+                              ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::compatibility(AttrType tag) {
+Error ARMAttributeParser::compatibility(AttrType चिह्नकम्_2) {
   uint64_t integer = de.getULEB128(cursor);
   StringRef string = de.getCStrRef(cursor);
 
-  if (sw) {
+  यदि (sw) {
     DictScope scope(*sw, "Attribute");
-    sw->printNumber("Tag", tag);
-    sw->startLine() << "Value: " << integer << ", " << string << '\n';
+    sw->print_सङ्ख्या("Tag", चिह्नकम्_2);
+    sw->start_पङ्क्तिः() << "Value: " << integer << ", " << string << '\n';
     sw->printString("TagName",
-                    ELFAttrs::attrTypeAsString(tag, tagToStringMap,
-                                               /*hasTagPrefix=*/false));
-    switch (integer) {
-    case 0:
+                    ELFAttrs::attrTypeAsString(चिह्नकम्_2, चिह्नकम्_गन्तव्यम्_String_Map,
+                                               /*hasTagPrefix=*/असत्य));
+    विकल्प (integer) {
+    पक्ष 0:
       sw->printString("Description", StringRef("No Specific Requirements"));
-      break;
-    case 1:
+      भङ्ग;
+    पक्ष 1:
       sw->printString("Description", StringRef("AEABI Conformant"));
-      break;
-    default:
+      भङ्ग;
+    स्वभाव:
       sw->printString("Description", StringRef("AEABI Non-Conformant"));
-      break;
+      भङ्ग;
     }
   }
-  return Error::success();
+  प्रत्यागम Error::success();
 }
 
-Error ARMAttributeParser::CPU_unaligned_access(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "v6-style"};
-  return parseStringAttribute("CPU_unaligned_access", tag, ArrayRef(strings));
+Error ARMAttributeParser::CPU_unaligned_access(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted", "v6-style"};
+  प्रत्यागम parseStringAttribute("CPU_unaligned_access", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::FP_HP_extension(AttrType tag) {
-  static const char *const strings[] = {"If Available", "Permitted"};
-  return parseStringAttribute("FP_HP_extension", tag, ArrayRef(strings));
+Error ARMAttributeParser::FP_HP_extension(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"If Available", "Permitted"};
+  प्रत्यागम parseStringAttribute("FP_HP_extension", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::ABI_FP_16bit_format(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "IEEE-754", "VFPv3"};
-  return parseStringAttribute("ABI_FP_16bit_format", tag, ArrayRef(strings));
+Error ARMAttributeParser::ABI_FP_16bit_format(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted", "IEEE-754", "VFPv3"};
+  प्रत्यागम parseStringAttribute("ABI_FP_16bit_format", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::MPextension_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Permitted"};
-  return parseStringAttribute("MPextension_use", tag, ArrayRef(strings));
+Error ARMAttributeParser::MPextension_use(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted", "Permitted"};
+  प्रत्यागम parseStringAttribute("MPextension_use", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::DIV_use(AttrType tag) {
-  static const char *const strings[] = {"If Available", "Not Permitted",
+Error ARMAttributeParser::DIV_use(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"If Available", "Not Permitted",
                                         "Permitted"};
-  return parseStringAttribute("DIV_use", tag, ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("DIV_use", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::DSP_extension(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Permitted"};
-  return parseStringAttribute("DSP_extension", tag, ArrayRef(strings));
+Error ARMAttributeParser::DSP_extension(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted", "Permitted"};
+  प्रत्यागम parseStringAttribute("DSP_extension", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::T2EE_use(AttrType tag) {
-  static const char *const strings[] = {"Not Permitted", "Permitted"};
-  return parseStringAttribute("T2EE_use", tag, ArrayRef(strings));
+Error ARMAttributeParser::T2EE_use(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted", "Permitted"};
+  प्रत्यागम parseStringAttribute("T2EE_use", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::Virtualization_use(AttrType tag) {
-  static const char *const strings[] = {
+Error ARMAttributeParser::Virtualization_use(AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {
       "Not Permitted", "TrustZone", "Virtualization Extensions",
       "TrustZone + Virtualization Extensions"};
-  return parseStringAttribute("Virtualization_use", tag, ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("Virtualization_use", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::PAC_extension(ARMBuildAttrs::AttrType tag) {
-  static const char *const strings[] = {"Not Permitted",
+Error ARMAttributeParser::PAC_extension(ARMBuildAttrs::AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted",
                                         "Permitted in NOP space", "Permitted"};
-  return parseStringAttribute("PAC_extension", tag, ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("PAC_extension", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::BTI_extension(ARMBuildAttrs::AttrType tag) {
-  static const char *const strings[] = {"Not Permitted",
+Error ARMAttributeParser::BTI_extension(ARMBuildAttrs::AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Permitted",
                                         "Permitted in NOP space", "Permitted"};
-  return parseStringAttribute("BTI_extension", tag, ArrayRef(strings));
+  प्रत्यागम parseStringAttribute("BTI_extension", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::PACRET_use(ARMBuildAttrs::AttrType tag) {
-  static const char *const strings[] = {"Not Used", "Used"};
-  return parseStringAttribute("PACRET_use", tag, ArrayRef(strings));
+Error ARMAttributeParser::PACRET_use(ARMBuildAttrs::AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Used", "Used"};
+  प्रत्यागम parseStringAttribute("PACRET_use", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::BTI_use(ARMBuildAttrs::AttrType tag) {
-  static const char *const strings[] = {"Not Used", "Used"};
-  return parseStringAttribute("BTI_use", tag, ArrayRef(strings));
+Error ARMAttributeParser::BTI_use(ARMBuildAttrs::AttrType चिह्नकम्_2) {
+  स्थिर ध्रुव वर्ण *ध्रुव वाक्यानि[] = {"Not Used", "Used"};
+  प्रत्यागम parseStringAttribute("BTI_use", चिह्नकम्_2, ArrayRef(वाक्यानि));
 }
 
-Error ARMAttributeParser::nodefaults(AttrType tag) {
-  uint64_t value = de.getULEB128(cursor);
-  printAttribute(tag, value, "Unspecified Tags UNDEFINED");
-  return Error::success();
+Error ARMAttributeParser::nodefaults(AttrType चिह्नकम्_2) {
+  uint64_t मानम्_2 = de.getULEB128(cursor);
+  printAttribute(चिह्नकम्_2, मानम्_2, "Unspecified Tags UNDEFINED");
+  प्रत्यागम Error::success();
 }
 
-Error ARMAttributeParser::also_compatible_with(AttrType tag) {
+Error ARMAttributeParser::also_compatible_with(AttrType चिह्नकम्_2) {
   // Parse value as a C string first in order to print it in escaped form later.
   // Then, parse it again to catch errors or to pretty print if Tag_CPU_arch.
-  std::optional<Error> returnValue;
+  std::optional<Error> return_मानम्;
 
   SmallString<8> Description;
-  raw_svector_ostream DescStream(Description);
+  raw_svector_ostream Desc_प्रवाहः(Description);
 
-  uint64_t InitialOffset = cursor.tell();
-  StringRef RawStringValue = de.getCStrRef(cursor);
-  uint64_t FinalOffset = cursor.tell();
-  cursor.seek(InitialOffset);
-  uint64_t InnerTag = de.getULEB128(cursor);
+  uint64_t Initial_विस्थापनम् = cursor.tell();
+  StringRef Raw_String_मानम् = de.getCStrRef(cursor);
+  uint64_t Final_विस्थापनम् = cursor.tell();
+  cursor.seek(Initial_विस्थापनम्);
+  uint64_t Inner_चिह्नकम् = de.getULEB128(cursor);
 
-  bool ValidInnerTag =
-      any_of(tagToStringMap, [InnerTag](const TagNameItem &Item) {
-        return Item.attr == InnerTag;
+  तार्किक Valid_Inner_चिह्नकम् =
+      any_सम्बन्धि(चिह्नकम्_गन्तव्यम्_String_Map, [Inner_चिह्नकम्](ध्रुव चिह्नकम्_Name_Item &Item) {
+        प्रत्यागम Item.attr == Inner_चिह्नकम्;
       });
 
-  if (!ValidInnerTag) {
-    returnValue =
-        createStringError(errc::argument_out_of_domain,
-                          Twine(InnerTag) + " is not a valid tag number");
-  } else {
-    switch (InnerTag) {
-    case ARMBuildAttrs::CPU_arch: {
-      uint64_t InnerValue = de.getULEB128(cursor);
-      auto strings = ArrayRef(CPU_arch_strings);
-      if (InnerValue >= strings.size()) {
-        returnValue = createStringError(
-            errc::argument_out_of_domain,
-            Twine(InnerValue) + " is not a valid " +
-                ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap) +
+  यदि (!Valid_Inner_चिह्नकम्) {
+    return_मानम् =
+        createStringError(errc::तर्कः_बहिर्गमनम्_सम्बन्धि_domain,
+                          Twine(Inner_चिह्नकम्) + " is not a valid tag number");
+  } अन्यथा {
+    विकल्प (Inner_चिह्नकम्) {
+    पक्ष ARMBuildAttrs::CPU_arch: {
+      uint64_t Inner_मानम् = de.getULEB128(cursor);
+      स्वचालित वाक्यानि = ArrayRef(CPU_arch_वाक्यानि);
+      यदि (Inner_मानम् >= वाक्यानि.आकार_2()) {
+        return_मानम् = createStringError(
+            errc::तर्कः_बहिर्गमनम्_सम्बन्धि_domain,
+            Twine(Inner_मानम्) + " is not a valid " +
+                ELFAttrs::attrTypeAsString(Inner_चिह्नकम्, चिह्नकम्_गन्तव्यम्_String_Map) +
                 " value");
-      } else {
-        DescStream << ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap)
-                   << " = " << InnerValue;
-        if (strings[InnerValue])
-          DescStream << " (" << strings[InnerValue] << ')';
+      } अन्यथा {
+        Desc_प्रवाहः << ELFAttrs::attrTypeAsString(Inner_चिह्नकम्, चिह्नकम्_गन्तव्यम्_String_Map)
+                   << " = " << Inner_मानम्;
+        यदि (वाक्यानि[Inner_मानम्])
+          Desc_प्रवाहः << " (" << वाक्यानि[Inner_मानम्] << ')';
       }
-      break;
+      भङ्ग;
     }
-    case ARMBuildAttrs::also_compatible_with:
-      returnValue = createStringError(
-          errc::invalid_argument,
-          ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap) +
+    पक्ष ARMBuildAttrs::also_compatible_with:
+      return_मानम् = createStringError(
+          errc::invalid_तर्कः,
+          ELFAttrs::attrTypeAsString(Inner_चिह्नकम्, चिह्नकम्_गन्तव्यम्_String_Map) +
               " cannot be recursively defined");
-      break;
-    case ARMBuildAttrs::CPU_raw_name:
-    case ARMBuildAttrs::CPU_name:
-    case ARMBuildAttrs::compatibility:
-    case ARMBuildAttrs::conformance: {
-      StringRef InnerValue = de.getCStrRef(cursor);
-      DescStream << ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap)
-                 << " = " << InnerValue;
-      break;
+      भङ्ग;
+    पक्ष ARMBuildAttrs::CPU_raw_name:
+    पक्ष ARMBuildAttrs::CPU_name:
+    पक्ष ARMBuildAttrs::compatibility:
+    पक्ष ARMBuildAttrs::conformance: {
+      StringRef Inner_मानम् = de.getCStrRef(cursor);
+      Desc_प्रवाहः << ELFAttrs::attrTypeAsString(Inner_चिह्नकम्, चिह्नकम्_गन्तव्यम्_String_Map)
+                 << " = " << Inner_मानम्;
+      भङ्ग;
     }
-    default: {
-      uint64_t InnerValue = de.getULEB128(cursor);
-      DescStream << ELFAttrs::attrTypeAsString(InnerTag, tagToStringMap)
-                 << " = " << InnerValue;
+    स्वभाव: {
+      uint64_t Inner_मानम् = de.getULEB128(cursor);
+      Desc_प्रवाहः << ELFAttrs::attrTypeAsString(Inner_चिह्नकम्, चिह्नकम्_गन्तव्यम्_String_Map)
+                 << " = " << Inner_मानम्;
     }
     }
   }
 
-  setAttributeString(tag, RawStringValue);
-  if (sw) {
+  समुच्चयः_Attribute_String(चिह्नकम्_2, Raw_String_मानम्);
+  यदि (sw) {
     DictScope scope(*sw, "Attribute");
-    sw->printNumber("Tag", tag);
+    sw->print_सङ्ख्या("Tag", चिह्नकम्_2);
     sw->printString("TagName",
-                    ELFAttrs::attrTypeAsString(tag, tagToStringMap, false));
-    sw->printStringEscaped("Value", RawStringValue);
-    if (!Description.empty()) {
+                    ELFAttrs::attrTypeAsString(चिह्नकम्_2, चिह्नकम्_गन्तव्यम्_String_Map, असत्य));
+    sw->printStringEscaped("Value", Raw_String_मानम्);
+    यदि (!Description.रिक्तानि()) {
       sw->printString("Description", Description);
     }
   }
 
-  cursor.seek(FinalOffset);
+  cursor.seek(Final_विस्थापनम्);
 
-  return returnValue ? std::move(*returnValue) : Error::success();
+  प्रत्यागम return_मानम् ? std::move(*return_मानम्) : Error::success();
 }
 
-Error ARMAttributeParser::handler(uint64_t tag, bool &handled) {
-  handled = false;
-  for (const auto &AH : displayRoutines) {
-    if (uint64_t(AH.attribute) == tag) {
-      if (Error e = (this->*AH.routine)(static_cast<AttrType>(tag)))
-        return e;
-      handled = true;
-      break;
+Error ARMAttributeParser::handler(uint64_t चिह्नकम्_2, तार्किक &handled) {
+  handled = असत्य;
+  प्रति (ध्रुव स्वचालित &AH : displayRoutines) {
+    यदि (uint64_t(AH.attribute) == चिह्नकम्_2) {
+      यदि (Error e = (एतत्->*AH.routine)(static_cast<AttrType>(चिह्नकम्_2)))
+        प्रत्यागम e;
+      handled = सत्य;
+      भङ्ग;
     }
   }
 
-  return Error::success();
+  प्रत्यागम Error::success();
 }
